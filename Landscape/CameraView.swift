@@ -24,9 +24,8 @@ class CameraView: UIView {
     }
   }
   
-  func addDdecoration(_ drawer: CALayerDelegate) -> CALayer {
+  func addDecorationLayer() -> CALayer {
     let newLayer = CALayer()
-    newLayer.delegate = drawer
     newLayer.frame = self.bounds
     self.layer.addSublayer(newLayer)
     return newLayer

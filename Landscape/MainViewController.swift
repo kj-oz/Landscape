@@ -7,10 +7,10 @@
 //
 
 import UIKit
-import AVFoundation
-import CoreGraphics
-import CoreLocation
 
+/**
+ * メイン画面のコントローラ
+ */
 class MainViewController: UIViewController {
 
   // カメラの映像を表示するビュー
@@ -19,29 +19,32 @@ class MainViewController: UIViewController {
   // アプリ名称
   private let appName = "風景ガイド"
   
+  // カメラのセッションを管理するオブジェクト
   private var cameraManager: CameraManager?
   
-//  // カメラビュー上の各種情報表示レイヤ
-//  private var decorationLayer: CALayer?
+  // 風景のラベルを描画するオブジェクト
+  private var renderer: SceneRenderer?
   
-  // 周囲の風景を管理するオブジェクト
-  private var sceneManager: SceneManager?
+  // 位置情報を管理するオブジェクト
+  private var locationManager: LocationManager?
   
   // ビューのロード時に呼び出される
   override func viewDidLoad() {
     super.viewDidLoad()
     
+    // 各種オブジェクトの初期化
     cameraManager = CameraManager(cameraView: cameraView!)
-    sceneManager = SceneManager(cameraView: cameraView)
-    let layer = cameraView.addDdecoration(sceneManager!)
-    layer.masksToBounds = false
-    sceneManager!.layer = layer
+    let layer = cameraView.addDecorationLayer()
+    renderer = SceneRenderer(layer: layer)
+    
+    locationManager = LocationManager(renderer: renderer!)
   }
 
   // ビューが画面に表示される直前に呼び出される
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     
+    // カメラセッションの状態を確認
     switch cameraManager!.setupResult {
     case .success:
       cameraManager!.startSession()
@@ -54,15 +57,14 @@ class MainViewController: UIViewController {
       showWarning(message: "カメラ画像を取得できません。")
     }
     
-    if !sceneManager!.supportsLocation {
+    // 位置情報関係の状態を確認
+    if !locationManager!.supportsLocation {
       showWarning(message: "この端末では位置情報を利用できません。")
-    } else if !(sceneManager!.authorizationStatus == .authorizedWhenInUse ||
-        sceneManager!.authorizationStatus == .authorizedAlways) {
+    } else if !(locationManager!.authorizationStatus == .authorizedWhenInUse ||
+        locationManager!.authorizationStatus == .authorizedAlways) {
       let message = "\(self.appName)は位置情報を使用する許可を与えられていません。\n" + "設定＞プライバシーで許可を与えてください。"
       showWarning(message: message, requireAuthorization: true)
     }
-    
-//    decorationLayer!.setNeedsDisplay()
   }
   
   // ビューが画面から隠される直前に呼び出される
@@ -87,9 +89,15 @@ class MainViewController: UIViewController {
     super.viewWillTransition(to: size, with: coordinator)
     
     cameraManager!.viewWillTransition(to: size, with: coordinator)
-    sceneManager!.viewWillTransition(to: size, with: coordinator)
+    locationManager!.viewWillTransition(to: size, with: coordinator)
   }
   
+  /**
+   * 警告ダイアログを表示する
+   *
+   * - parameter message: 表示するメッセージ
+   * - parameter requireAuthrization: 設定画面の表示ボタンを表示するかどうか
+   */
   private func showWarning(message: String, requireAuthorization: Bool = false) {
     let alertController = UIAlertController(title: self.appName, message: message, preferredStyle: .alert)
     alertController.addAction(UIAlertAction(title: "了解", style: .cancel, handler: nil))
@@ -102,43 +110,3 @@ class MainViewController: UIViewController {
   }
   
 }
-
-/**
- * UIDeviceOrientationに、対応するビデオの向き、方位基準の向きを返すプロパティを追加
- */
-extension UIDeviceOrientation {
-  var videoOrientation: AVCaptureVideoOrientation? {
-    switch self {
-    case .portrait: return .portrait
-    case .portraitUpsideDown: return .portraitUpsideDown
-    case .landscapeLeft: return .landscapeRight
-    case .landscapeRight: return .landscapeLeft
-    default: return nil
-    }
-  }
-  var headingOrientation: CLDeviceOrientation {
-    switch self {
-    case .portrait: return .portrait
-    case .portraitUpsideDown: return .portraitUpsideDown
-    case .landscapeLeft: return .landscapeLeft
-    case .landscapeRight: return .landscapeRight
-    default: return .unknown
-    }
-  }
-}
-
-/**
- * UIInterfaceOrientationに、対応するビデオの向きを返すプロパティを追加
- */
-extension UIInterfaceOrientation {
-  var videoOrientation: AVCaptureVideoOrientation? {
-    switch self {
-    case .portrait: return .portrait
-    case .portraitUpsideDown: return .portraitUpsideDown
-    case .landscapeLeft: return .landscapeLeft
-    case .landscapeRight: return .landscapeRight
-    default: return nil
-    }
-  }
-}
-
