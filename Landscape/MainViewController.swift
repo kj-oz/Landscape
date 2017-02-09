@@ -65,6 +65,13 @@ class MainViewController: UIViewController {
       let message = "\(self.appName)は位置情報を使用する許可を与えられていません。\n" + "設定＞プライバシーで許可を与えてください。"
       showWarning(message: message, requireAuthorization: true)
     }
+    print("frame: \(view.frame.size), bounds: \(view.bounds.size)")
+    
+    if UIDevice.current.orientation == UIDeviceOrientation.portrait {
+      // 他の向きの場合はTransitイベントが発生するが、Portraitだけは発生しない
+      cameraManager!.viewWillTransition(to: view.bounds.size)
+      locationManager!.viewWillTransition(to: view.bounds.size)
+    }
   }
   
   // ビューが画面から隠される直前に呼び出される
@@ -88,8 +95,9 @@ class MainViewController: UIViewController {
   override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
     super.viewWillTransition(to: size, with: coordinator)
     
-    cameraManager!.viewWillTransition(to: size, with: coordinator)
-    locationManager!.viewWillTransition(to: size, with: coordinator)
+    print("trasit to: \(size)")
+    cameraManager!.viewWillTransition(to: size)
+    locationManager!.viewWillTransition(to: size)
   }
   
   /**

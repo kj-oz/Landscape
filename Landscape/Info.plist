@@ -24,6 +24,8 @@
 	<string>画面に風景を表示するため</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>現在地の緯度経度を得るため</string>
+	<key>UIFileSharingEnabled</key>
+	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

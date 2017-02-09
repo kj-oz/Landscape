@@ -9,35 +9,12 @@
 import UIKit
 import CoreLocation
 
-// ラベルに表示する文字サイズ
-private let labelFontSize: CGFloat = 12.0
-
-// ラベルの文字と枠間のパディング
-private let labelPadding: CGFloat = 3.0
-
-// ラベルの間隔
-private let labelSpacing: CGFloat = 4.0
-
-// 画角の1/2のタンジェント
-private var tanFA_2: Double = 0.0
-
-private var w_2: CGFloat = 0.0
-
-class Label {
-  let poi: Poi
-  let center: CGFloat
-  let width: CGFloat
-  let left: CGFloat = 0.0
-  
-  init(poi: Poi) {
-    self.poi = poi
-    center = w_2 * CGFloat(1 + tan(toRadian(poi.azimuth)) / tanFA_2)
-    width = poi.name.size(attributes:
-      [NSFontAttributeName: UIFont.systemFont(ofSize: labelFontSize)]).width + 2 * labelPadding
-  }
-}
-
 class SceneRenderer: NSObject, CALayerDelegate {
+  // 画角の1/2のタンジェント
+  static var tanFA_2: Double = 0.0
+  
+  static var w_2: CGFloat = 0.0
+  
   // 方位文字列
   private let directions = ["北", "北北東", "北東", "東北東",
                             "東", "東南東", "南東", "南南東",
@@ -71,7 +48,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
   private let poiManager = PoiManager()
   
   // ラベルの行数
-  private let rowCount = 8
+  private var rowCount = 8
   
   // ラベルの高さ
   private var labelHeight: CGFloat = 0.0
@@ -96,6 +73,8 @@ class SceneRenderer: NSObject, CALayerDelegate {
   // 水平方向の画角
   private var fieldAngle = 0.0
   
+  private let angleMargin = 3.0
+  
   // 画面のサイズ
   private var size = CGSize.zero
   
@@ -105,6 +84,9 @@ class SceneRenderer: NSObject, CALayerDelegate {
   // 描画コンテキスト
   private var context: CGContext?
   
+  var expandGroup = false
+  
+  private var poiIndex = 0
   /**
    * コンストラクタ
    *
@@ -150,7 +132,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
     fieldAngleV = toDegree(atan(v / h * tan(toRadian(fieldAngleH / 2.0)))) * 2.0
     
     labelHeight = "国".size(attributes:
-      [NSFontAttributeName: UIFont.systemFont(ofSize: labelFontSize)]).height + 2 * labelPadding
+      [NSFontAttributeName: UIFont.systemFont(ofSize: Label.fontSize)]).height + 2 * Label.padding
     
     tickCount = Int(360.0 / tickDegree)
     tickPerDir = tickCount / directions.count
@@ -158,8 +140,9 @@ class SceneRenderer: NSObject, CALayerDelegate {
   
   private func setupViewParameter() {
     fieldAngle = size.width > size.height ? fieldAngleH : fieldAngleV
-    tanFA_2 = tan(toRadian(fieldAngle / 2.0))
-    w_2 = size.width / 2
+    SceneRenderer.tanFA_2 = tan(toRadian(fieldAngle / 2.0))
+    SceneRenderer.w_2 = size.width / 2
+    rowCount = size.width > size.height ? 6 : 8
   }
   
 
@@ -204,58 +187,97 @@ class SceneRenderer: NSObject, CALayerDelegate {
     }
     
     // POIの描画
-    let pois = poiManager.getVisiblePois(startAzimuth: startAngle, endAzimuth: endAngle)
+    var startAzimuth = startAngle + angleMargin
+    if startAzimuth > 360.0 {
+      startAzimuth -= 360.0
+    }
+    var endAzimuth = endAngle - angleMargin
+    if endAzimuth < 0 {
+      endAzimuth += 360.0
+    }
+
+    let pois = poiManager.getVisiblePois(startAzimuth: startAzimuth, endAzimuth: endAzimuth)
     let rows = self.createRows(pois: pois)
     
     ctx.setStrokeColor(labelFontColor)
     let paragraphStyle = NSMutableParagraphStyle()
     paragraphStyle.alignment = .center
-    let attrs = [NSFontAttributeName: UIFont.systemFont(ofSize: labelFontSize), NSParagraphStyleAttributeName: paragraphStyle]
+    var attrs = [NSFontAttributeName: UIFont.systemFont(ofSize: Label.fontSize),
+                 NSParagraphStyleAttributeName: paragraphStyle,
+                 NSForegroundColorAttributeName: UIColor.black]
     
     for (index, row) in rows.enumerated() {
-      let y = labelSpacing + (labelHeight + labelSpacing) * CGFloat(index)
-      for label in row {
-        let color = getPoiColor(type: label.poi.type)
+      print("ROW-\(index)")
+      poiIndex = 0
+      let y = Label.spacing + (labelHeight + Label.spacing) * CGFloat(index)
+      for label in row.labels {
+        let color = getPoiColor(poi: label.poi)
         ctx.setFillColor(color)
-        ctx.fill(CGRect(x: label.left, y: y, width: label.width, height: labelHeight))
-        ctx.fill(CGRect(x: label.center - labelLineWidth * 0.5, y: y + labelHeight,
-                        width: labelLineWidth, height: labelLineLength))
-        
-        label.poi.name.draw(with: CGRect(x: label.left + labelPadding, y: y + labelPadding,
-                                         width: label.width, height: labelHeight),
-                            options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
+        if label.group {
+          ctx.fill(CGRect(x: label.left, y: y - 0.5, width: label.width, height: labelHeight + 1.0))
+          ctx.fill(CGRect(x: label.center - 0.5, y: y + labelHeight + 0.5,
+                          width: 1, height: labelLineLength))
+          attrs[NSFontAttributeName] = UIFont.systemFont(ofSize: Label.fontSize + 1)
+          label.poi.group!.draw(with: CGRect(x: label.left, y: y + Label.padding - 0.5,
+                                           width: label.width, height: labelHeight),
+                              options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
+        } else {
+          ctx.fill(CGRect(x: label.left, y: y, width: label.width, height: labelHeight))
+          ctx.fill(CGRect(x: label.center - 0.5, y: y + labelHeight,
+                          width: 1, height: labelLineLength))
+          attrs[NSFontAttributeName] = UIFont.systemFont(ofSize: Label.fontSize)
+          label.poi.name.draw(with: CGRect(x: label.left, y: y + Label.padding,
+                                           width: label.width, height: labelHeight),
+                              options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
+        }
+        print("\(label.poi.name): L \(label.left) W \(label.width) C \(label.center) E \(label.poi.elevation)")
+        poiIndex += 1
       }
     }
     
     // デバッグ出力
-    //    let rect3 = CGRect(x: 40, y: 40, width: size.width - 100, height: size.height - 100)
-    //    ctx.setFillColor(red: 1, green: 1, blue: 1, alpha: 0.5)
-    //    ctx.fill(rect3)
-    //    
-    //    ctx.setStrokeColor(UIColor.black.cgColor)
-    //    var string = "size: \(size)\n"
-    //    string += "layer size: \(layer.bounds)\n"
-    //    string += "layer postion: \(layer.position)\n"
-    //    string += "layer scale: \(layer.contentsScale)\n"
-    //    string += "view: \(cameraView?.bounds)\n"
-    //    string += "heading: \(headingAngle)\n"
-    //    string += "fieldAngle: \(fieldAngle)\n"
-    //  
-    //    string.draw(with: CGRect(x: 50, y: 50, width: 200, height: 200), options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
+    let rect2 = CGRect(x: 40, y: size.height - 170, width: size.width - 80, height: 100)
+    ctx.setFillColor(red: 1, green: 1, blue: 1, alpha: 0.5)
+    ctx.fill(rect2)
+    
+    attrs = [NSFontAttributeName: UIFont.systemFont(ofSize: 12),
+             NSForegroundColorAttributeName: UIColor.black]
+    var string = ""
+    string += "heading: \(heading)\n"
+    string += "fieldAngle: \(fieldAngle)\n"
+  
+    string.draw(with: CGRect(x: 50, y: size.height - 160, width: size.width - 100, height: 80), options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
     
     UIGraphicsPopContext()
     ctx.restoreGState()
   }
   
-  private func getPoiColor(type: PoiType) -> CGColor {
-    switch type {
-    case .mountain:
+  private func getPoiColor(poi: Poi) -> CGColor {
+    switch poi.height {
+    case 0 ..< 500:
+      return UIColor(red: 0, green: 0.5, blue: 1, alpha: 1).cgColor
+    case 500 ..< 1000:
+      return UIColor.cyan.cgColor
+    case 1000 ..< 1500:
       return UIColor.green.cgColor
-    case .building:
-      return UIColor.darkGray.cgColor
-    case .userDefined:
+    case 1500 ..< 2000:
+      return UIColor(red: 0.6, green: 0.8, blue: 0, alpha: 1).cgColor
+    case 2000 ..< 2500:
+      return UIColor.yellow.cgColor
+    case 2500 ..< 3000:
       return UIColor.orange.cgColor
+    default:
+      return UIColor.red.cgColor
     }
+    
+//    switch type {
+//    case .mountain:
+//      return UIColor.green.cgColor
+//    case .building:
+//      return UIColor.darkGray.cgColor
+//    case .userDefined:
+//      return UIColor.orange.cgColor
+//    }
   }
   
   private func drawDirection(tickIndex: Int) {
@@ -265,8 +287,8 @@ class SceneRenderer: NSObject, CALayerDelegate {
     } else if angle > 180 {
       angle -= 360
     }
-    let w_2 = size.width / 2
-    let x = w_2 * CGFloat(1 + tan(toRadian(angle)) / tanFA_2)
+    SceneRenderer.w_2 = size.width / 2
+    let x = SceneRenderer.w_2 * CGFloat(1 + tan(toRadian(angle)) / SceneRenderer.tanFA_2)
     
     if tickIndex % tickPerDir == 0 {
       let label = directions[tickIndex / tickPerDir]
@@ -299,8 +321,36 @@ class SceneRenderer: NSObject, CALayerDelegate {
     return 62.0
   }
   
-  private func createRows(pois: [Poi]) -> [[Label]] {
-    return [[]]
+  private func createRows(pois: [Poi]) -> [LabelRow] {
+    print("■view: w \(size.width)")
+    var rows: [LabelRow] = []
+    for _ in 0 ..< rowCount {
+      rows.append(LabelRow(length: size.width))
+    }
+    var groups = Set<String>()
+    for poi in pois {
+      let label: Label
+      if !expandGroup, let group = poi.group {
+        if groups.contains(group) {
+          continue
+        } else {
+          label = Label(poi: poi, group: true, heading: heading!)
+          print("label: \(group) \(poi.azimuth) c:\(label.center) w:\(label.width)")
+          groups.insert(group)
+        }
+      } else {
+        label = Label(poi: poi, group: false, heading: heading!)
+        print("label: \(poi.name) \(poi.azimuth) c:\(label.center) w:\(label.width)")
+      }
+      for row in rows {
+        if row.insert(label: label) {
+          break
+        }
+      }
+    }
+    
+    return rows
+    
   }
 }
 

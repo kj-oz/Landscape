@@ -9,6 +9,9 @@
 import UIKit
 import AVFoundation
 
+/**
+ * カメラ画像取得のセッションを管理するクラス
+ */
 class CameraManager: NSObject {
 
   // ビデオ・セッションのセットアップの結果のENUM
@@ -18,6 +21,7 @@ class CameraManager: NSObject {
     case configurationFailed
   }
   
+  // 対象のビュー
   private weak var cameraView: CameraView? = nil
   
   // ビデオ・セッション
@@ -35,6 +39,11 @@ class CameraManager: NSObject {
   // MARK: KVO and Notifications
   private var sessionRunningObserveContext = 0
   
+  /**
+   *
+   *
+   * - parameter cameraView:
+   */
   init(cameraView: CameraView) {
     super.init()
     self.cameraView = cameraView
@@ -64,7 +73,7 @@ class CameraManager: NSObject {
     }
   }
   
-  func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+  func viewWillTransition(to size: CGSize) {
     if let videoPreviewLayerConnection = cameraView!.previewLayer.connection {
       let deviceOrientation = UIDevice.current.orientation
       guard let newVideoOrientation = deviceOrientation.videoOrientation, deviceOrientation.isPortrait || deviceOrientation.isLandscape else {

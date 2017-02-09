@@ -20,11 +20,16 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
   // 位置情報サービス
   let lm = CLLocationManager()
   
+  let distanceFilter = 100.0
+  
   // デバイスの背面の指す方位
   var heading: CLHeading?
   
   // 画面描画オブジェクト
   var renderer: SceneRenderer?
+  
+  //
+  var prevLocation = CLLocationCoordinate2D()
   
   init(renderer: SceneRenderer) {
     super.init()
@@ -83,15 +88,21 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
   }
   
   func locationManager(_ manager: CLLocationManager, didUpdateLocations locations:[CLLocation]) {
-    renderer!.updateLocation(location: locations.last!.coordinate)
+    let newLocation = locations.last!.coordinate
+    let (distance, _) = calcDistanceAndAngle(from: newLocation, to: prevLocation)
+    if distance > distanceFilter {
+      renderer!.updateLocation(location: newLocation)
+    }
+    prevLocation = newLocation
   }
   
   
   func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
-    renderer!.updateHeading(heading: Double(newHeading.trueHeading))
+//    renderer!.updateHeading(heading: Double(newHeading.trueHeading))
+    renderer!.updateHeading(heading: 285.0)
   }
   
-  func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+  func viewWillTransition(to size: CGSize) {
     lm.headingOrientation = UIDevice.current.orientation.headingOrientation
     renderer!.changeOrientation(to: size)
   }
@@ -101,7 +112,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
    */
   func startHeadingService() {
     lm.headingOrientation = UIDevice.current.orientation.headingOrientation
-    lm.headingFilter = 0.1
+    lm.headingFilter = 3.0
     lm.startUpdatingHeading()
   }
   
@@ -110,7 +121,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
    */
   func startLocationService() {
     lm.desiredAccuracy = kCLLocationAccuracyBest
-    lm.distanceFilter = 100
+    lm.distanceFilter = distanceFilter
     lm.startUpdatingLocation()
   }
   
