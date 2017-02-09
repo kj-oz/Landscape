@@ -49,7 +49,7 @@ class Label {
     let angle = poi.angle(from: heading)
     center = SceneRenderer.w_2 * CGFloat(1 + tan(toRadian(angle)) / SceneRenderer.tanFA_2)
     if group {
-      width = poi.group!.size(attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: Label.fontSize)]).width + 4 * Label.padding
+      width = (poi.group! + " ▶").size(attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: Label.fontSize)]).width + 4 * Label.padding
     } else {
       width = poi.name.size(attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: Label.fontSize)]).width + 2 * Label.padding
     }

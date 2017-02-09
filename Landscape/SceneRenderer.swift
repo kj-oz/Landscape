@@ -218,15 +218,15 @@ class SceneRenderer: NSObject, CALayerDelegate {
           ctx.fill(CGRect(x: label.center - 0.5, y: y + labelHeight + 0.5,
                           width: 1, height: labelLineLength))
           attrs[NSFontAttributeName] = UIFont.systemFont(ofSize: Label.fontSize + 1)
-          label.poi.group!.draw(with: CGRect(x: label.left, y: y + Label.padding - 0.5,
+          (label.poi.group! + " ▶").draw(with: CGRect(x: label.left, y: y + Label.padding - 0.5,
                                            width: label.width, height: labelHeight),
                               options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
         } else {
-          ctx.fill(CGRect(x: label.left, y: y, width: label.width, height: labelHeight))
-          ctx.fill(CGRect(x: label.center - 0.5, y: y + labelHeight,
+          ctx.fill(CGRect(x: label.left, y: y + 0.5, width: label.width, height: labelHeight - 1.0))
+          ctx.fill(CGRect(x: label.center - 0.5, y: y + labelHeight - 0.5,
                           width: 1, height: labelLineLength))
-          attrs[NSFontAttributeName] = UIFont.systemFont(ofSize: Label.fontSize)
-          label.poi.name.draw(with: CGRect(x: label.left, y: y + Label.padding,
+          attrs[NSFontAttributeName] = UIFont.systemFont(ofSize: Label.fontSize - 1)
+          label.poi.name.draw(with: CGRect(x: label.left, y: y + Label.padding + 0.5,
                                            width: label.width, height: labelHeight),
                               options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
         }
@@ -261,7 +261,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
     case 1000 ..< 1500:
       return UIColor.green.cgColor
     case 1500 ..< 2000:
-      return UIColor(red: 0.6, green: 0.8, blue: 0, alpha: 1).cgColor
+      return UIColor(red: 0.75, green: 1, blue: 0, alpha: 1).cgColor
     case 2000 ..< 2500:
       return UIColor.yellow.cgColor
     case 2500 ..< 3000:
