@@ -65,6 +65,10 @@ class LabelRow {
   // 画面の幅
   let length: CGFloat
   
+  let depth: CGFloat
+  
+  let coef: CGFloat = 1.0
+
   // ラベルそのもの
   var labels: [Label] = []
   
@@ -73,8 +77,9 @@ class LabelRow {
    *
    * - parameter length 画面横のピクセル数
    */
-  init(length: CGFloat) {
+  init(length: CGFloat, depth: CGFloat) {
     self.length = length
+    self.depth = depth
   }
   
   /**
@@ -84,12 +89,12 @@ class LabelRow {
    * - returns 吸収することが出来たらばtrue、何らかの理由で出来なければfalse
    */
   func insert(label: Label) -> Bool {
-    var totalWidth = labels.reduce(CGFloat(0.0), { $0 + $1.width })
-    let spaceCount = labels.count + 2
-    totalWidth += label.width
-    if totalWidth + Label.spacing * CGFloat(spaceCount) > length {
-      return false
-    }
+//    var totalWidth = labels.reduce(CGFloat(0.0), { $0 + $1.width })
+//    let spaceCount = labels.count + 2
+//    totalWidth += label.width
+//    if totalWidth + Label.spacing * CGFloat(spaceCount) > length {
+//      return false
+//    }
     
     // 挿入位置の確定
     var index = 0
@@ -100,72 +105,72 @@ class LabelRow {
       index += 1
     }
     
-    let space = (length - totalWidth) / CGFloat(spaceCount)
-    labels.insert(label, at: index)
-    var next = space
-    for lb in labels {
-      lb.left = next
-      next += lb.width + space
+//    let space = (length - totalWidth) / CGFloat(spaceCount)
+//    labels.insert(label, at: index)
+//    var next = space
+//    for lb in labels {
+//      lb.left = next
+//      next += lb.width + space
+//    }
+    
+    // 片側で使用する可能性のある最大スペース（それ以上確保しても使えない）
+    let maxSpace: CGFloat = depth * coef + label.width
+
+    // 左側の最大スペースの確認
+    var leftSpace: CGFloat = 0    // 現在ラベルの中心より左に空いているスペース
+    var leftMargin: CGFloat = 0   // 左のラベルを移動することで確保可能なスペース
+    if index > 0 {
+      leftSpace = label.point - (labels[index - 1].right + Label.spacing)
+      if leftSpace > maxSpace {
+        leftSpace = maxSpace
+      } else {
+        leftMargin = estimateLeftShift(index: index - 1)
+        if leftSpace + leftMargin < -depth * coef {
+          // 左に最小限の余裕がない
+          return false
+        } else if leftSpace + leftMargin > maxSpace {
+          leftMargin = maxSpace - leftSpace
+        }
+      }
+    } else {
+      leftSpace = label.point - Label.spacing
+      if leftSpace > maxSpace {
+        leftSpace = maxSpace
+      }
     }
     
-//    // 片側で使用する可能性のある最大スペース（それ以上確保しても使えない）
-//    let maxSpace: CGFloat = label.width - Label.padding
-//
-//    // 左側の最大スペースの確認
-//    var leftSpace: CGFloat = 0    // 現在ラベルの中心より左に空いているスペース
-//    var leftMargin: CGFloat = 0   // 左のラベルを移動することで確保可能なスペース
-//    if index > 0 {
-//      leftSpace = label.point - (labels[index - 1].right + Label.spacing)
-//      if leftSpace > maxSpace {
-//        leftSpace = maxSpace
-//      } else {
-//        leftMargin = estimateLeftShift(index: index - 1)
-//        if leftSpace + leftMargin < Label.padding {
-//          // 左に最小限の余裕がない
-//          return false
-//        } else if leftSpace + leftMargin > maxSpace {
-//          leftMargin = maxSpace - leftSpace
-//        }
-//      }
-//    } else {
-//      leftSpace = label.point - Label.spacing
-//      if leftSpace > maxSpace {
-//        leftSpace = maxSpace
-//      }
-//    }
-//    
-//    // 右側の最大スペースの確認
-//    var rightSpace: CGFloat = 0   // 現在ラベルの中心より右に空いているスペース
-//    var rightMargin: CGFloat = 0  // 右のラベルを移動することで確保可能なスペース
-//    if index < labels.count {
-//      rightSpace = (labels[index].left - Label.spacing) - label.point
-//      if rightSpace > maxSpace {
-//        rightSpace = maxSpace
-//      } else {
-//        rightMargin = estimateRightShift(index: index)
-//        if rightSpace + rightMargin < Label.padding {
-//          // 右に最小限の余裕がない
-//          return false
-//        } else if rightSpace + rightMargin > maxSpace {
-//          rightMargin = maxSpace - rightSpace
-//        }
-//      }
-//    } else {
-//      rightSpace = length - Label.spacing - label.point
-//      if rightSpace > maxSpace {
-//        rightSpace = maxSpace
-//      }
-//    }
-//    
-//    if leftSpace + leftMargin + rightSpace + rightMargin < label.width {
-//      // 両側の最大スペースを合わせても足りない
-//      return false
-//    }
-//    
-//    var leftShift: CGFloat = 0    // 左のラベルを移動する量
-//    var rightShift: CGFloat = 0   // 右のラベルを移動する量
-//    
-//    // まず、左右とも最小限のスペースを確保する（スペースがあることは上で確認済み）
+    // 右側の最大スペースの確認
+    var rightSpace: CGFloat = 0   // 現在ラベルの中心より右に空いているスペース
+    var rightMargin: CGFloat = 0  // 右のラベルを移動することで確保可能なスペース
+    if index < labels.count {
+      rightSpace = (labels[index].left - Label.spacing) - label.point
+      if rightSpace > maxSpace {
+        rightSpace = maxSpace
+      } else {
+        rightMargin = estimateRightShift(index: index)
+        if rightSpace + rightMargin < -depth * coef {
+          // 右に最小限の余裕がない
+          return false
+        } else if rightSpace + rightMargin > maxSpace {
+          rightMargin = maxSpace - rightSpace
+        }
+      }
+    } else {
+      rightSpace = length - Label.spacing - label.point
+      if rightSpace > maxSpace {
+        rightSpace = maxSpace
+      }
+    }
+    
+    if leftSpace + leftMargin + rightSpace + rightMargin < label.width {
+      // 両側の最大スペースを合わせても足りない
+      return false
+    }
+    
+    var leftShift: CGFloat = 0    // 左のラベルを移動する量
+    var rightShift: CGFloat = 0   // 右のラベルを移動する量
+    
+    // まず、左右とも最小限のスペースを確保する（スペースがあることは上で確認済み）
 //    if leftSpace < Label.padding {
 //      leftShift = Label.padding - leftSpace
 //      leftSpace = Label.padding
@@ -176,30 +181,31 @@ class LabelRow {
 //      rightSpace = Label.padding
 //      rightMargin -= rightShift
 //    }
-//    
-//    let space = leftSpace + rightSpace
-//    let margin = leftMargin + rightMargin
-//    if space < label.width {
-//      // 現状のスペースでは不足の場合、足りない分の移動量を左右の確保可能量の比から算定
-//      let delta = label.width - space
-//      let leftdelta = delta * leftMargin / margin
-//      let rightdelta = delta - leftdelta
-//      leftShift += leftdelta
-//      rightShift += rightdelta
-//      label.left = label.point - (leftdelta + leftSpace)
-//    } else {
-//      // 現状のスペースで足りている場合、左右の割り振りをスペースの比から算定
-//      label.left = label.point - label.width * leftSpace / space
-//    }
-//    
-//    // 実際に移動させる
-//    if leftShift > 0 {
-//      shiftLeft(index: index - 1, distance: leftShift)
-//    }
-//    if rightShift > 0 {
-//      shiftRight(index: index, distance: rightShift)
-//    }
-//    labels.insert(label, at: index)
+    
+    let space = leftSpace + rightSpace
+    let margin = leftMargin + rightMargin
+    if space < label.width {
+      // 現状のスペースでは不足の場合、足りない分の移動量を左右の確保可能量の比から算定
+      let delta = label.width - space
+      let leftdelta = delta * leftMargin / margin
+      let rightdelta = delta - leftdelta
+      leftShift += leftdelta
+      rightShift += rightdelta
+      label.left = label.point - (leftdelta + leftSpace)
+    } else {
+      // 現状のスペースで足りている場合、左右の割り振りをスペースの比から算定
+      let delta = space - label.width
+      label.left = label.point - leftSpace + delta / 2
+    }
+    
+    // 実際に移動させる
+    if leftShift > 0.1 {
+      shiftLeft(index: index - 1, distance: leftShift)
+    }
+    if rightShift > 0.1 {
+      shiftRight(index: index, distance: rightShift)
+    }
+    labels.insert(label, at: index)
     return true
   }
   
@@ -211,7 +217,7 @@ class LabelRow {
    */
   private func estimateLeftShift(index: Int) -> CGFloat {
     let label = labels[index]
-    let maxSift: CGFloat = label.width - Label.padding - (label.point - label.left)
+    let maxSift: CGFloat = depth * coef + label.width - (label.point - label.left)
     if index == 0 {
       return min(label.left - Label.spacing, maxSift)
     } else {
@@ -228,12 +234,12 @@ class LabelRow {
    */
   private func estimateRightShift(index: Int) -> CGFloat {
     let label = labels[index]
-    let maxSpace: CGFloat = (label.point - label.left) - Label.padding
+    let maxSift: CGFloat = (label.point - label.left) + depth * coef
     if index == labels.count - 1 {
-      return min(length - Label.spacing - label.right, maxSpace)
+      return min(length - Label.spacing - label.right, maxSift)
     } else {
       return min(estimateRightShift(index: index + 1) +
-        (labels[index + 1].left - Label.spacing) - label.right, maxSpace)
+        (labels[index + 1].left - Label.spacing) - label.right, maxSift)
     }
   }
   

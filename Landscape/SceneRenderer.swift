@@ -220,7 +220,15 @@ class SceneRenderer: NSObject, CALayerDelegate {
         ctx.fill(CGRect(x: label.left, y: y, width: label.width, height: labelHeight))
         
         ctx.setStrokeColor(color)
-        ctx.move(to: CGPoint(x: label.left + label.width / 2, y: y + labelHeight))
+        let x: CGFloat
+        if label.point > label.right {
+          x = label.right
+        } else if label.point < label.left {
+          x = label.left
+        } else {
+          x = label.point
+        }
+        ctx.move(to: CGPoint(x: x, y: y + labelHeight))
         ctx.addLine(to: CGPoint(x: label.point, y: labelLineEndHeight))
         ctx.addLine(to: CGPoint(x: label.point, y: labelLineEndHeight + 20))
         ctx.strokePath()
@@ -309,8 +317,10 @@ class SceneRenderer: NSObject, CALayerDelegate {
   private func createRows(pois: [Poi]) -> [LabelRow] {
     print("■view: w \(size.width)")
     var rows: [LabelRow] = []
-    for _ in 0 ..< rowCount {
-      rows.append(LabelRow(length: size.width))
+    let depth = labelLineEndHeight - (labelHeight + Label.spacing) * CGFloat(rowCount)
+    for i in 0 ..< rowCount {
+      rows.append(LabelRow(length: size.width,
+                           depth: depth + CGFloat(i) * (labelHeight + Label.spacing)))
     }
     var groups = Set<String>()
     var labels: [Label] = []
@@ -333,9 +343,11 @@ class SceneRenderer: NSObject, CALayerDelegate {
 //    labels.sort(by: { $0.height > $1.height })
     labels.sort(by: { $0.poi.distance < $1.poi.distance})
     
+    var startRow = 0
     labels: for label in labels {
-      for row in rows {
-        if row.insert(label: label) {
+      for i in startRow ..< rows.count {
+        if rows[i].insert(label: label) {
+          startRow = i
           continue labels
         }
       }
