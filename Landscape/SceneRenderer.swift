@@ -50,6 +50,9 @@ class SceneRenderer: NSObject, CALayerDelegate {
   // ラベルの行数
   private var rowCount = 0
   
+  // ラベルの行数
+  private var rowStartHeight: CGFloat = 0.0
+  
   // ラベルの高さ
   private var labelHeight: CGFloat = 0.0
   
@@ -144,6 +147,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
     SceneRenderer.w_2 = size.width / 2
     rowCount = size.width > size.height ? 4 : 6
     labelLineEndHeight = size.height * 0.4
+    rowStartHeight = size.width > size.height ? Label.spacing : 20.0 + Label.spacing
   }
   
 
@@ -209,7 +213,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
     
     for (index, row) in rows.enumerated() {
       print("ROW-\(index)")
-      let y = Label.spacing + (labelHeight + Label.spacing) * CGFloat(index)
+      let y = rowStartHeight + (labelHeight + Label.spacing) * CGFloat(index)
       for label in row.labels {
         let color = getColor(of: label)
         ctx.setFillColor(color)
