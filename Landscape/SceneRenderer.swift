@@ -323,7 +323,8 @@ class SceneRenderer: NSObject, CALayerDelegate {
       }
       labels.append(label)
     }
-    labels.sort(by: { $0.height > $1.height })
+//    labels.sort(by: { $0.height > $1.height })
+    labels.sort(by: { $0.poi.distance < $1.poi.distance})
     
     labels: for label in labels {
       for row in rows {
@@ -333,7 +334,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
       }
       print("missed label: \(label.text) (\(label.height))")
     }
-    
+    rows.reverse()
     return rows
     
   }
