@@ -48,7 +48,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
   private let poiManager = PoiManager()
   
   // ラベルの行数
-  private var rowCount = 8
+  private var rowCount = 0
   
   // ラベルの高さ
   private var labelHeight: CGFloat = 0.0
@@ -57,9 +57,9 @@ class SceneRenderer: NSObject, CALayerDelegate {
   private let labelFontColor = UIColor.white.cgColor
   
   // 
-  private let labelLineWidth: CGFloat = 2.0
+  private let labelLineWidth: CGFloat = 1.0
   
-  private let labelLineLength: CGFloat = 100.0
+  private var labelLineEndHeight: CGFloat = 0.0
 
   // 長辺方向の画角
   private var fieldAngleH = 0.0
@@ -86,7 +86,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
   
   var expandGroup = false
   
-  private var poiIndex = 0
+//  private var poiIndex = 0
   /**
    * コンストラクタ
    *
@@ -142,7 +142,8 @@ class SceneRenderer: NSObject, CALayerDelegate {
     fieldAngle = size.width > size.height ? fieldAngleH : fieldAngleV
     SceneRenderer.tanFA_2 = tan(toRadian(fieldAngle / 2.0))
     SceneRenderer.w_2 = size.width / 2
-    rowCount = size.width > size.height ? 6 : 8
+    rowCount = size.width > size.height ? 4 : 6
+    labelLineEndHeight = size.height * 0.4
   }
   
 
@@ -208,30 +209,18 @@ class SceneRenderer: NSObject, CALayerDelegate {
     
     for (index, row) in rows.enumerated() {
       print("ROW-\(index)")
-      poiIndex = 0
       let y = Label.spacing + (labelHeight + Label.spacing) * CGFloat(index)
       for label in row.labels {
-        let color = getPoiColor(poi: label.poi)
+        let color = getColor(of: label)
         ctx.setFillColor(color)
-        if label.group {
-          ctx.fill(CGRect(x: label.left, y: y - 0.5, width: label.width, height: labelHeight + 1.0))
-          ctx.fill(CGRect(x: label.center - 0.5, y: y + labelHeight + 0.5,
-                          width: 1, height: labelLineLength))
-          attrs[NSFontAttributeName] = UIFont.systemFont(ofSize: Label.fontSize + 1)
-          (label.poi.group! + " ▶").draw(with: CGRect(x: label.left, y: y + Label.padding - 0.5,
-                                           width: label.width, height: labelHeight),
-                              options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
-        } else {
-          ctx.fill(CGRect(x: label.left, y: y + 0.5, width: label.width, height: labelHeight - 1.0))
-          ctx.fill(CGRect(x: label.center - 0.5, y: y + labelHeight - 0.5,
-                          width: 1, height: labelLineLength))
-          attrs[NSFontAttributeName] = UIFont.systemFont(ofSize: Label.fontSize - 1)
-          label.poi.name.draw(with: CGRect(x: label.left, y: y + Label.padding + 0.5,
-                                           width: label.width, height: labelHeight),
-                              options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
-        }
-        print("\(label.poi.name): L \(label.left) W \(label.width) C \(label.center) E \(label.poi.elevation)")
-        poiIndex += 1
+        ctx.fill(CGRect(x: label.left, y: y, width: label.width, height: labelHeight))
+        ctx.fill(CGRect(x: label.point - 0.5 * labelLineWidth, y: y + labelHeight,
+                        width: labelLineWidth, height: labelLineEndHeight - y - labelHeight))
+        attrs[NSFontAttributeName] = UIFont.systemFont(ofSize: Label.fontSize)
+        label.text.draw(with: CGRect(x: label.left, y: y + Label.padding,
+                                         width: label.width, height: labelHeight),
+                            options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
+        print("\(label.text): L \(label.left) W \(label.width) C \(label.point) E \(label.poi.elevation)")
       }
     }
     
@@ -252,32 +241,17 @@ class SceneRenderer: NSObject, CALayerDelegate {
     ctx.restoreGState()
   }
   
-  private func getPoiColor(poi: Poi) -> CGColor {
-    switch poi.height {
-    case 0 ..< 500:
-      return UIColor(red: 0, green: 0.5, blue: 1, alpha: 1).cgColor
-    case 500 ..< 1000:
+  private func getColor(of label: Label) -> CGColor {
+    switch label.height {
+    case 0 ..< 1000:
       return UIColor.cyan.cgColor
-    case 1000 ..< 1500:
+    case 1000 ..< 2000:
       return UIColor.green.cgColor
-    case 1500 ..< 2000:
-      return UIColor(red: 0.75, green: 1, blue: 0, alpha: 1).cgColor
-    case 2000 ..< 2500:
+    case 2000 ..< 3000:
       return UIColor.yellow.cgColor
-    case 2500 ..< 3000:
-      return UIColor.orange.cgColor
     default:
-      return UIColor.red.cgColor
+      return UIColor.orange.cgColor
     }
-    
-//    switch type {
-//    case .mountain:
-//      return UIColor.green.cgColor
-//    case .building:
-//      return UIColor.darkGray.cgColor
-//    case .userDefined:
-//      return UIColor.orange.cgColor
-//    }
   }
   
   private func drawDirection(tickIndex: Int) {
@@ -328,25 +302,32 @@ class SceneRenderer: NSObject, CALayerDelegate {
       rows.append(LabelRow(length: size.width))
     }
     var groups = Set<String>()
+    var labels: [Label] = []
     for poi in pois {
       let label: Label
       if !expandGroup, let group = poi.group {
         if groups.contains(group) {
           continue
         } else {
-          label = Label(poi: poi, group: true, heading: heading!)
-          print("label: \(group) \(poi.azimuth) c:\(label.center) w:\(label.width)")
+          label = Label(poi: poi, group: true, groupHeight: poiManager.getHeight(of: group), heading: heading!)
+          // print("label: \(group) \(poi.azimuth) c:\(label.point) w:\(label.width)")
           groups.insert(group)
         }
       } else {
-        label = Label(poi: poi, group: false, heading: heading!)
-        print("label: \(poi.name) \(poi.azimuth) c:\(label.center) w:\(label.width)")
+        label = Label(poi: poi, group: false, groupHeight: nil, heading: heading!)
+        // print("label: \(poi.name) \(poi.azimuth) c:\(label.point) w:\(label.width)")
       }
+      labels.append(label)
+    }
+    labels.sort(by: { $0.height > $1.height })
+    
+    labels: for label in labels {
       for row in rows {
         if row.insert(label: label) {
-          break
+          continue labels
         }
       }
+      print("missed label: \(label.text) (\(label.height))")
     }
     
     return rows

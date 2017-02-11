@@ -20,16 +20,20 @@ class Label {
   static let padding: CGFloat = 3.0
   
   // ラベルの間隔
-  static let spacing: CGFloat = 5.0
+  static let spacing: CGFloat = 12.0
   
   // 対象の地物
   let poi: Poi
+  
+  let text: String
+  
+  let height: Double
   
   //
   let group: Bool
   
   // 対象地物の位置の画面への投影のx座標
-  let center: CGFloat
+  let point: CGFloat
   
   // ラベルの枠長方形の幅
   let width: CGFloat
@@ -43,16 +47,14 @@ class Label {
   }
   
   // コンストラクタ
-  init(poi: Poi, group: Bool, heading: Double) {
+  init(poi: Poi, group: Bool, groupHeight: Double?, heading: Double) {
     self.poi = poi
     self.group = group
+    self.height = group ? groupHeight! : poi.height
     let angle = poi.angle(from: heading)
-    center = SceneRenderer.w_2 * CGFloat(1 + tan(toRadian(angle)) / SceneRenderer.tanFA_2)
-    if group {
-      width = (poi.group! + " ▶").size(attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: Label.fontSize)]).width + 4 * Label.padding
-    } else {
-      width = poi.name.size(attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: Label.fontSize)]).width + 2 * Label.padding
-    }
+    point = SceneRenderer.w_2 * CGFloat(1 + tan(toRadian(angle)) / SceneRenderer.tanFA_2)
+    text = group ? poi.group! + " ▶" : poi.name
+    width = text.size(attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: Label.fontSize)]).width + 2 * Label.padding
   }
 }
 
@@ -85,7 +87,7 @@ class LabelRow {
     // 挿入位置の確定
     var index = 0
     for lb in labels {
-      if lb.center > label.center {
+      if lb.point > label.point {
         break
       }
       index += 1
@@ -98,7 +100,7 @@ class LabelRow {
     var leftSpace: CGFloat = 0    // 現在ラベルの中心より左に空いているスペース
     var leftMargin: CGFloat = 0   // 左のラベルを移動することで確保可能なスペース
     if index > 0 {
-      leftSpace = label.center - (labels[index - 1].right + Label.spacing)
+      leftSpace = label.point - (labels[index - 1].right + Label.spacing)
       if leftSpace > maxSpace {
         leftSpace = maxSpace
       } else {
@@ -111,7 +113,7 @@ class LabelRow {
         }
       }
     } else {
-      leftSpace = label.center - Label.spacing
+      leftSpace = label.point - Label.spacing
       if leftSpace > maxSpace {
         leftSpace = maxSpace
       }
@@ -121,7 +123,7 @@ class LabelRow {
     var rightSpace: CGFloat = 0   // 現在ラベルの中心より右に空いているスペース
     var rightMargin: CGFloat = 0  // 右のラベルを移動することで確保可能なスペース
     if index < labels.count {
-      rightSpace = (labels[index].left - Label.spacing) - label.center
+      rightSpace = (labels[index].left - Label.spacing) - label.point
       if rightSpace > maxSpace {
         rightSpace = maxSpace
       } else {
@@ -134,7 +136,7 @@ class LabelRow {
         }
       }
     } else {
-      rightSpace = length - Label.spacing - label.center
+      rightSpace = length - Label.spacing - label.point
       if rightSpace > maxSpace {
         rightSpace = maxSpace
       }
@@ -169,10 +171,10 @@ class LabelRow {
       let rightdelta = delta - leftdelta
       leftShift += leftdelta
       rightShift += rightdelta
-      label.left = label.center - (leftdelta + leftSpace)
+      label.left = label.point - (leftdelta + leftSpace)
     } else {
       // 現状のスペースで足りている場合、左右の割り振りをスペースの比から算定
-      label.left = label.center - label.width * leftSpace / space
+      label.left = label.point - label.width * leftSpace / space
     }
     
     // 実際に移動させる
@@ -194,7 +196,7 @@ class LabelRow {
    */
   private func estimateLeftShift(index: Int) -> CGFloat {
     let label = labels[index]
-    let maxSift: CGFloat = label.width - Label.padding - (label.center - label.left)
+    let maxSift: CGFloat = label.width - Label.padding - (label.point - label.left)
     if index == 0 {
       return min(label.left - Label.spacing, maxSift)
     } else {
@@ -211,7 +213,7 @@ class LabelRow {
    */
   private func estimateRightShift(index: Int) -> CGFloat {
     let label = labels[index]
-    let maxSpace: CGFloat = (label.center - label.left) - Label.padding
+    let maxSpace: CGFloat = (label.point - label.left) - Label.padding
     if index == labels.count - 1 {
       return min(length - Label.spacing - label.right, maxSpace)
     } else {

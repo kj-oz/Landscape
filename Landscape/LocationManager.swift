@@ -98,8 +98,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
   
   
   func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
-//    renderer!.updateHeading(heading: Double(newHeading.trueHeading))
-    renderer!.updateHeading(heading: 285.0)
+    renderer!.updateHeading(heading: Double(newHeading.trueHeading))
   }
   
   func viewWillTransition(to size: CGSize) {

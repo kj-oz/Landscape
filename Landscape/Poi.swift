@@ -92,10 +92,11 @@ class Poi {
  */
 class PoiManager {
   let minElevation = 0.01
-  let maxDistance = 100000.0
+  let maxDistance = 50_000.0
   var poiList: [Poi] = []
   var candidates: [Poi] = []
-  var includeHiddenPoi = false
+  var groups: [String : Double] = [:]
+//  var includeHiddenPoi = true
   
   init() {
     loadPois()
@@ -109,7 +110,7 @@ class PoiManager {
   func setCurrentPosition(position: CLLocationCoordinate2D) {
     print("origin: \(position.longitude)/\(position.latitude)")
     
-    var pois = poiList.filter({
+    let pois = poiList.filter({
       $0.calcVector(from: position)
       // print($0.debugString)
       if $0.type == .userDefined {
@@ -125,36 +126,36 @@ class PoiManager {
     })
     print("elevation filter: \(pois.count)")
     
-    pois.sort(by: { $0.height < $1.height })
-    if !includeHiddenPoi {
-      let start = Date()
-      candidates = []
-      targets: for i in 0 ..< pois.count - 1 {
-        if pois[i].type == .userDefined {
-          continue
-        }
-        for j in i + 1 ..< pois.count {
-          if pois[j].type != .mountain {
-            continue
-          }
-          let angle = abs(pois[i].angle(from: pois[j]))
-          // 山の斜面の勾配が1/2とし、且つ tanθ ≒ θ　と見做して隠れるかどうか判定
-          if angle < pois[j].elevation * 2 &&
-              pois[i].elevation < pois[j].elevation - angle * 0.5 {
-            // 隠す
-            print("\(pois[i].name) is hidden by \(pois[j].name)")
-            print("  \(pois[i].debugString)")
-            print("  \(pois[j].debugString)")
-           continue targets
-          }
-        }
-        candidates.insert(pois[i], at: 0)
-      }
-      print("elapsed: \(Date().timeIntervalSince(start))")
-      print("hidden filter: \(candidates.count)")
-    } else {
+//    pois.sort(by: { $0.height < $1.height })
+//    if !includeHiddenPoi {
+//      let start = Date()
+//      candidates = []
+//      targets: for i in 0 ..< pois.count - 1 {
+//        if pois[i].type == .userDefined {
+//          continue
+//        }
+//        for j in i + 1 ..< pois.count {
+//          if pois[j].type != .mountain {
+//            continue
+//          }
+//          let angle = abs(pois[i].angle(from: pois[j]))
+//          // 山の斜面の勾配が1/2とし、且つ tanθ ≒ θ　と見做して隠れるかどうか判定
+//          if angle < pois[j].elevation * 2 &&
+//              pois[i].elevation < pois[j].elevation - angle * 0.5 {
+//            // 隠す
+//            print("\(pois[i].name) is hidden by \(pois[j].name)")
+//            print("  \(pois[i].debugString)")
+//            print("  \(pois[j].debugString)")
+//           continue targets
+//          }
+//        }
+//        candidates.insert(pois[i], at: 0)
+//      }
+//      print("elapsed: \(Date().timeIntervalSince(start))")
+//      print("hidden filter: \(candidates.count)")
+//    } else {
       candidates = pois
-    }
+//    }
   }
   
   /**
@@ -170,6 +171,10 @@ class PoiManager {
     return filtered
   }
   
+  func getHeight(of group: String) -> Double? {
+    return groups[group]
+  }
+  
   func loadPois() {
     poiList = []
     
@@ -183,13 +188,23 @@ class PoiManager {
         first = false
       } else {
         let parts = line.components(separatedBy: ",")
-        let group = parts[2].isEmpty ? nil : parts[2]
-        let coord = CLLocationCoordinate2D(latitude: CLLocationDegrees(parts[4])!,
-                                           longitude: CLLocationDegrees(parts[5])!)
-        let famous = !parts[6].isEmpty
-        let poi = Poi(name: parts[0], group: group, height: Double(parts[3])!,
+        let group = parts[3].isEmpty ? nil : parts[3]
+        let coord = CLLocationCoordinate2D(latitude: CLLocationDegrees(parts[5])!,
+                                           longitude: CLLocationDegrees(parts[6])!)
+        let famous = !parts[7].isEmpty
+        let poi = Poi(name: parts[1], group: group, height: Double(parts[4])!,
                       location: coord, type: .mountain, famous: famous)
         poiList.append(poi)
+        
+        if let group = group {
+          if let height = groups[group] {
+            if poi.height > height {
+              groups[group] = poi.height
+            }
+          } else {
+            groups[group] = poi.height
+          }
+        }
       }
       
     }
