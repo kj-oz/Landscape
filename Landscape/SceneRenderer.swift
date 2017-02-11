@@ -218,8 +218,15 @@ class SceneRenderer: NSObject, CALayerDelegate {
         let color = getColor(of: label)
         ctx.setFillColor(color)
         ctx.fill(CGRect(x: label.left, y: y, width: label.width, height: labelHeight))
-        ctx.fill(CGRect(x: label.point - 0.5 * labelLineWidth, y: y + labelHeight,
-                        width: labelLineWidth, height: labelLineEndHeight - y - labelHeight))
+        
+        ctx.setStrokeColor(color)
+        ctx.move(to: CGPoint(x: label.left + label.width / 2, y: y + labelHeight))
+        ctx.addLine(to: CGPoint(x: label.point, y: labelLineEndHeight))
+        ctx.addLine(to: CGPoint(x: label.point, y: labelLineEndHeight + 20))
+        ctx.strokePath()
+        
+//        ctx.fill(CGRect(x: label.point - 0.5 * labelLineWidth, y: y + labelHeight,
+//                        width: labelLineWidth, height: labelLineEndHeight - y - labelHeight))
         attrs[NSFontAttributeName] = UIFont.systemFont(ofSize: Label.fontSize)
         label.text.draw(with: CGRect(x: label.left, y: y + Label.padding,
                                          width: label.width, height: labelHeight),
