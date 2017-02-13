@@ -24,6 +24,7 @@ enum PoiType {
 class Poi {
   
   let name: String
+  let detail: String?
   let group: String?
   let height: Double
   let location: CLLocationCoordinate2D
@@ -39,9 +40,10 @@ class Poi {
     return "\(nameStr), \(locStr), \(height), \(distance), \(azimuth), \(elevation)"
   }
   
-  init(name: String, group: String?, height: Double,
+  init(name: String, detail: String?, group: String?, height: Double,
        location: CLLocationCoordinate2D, type: PoiType, famous: Bool) {
     self.name = name
+    self.detail = detail
     self.group = group
     self.height = height
     self.location = location
@@ -67,13 +69,6 @@ class Poi {
   
   func angle(from: Poi) -> Double {
     return angle(from: from.azimuth)
-//    var diff = to.azimuth - azimuth
-//    if diff > 180.0 {
-//      diff = diff - 360
-//    } else if diff < -180.0 {
-//      diff = diff + 360
-//    }
-//    return diff
   }
   
   func angle(from: Double) -> Double {
@@ -188,11 +183,16 @@ class PoiManager {
         first = false
       } else {
         let parts = line.components(separatedBy: ",")
-        let group = parts[3].isEmpty ? nil : parts[3]
-        let coord = CLLocationCoordinate2D(latitude: CLLocationDegrees(parts[5])!,
-                                           longitude: CLLocationDegrees(parts[6])!)
-        let famous = !parts[7].isEmpty
-        let poi = Poi(name: parts[1], group: group, height: Double(parts[4])!,
+        if parts[11] == "☓" {
+          continue
+        }
+        let group = parts[5].isEmpty ? nil : parts[5]
+        let coord = CLLocationCoordinate2D(latitude: CLLocationDegrees(parts[7])!,
+                                           longitude: CLLocationDegrees(parts[8])!)
+        let famous = !parts[11].isEmpty
+        let detail = parts[2] + "," + parts[3] + "," + parts[4] + "," +
+          parts[9] + "," + parts[10] + "," + parts[11]
+        let poi = Poi(name: parts[1], detail: detail, group: group, height: Double(parts[6])!,
                       location: coord, type: .mountain, famous: famous)
         poiList.append(poi)
         

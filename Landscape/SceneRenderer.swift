@@ -60,7 +60,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
   private let labelFontColor = UIColor.white.cgColor
   
   // 
-  private let labelLineWidth: CGFloat = 1.0
+  private let labelLineWidth: CGFloat = 2.0
   
   private var labelLineEndHeight: CGFloat = 0.0
 
@@ -81,6 +81,8 @@ class SceneRenderer: NSObject, CALayerDelegate {
   // 画面のサイズ
   private var size = CGSize.zero
   
+  private var portrait = true
+  
   // 描画対象のレイヤ
   private var layer: CALayer?
   
@@ -88,6 +90,12 @@ class SceneRenderer: NSObject, CALayerDelegate {
   private var context: CGContext?
   
   var expandGroup = false
+  
+  private var rows: [LabelRow] = []
+  
+  private var selectedGroup: String?
+  
+  private var selectedPoi: Poi?
   
 //  private var poiIndex = 0
   /**
@@ -142,15 +150,41 @@ class SceneRenderer: NSObject, CALayerDelegate {
   }
   
   private func setupViewParameter() {
-    fieldAngle = size.width > size.height ? fieldAngleH : fieldAngleV
+    if size.width > size.height {
+      portrait = false
+      fieldAngle = fieldAngleH
+      rowCount = 4
+      rowStartHeight = Label.spacing
+    } else {
+      portrait = true
+      fieldAngle = fieldAngleV
+      rowCount = 6
+      rowStartHeight = 20.0 + Label.spacing
+    }
     SceneRenderer.tanFA_2 = tan(toRadian(fieldAngle / 2.0))
     SceneRenderer.w_2 = size.width / 2
-    rowCount = size.width > size.height ? 4 : 6
     labelLineEndHeight = size.height * 0.4
-    rowStartHeight = size.width > size.height ? Label.spacing : 20.0 + Label.spacing
   }
   
-
+  func tapped(at point: CGPoint) {
+    if let label = findLabel(at: point) {
+      if label.group {
+        selectedGroup = label.poi.group
+        selectedPoi = nil
+      } else {
+        selectedPoi = label.poi
+      }
+    } else {
+      if selectedPoi != nil {
+        selectedPoi = nil
+      } else {
+        selectedGroup = nil
+      }
+    }
+    layer!.setNeedsDisplay()
+  }
+  
+  
   func draw(_ layer: CALayer, in ctx: CGContext) {
     if heading == nil {
       return
@@ -202,59 +236,43 @@ class SceneRenderer: NSObject, CALayerDelegate {
     }
 
     let pois = poiManager.getVisiblePois(startAzimuth: startAzimuth, endAzimuth: endAzimuth)
-    let rows = self.createRows(pois: pois)
+    rows = self.createRows(pois: pois)
+    drawPois()
     
-    ctx.setStrokeColor(labelFontColor)
-    let paragraphStyle = NSMutableParagraphStyle()
-    paragraphStyle.alignment = .center
-    var attrs = [NSFontAttributeName: UIFont.systemFont(ofSize: Label.fontSize),
-                 NSParagraphStyleAttributeName: paragraphStyle,
-                 NSForegroundColorAttributeName: UIColor.black]
-    
-    for (index, row) in rows.enumerated() {
-      print("ROW-\(index)")
-      let y = rowStartHeight + (labelHeight + Label.spacing) * CGFloat(index)
-      for label in row.labels {
-        let color = getColor(of: label)
-        ctx.setFillColor(color)
-        ctx.fill(CGRect(x: label.left, y: y, width: label.width, height: labelHeight))
-        
-        ctx.setStrokeColor(color)
-        let x: CGFloat
-        if label.point > label.right {
-          x = label.right
-        } else if label.point < label.left {
-          x = label.left
-        } else {
-          x = label.point
-        }
-        ctx.move(to: CGPoint(x: x, y: y + labelHeight))
-        ctx.addLine(to: CGPoint(x: label.point, y: labelLineEndHeight))
-        ctx.addLine(to: CGPoint(x: label.point, y: labelLineEndHeight + 20))
-        ctx.strokePath()
-        
-//        ctx.fill(CGRect(x: label.point - 0.5 * labelLineWidth, y: y + labelHeight,
-//                        width: labelLineWidth, height: labelLineEndHeight - y - labelHeight))
-        attrs[NSFontAttributeName] = UIFont.systemFont(ofSize: Label.fontSize)
-        label.text.draw(with: CGRect(x: label.left, y: y + Label.padding,
-                                         width: label.width, height: labelHeight),
-                            options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
-        print("\(label.text): L \(label.left) W \(label.width) C \(label.point) E \(label.poi.elevation)")
-      }
-    }
     
     // デバッグ出力
-    let rect2 = CGRect(x: 40, y: size.height - 170, width: size.width - 80, height: 100)
-    ctx.setFillColor(red: 1, green: 1, blue: 1, alpha: 0.5)
-    ctx.fill(rect2)
-    
-    attrs = [NSFontAttributeName: UIFont.systemFont(ofSize: 12),
-             NSForegroundColorAttributeName: UIColor.black]
-    var string = ""
-    string += "heading: \(heading)\n"
-    string += "fieldAngle: \(fieldAngle)\n"
-  
-    string.draw(with: CGRect(x: 50, y: size.height - 160, width: size.width - 100, height: 80), options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
+    if let poi = selectedPoi {
+      var y = size.height - (portrait ? 200 : 165)
+      let rect = CGRect(x: 40, y: y, width: size.width - 80, height: portrait ? 150 : 115)
+      ctx.setFillColor(red: 1, green: 1, blue: 1, alpha: 0.5)
+      ctx.fill(rect)
+      
+      let details = poi.detail!.components(separatedBy: ",")
+      
+      var attrs = [NSFontAttributeName: UIFont.systemFont(ofSize: 16),
+                   NSForegroundColorAttributeName: UIColor.black]
+      var string = "\(poi.name)　\(details[0])"
+      y += 5;
+      string.draw(with: CGRect(x: 45, y: y, width: size.width - 90, height: 20), options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
+
+      attrs[NSFontAttributeName] = UIFont.systemFont(ofSize: 14)
+      string = ""
+      if !details[1].isEmpty {
+        string += "別名　　：\(details[1])　\(details[2])"
+      }
+      string += "標高　　：\(String(format: "%.0f", poi.height)) m\n"
+      string += "緯度経度：北緯 \(String(format: "%.2f", poi.location.latitude)) 度"
+      string += portrait ? "\n　　　　　" : "　"
+      string += "東経 \(String(format: "%.2f", poi.location.longitude)) 度\n"
+      string += "山域　　：\(details[4])"
+      string += portrait ? "\n　　　　　" : "　"
+      string += "（\(details[3])）\n"
+      if !details[5].isEmpty {
+        string += "その他　：\(details[5])\n"
+      }
+      y += 20;
+      string.draw(with: CGRect(x: 60, y: y, width: size.width - 90, height: 105), options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
+    }
     
     UIGraphicsPopContext()
     ctx.restoreGState()
@@ -264,12 +282,16 @@ class SceneRenderer: NSObject, CALayerDelegate {
     switch label.height {
     case 0 ..< 1000:
       return UIColor.cyan.cgColor
-    case 1000 ..< 2000:
+    case 1000 ..< 1500:
       return UIColor.green.cgColor
-    case 2000 ..< 3000:
+    case 1500 ..< 2000:
+      return UIColor(red: 0.68, green: 1, blue:0.18, alpha: 1).cgColor
+    case 2000 ..< 2500:
       return UIColor.yellow.cgColor
-    default:
+    case 2500 ..< 3000:
       return UIColor.orange.cgColor
+    default:
+      return UIColor.red.cgColor
     }
   }
   
@@ -326,21 +348,24 @@ class SceneRenderer: NSObject, CALayerDelegate {
     var labels: [Label] = []
     for poi in pois {
       let label: Label
-      if !expandGroup, let group = poi.group {
+      if let selectedGroup = selectedGroup {
+        if poi.group != selectedGroup {
+          continue
+        }
+        label = Label(poi: poi, group: false, groupHeight: nil, heading: heading!)
+      } else if let group = poi.group {
         if groups.contains(group) {
           continue
-        } else {
-          label = Label(poi: poi, group: true, groupHeight: poiManager.getHeight(of: group), heading: heading!)
-          // print("label: \(group) \(poi.azimuth) c:\(label.point) w:\(label.width)")
-          groups.insert(group)
         }
+        label = Label(poi: poi, group: true,
+                        groupHeight: poiManager.getHeight(of: group), heading: heading!)
+        groups.insert(group)
       } else {
         label = Label(poi: poi, group: false, groupHeight: nil, heading: heading!)
-        // print("label: \(poi.name) \(poi.azimuth) c:\(label.point) w:\(label.width)")
       }
       labels.append(label)
+      // print("label: \(label.text) \(poi.azimuth) c:\(label.point) w:\(label.width)")
     }
-//    labels.sort(by: { $0.height > $1.height })
     labels.sort(by: { $0.poi.distance < $1.poi.distance})
     
     var startRow = 0
@@ -355,7 +380,64 @@ class SceneRenderer: NSObject, CALayerDelegate {
     }
     rows.reverse()
     return rows
+  }
+  
+  private func drawPois() {
+    let ctx = context!
+    ctx.setStrokeColor(labelFontColor)
+    let paragraphStyle = NSMutableParagraphStyle()
+    paragraphStyle.alignment = .center
+    var attrs = [NSFontAttributeName: UIFont.systemFont(ofSize: Label.fontSize),
+                 NSParagraphStyleAttributeName: paragraphStyle,
+                 NSForegroundColorAttributeName: UIColor.black]
     
+    for (index, row) in rows.enumerated() {
+      // print("ROW-\(index)")
+      let y = rowStartHeight + (labelHeight + Label.spacing) * CGFloat(index)
+      for label in row.labels {
+        let color = getColor(of: label)
+        ctx.setFillColor(color)
+        ctx.fill(CGRect(x: label.left, y: y, width: label.width, height: labelHeight))
+        
+        ctx.setStrokeColor(color)
+        let x: CGFloat
+        if label.point > label.right {
+          x = label.right
+        } else if label.point < label.left {
+          x = label.left
+        } else {
+          x = label.point
+        }
+        ctx.setLineWidth(labelLineWidth)
+        ctx.move(to: CGPoint(x: x, y: y + labelHeight))
+        ctx.addLine(to: CGPoint(x: label.point, y: labelLineEndHeight))
+        ctx.addLine(to: CGPoint(x: label.point, y: labelLineEndHeight + 20))
+        ctx.strokePath()
+        
+        attrs[NSFontAttributeName] = UIFont.systemFont(ofSize: Label.fontSize)
+        label.text.draw(with: CGRect(x: label.left, y: y + Label.padding,
+                                     width: label.width, height: labelHeight),
+                        options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
+        // print("\(label.text): L \(label.left) W \(label.width) C \(label.point) E \(label.poi.elevation)")
+      }
+    }
+  }
+  
+  private func findLabel(at point: CGPoint) -> Label? {
+    for (index, row) in rows.enumerated() {
+      let y = rowStartHeight + (labelHeight + Label.spacing) * CGFloat(index)
+      if point.y < y || point.y > y + labelHeight {
+        continue
+      }
+      
+      for label in row.labels {
+        if point.x < label.left || point.x > label.right {
+          continue
+        }
+        return label
+      }
+    }
+    return nil
   }
 }
 

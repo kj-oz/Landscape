@@ -11,7 +11,7 @@ import UIKit
 /**
  * メイン画面のコントローラ
  */
-class MainViewController: UIViewController {
+class MainViewController: UIViewController, UIGestureRecognizerDelegate {
 
   // カメラの映像を表示するビュー
   @IBOutlet weak var cameraView: CameraView!
@@ -38,6 +38,16 @@ class MainViewController: UIViewController {
     renderer = SceneRenderer(layer: layer)
     
     locationManager = LocationManager(renderer: renderer!)
+
+    // 画面タップでシャッターを切るための設定
+    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(MainViewController.tapped(sender:)))
+
+    // デリゲートをセット
+    tapGesture.delegate = self;
+    
+    // Viewに追加.
+    self.view.addGestureRecognizer(tapGesture)
+    
   }
 
   // ビューが画面に表示される直前に呼び出される
@@ -95,7 +105,7 @@ class MainViewController: UIViewController {
   override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
     super.viewWillTransition(to: size, with: coordinator)
     
-    print("trasit to: \(size)")
+    print("transit to: \(size)")
     cameraManager!.viewWillTransition(to: size)
     locationManager!.viewWillTransition(to: size)
   }
@@ -117,4 +127,8 @@ class MainViewController: UIViewController {
     self.present(alertController, animated: true, completion: nil)
   }
   
+  // タップイベント.
+  func tapped(sender: UITapGestureRecognizer) {
+    renderer!.tapped(at: sender.location(in: self.view))
+  }
 }
