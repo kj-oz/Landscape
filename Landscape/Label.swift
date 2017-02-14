@@ -89,13 +89,6 @@ class LabelRow {
    * - returns 吸収することが出来たらばtrue、何らかの理由で出来なければfalse
    */
   func insert(label: Label) -> Bool {
-//    var totalWidth = labels.reduce(CGFloat(0.0), { $0 + $1.width })
-//    let spaceCount = labels.count + 2
-//    totalWidth += label.width
-//    if totalWidth + Label.spacing * CGFloat(spaceCount) > length {
-//      return false
-//    }
-    
     // 挿入位置の確定
     var index = 0
     for lb in labels {
@@ -104,14 +97,6 @@ class LabelRow {
       }
       index += 1
     }
-    
-//    let space = (length - totalWidth) / CGFloat(spaceCount)
-//    labels.insert(label, at: index)
-//    var next = space
-//    for lb in labels {
-//      lb.left = next
-//      next += lb.width + space
-//    }
     
     // 片側で使用する可能性のある最大スペース（それ以上確保しても使えない）
     let maxSpace: CGFloat = depth * coef + label.width
@@ -169,18 +154,6 @@ class LabelRow {
     
     var leftShift: CGFloat = 0    // 左のラベルを移動する量
     var rightShift: CGFloat = 0   // 右のラベルを移動する量
-    
-    // まず、左右とも最小限のスペースを確保する（スペースがあることは上で確認済み）
-//    if leftSpace < Label.padding {
-//      leftShift = Label.padding - leftSpace
-//      leftSpace = Label.padding
-//      leftMargin -= leftShift
-//    }
-//    if rightSpace < Label.padding {
-//      rightShift = Label.padding - rightSpace
-//      rightSpace = Label.padding
-//      rightMargin -= rightShift
-//    }
     
     let space = leftSpace + rightSpace
     let margin = leftMargin + rightMargin

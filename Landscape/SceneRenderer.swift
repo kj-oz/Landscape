@@ -299,7 +299,6 @@ class SceneRenderer: NSObject, CALayerDelegate {
     } else if angle > 180 {
       angle -= 360
     }
-    SceneRenderer.w_2 = size.width / 2
     let x = SceneRenderer.w_2 * CGFloat(1 + tan(toRadian(angle)) / SceneRenderer.tanFA_2)
     
     if tickIndex % tickPerDir == 0 {
