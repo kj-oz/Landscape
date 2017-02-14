@@ -20,7 +20,7 @@ class Label {
   static let padding: CGFloat = 3.0
   
   // ラベルの間隔
-  static let spacing: CGFloat = 12.0
+  static let spacing: CGFloat = 9.0
   
   // 対象の地物
   let poi: Poi
@@ -67,7 +67,7 @@ class LabelRow {
   
   let depth: CGFloat
   
-  let coef: CGFloat = 1.0
+  let coef: CGFloat = 1.5
 
   // ラベルそのもの
   var labels: [Label] = []

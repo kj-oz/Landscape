@@ -91,7 +91,6 @@ class PoiManager {
   var poiList: [Poi] = []
   var candidates: [Poi] = []
   var groups: [String : Double] = [:]
-//  var includeHiddenPoi = true
   
   init() {
     loadPois()
@@ -105,7 +104,7 @@ class PoiManager {
   func setCurrentPosition(position: CLLocationCoordinate2D) {
     print("origin: \(position.longitude)/\(position.latitude)")
     
-    let pois = poiList.filter({
+    candidates = poiList.filter({
       $0.calcVector(from: position)
       // print($0.debugString)
       if $0.type == .userDefined {
@@ -114,43 +113,12 @@ class PoiManager {
       if $0.elevation < minElevation {
         return false
       }
-      if !$0.famous && $0.distance > maxDistance {
+      if !$0.famous && $0.group == nil && $0.distance > maxDistance {
         return false
       }
       return true
     })
-    print("elevation filter: \(pois.count)")
-    
-//    pois.sort(by: { $0.height < $1.height })
-//    if !includeHiddenPoi {
-//      let start = Date()
-//      candidates = []
-//      targets: for i in 0 ..< pois.count - 1 {
-//        if pois[i].type == .userDefined {
-//          continue
-//        }
-//        for j in i + 1 ..< pois.count {
-//          if pois[j].type != .mountain {
-//            continue
-//          }
-//          let angle = abs(pois[i].angle(from: pois[j]))
-//          // 山の斜面の勾配が1/2とし、且つ tanθ ≒ θ　と見做して隠れるかどうか判定
-//          if angle < pois[j].elevation * 2 &&
-//              pois[i].elevation < pois[j].elevation - angle * 0.5 {
-//            // 隠す
-//            print("\(pois[i].name) is hidden by \(pois[j].name)")
-//            print("  \(pois[i].debugString)")
-//            print("  \(pois[j].debugString)")
-//           continue targets
-//          }
-//        }
-//        candidates.insert(pois[i], at: 0)
-//      }
-//      print("elapsed: \(Date().timeIntervalSince(start))")
-//      print("hidden filter: \(candidates.count)")
-//    } else {
-      candidates = pois
-//    }
+    print("elevation filter: \(candidates.count)")
   }
   
   /**
