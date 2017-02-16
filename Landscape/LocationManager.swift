@@ -111,7 +111,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
    */
   func startHeadingService() {
     lm.headingOrientation = UIDevice.current.orientation.headingOrientation
-    lm.headingFilter = 3.0
+    lm.headingFilter = 5.0
     lm.startUpdatingHeading()
   }
   

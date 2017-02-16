@@ -47,12 +47,11 @@ class Label {
   }
   
   // コンストラクタ
-  init(poi: Poi, group: Bool, groupHeight: Double?, heading: Double) {
+  init(poi: Poi, group: Bool, groupHeight: Double?, params: RenderingParams) {
     self.poi = poi
     self.group = group
     self.height = group ? groupHeight! : poi.height
-    let angle = poi.angle(from: heading)
-    point = SceneRenderer.w_2 * CGFloat(1 + tan(toRadian(angle)) / SceneRenderer.tanFA_2)
+    point = params.calcX(of: poi.azimuth)
     text = group ? poi.group! + " ▶" : poi.name
     width = text.size(attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: Label.fontSize)]).width + 2 * Label.padding
   }
