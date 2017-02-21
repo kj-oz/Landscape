@@ -12,9 +12,31 @@ import UIKit
  * メイン画面のコントローラ
  */
 class MainViewController: UIViewController, UIGestureRecognizerDelegate {
+  enum TargetActionType {
+    case imageZoom
+    case fieldAngleAdjust
+  }
 
+  private var targetActionType: TargetActionType = .imageZoom
+  
   // カメラの映像を表示するビュー
   @IBOutlet weak var cameraView: CameraView!
+  @IBOutlet weak var annotationView: UIView!
+  
+  @IBOutlet weak var zoominButton: UIButton!
+  @IBOutlet weak var zoomoutButton: UIButton!
+  @IBOutlet weak var targetButton: UIButton!
+  
+  private var currentZoom: Int = 1 {
+    didSet {
+      if let cm = cameraManager {
+        cm.setZoom(CGFloat(currentZoom))
+      }
+      if let renderer = renderer {
+        renderer.zoom(Double(currentZoom))
+      }
+    }
+  }
   
   // アプリ名称
   private let appName = "風景ガイド"
@@ -34,13 +56,14 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     
     // 各種オブジェクトの初期化
     cameraManager = CameraManager(cameraView: cameraView!)
-    let layer = cameraView.addDecorationLayer()
+    let layer = annotationView.layer
     renderer = SceneRenderer(layer: layer)
     
     locationManager = LocationManager(renderer: renderer!)
 
     // 画面タップでシャッターを切るための設定
-    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(MainViewController.tapped(sender:)))
+    let tapGesture = UITapGestureRecognizer(target: self,
+                                            action: #selector(MainViewController.tapped(sender:)))
 
     // デリゲートをセット
     tapGesture.delegate = self;
@@ -75,12 +98,12 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
       let message = "\(self.appName)は位置情報を使用する許可を与えられていません。\n" + "設定＞プライバシーで許可を与えてください。"
       showWarning(message: message, requireAuthorization: true)
     }
+    
     print("frame: \(view.frame.size), bounds: \(view.bounds.size)")
     
     if UIDevice.current.orientation == UIDeviceOrientation.portrait {
       // 他の向きの場合はTransitイベントが発生するが、Portraitだけは発生しない
-      cameraManager!.viewWillTransition(to: view.bounds.size)
-      locationManager!.viewWillTransition(to: view.bounds.size)
+      viewWillTransition(to: view.bounds.size)
     }
   }
   
@@ -104,10 +127,46 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   // 画面が回転する直前に呼び出される
   override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
     super.viewWillTransition(to: size, with: coordinator)
-    
+    viewWillTransition(to: size)
+  }
+  
+  private func viewWillTransition(to size: CGSize) {
     print("transit to: \(size)")
     cameraManager!.viewWillTransition(to: size)
     locationManager!.viewWillTransition(to: size)
+    let buttonSize = targetButton.bounds.size
+    if size.width > size.height {
+      targetButton.frame = CGRect(x: size.width - buttonSize.width - 132, y: 85,
+                                  width: buttonSize.width, height: buttonSize.height)
+    } else {
+      targetButton.frame = CGRect(x: size.width - buttonSize.width, y: 140,
+                                  width: buttonSize.width, height: buttonSize.height)
+    }
+  }
+  
+  // ステータスバーは表示しない
+  override var prefersStatusBarHidden: Bool {
+    return true
+  }
+  
+  @IBAction func targetTapped(_ sender: Any) {
+    targetActionType = targetActionType == .imageZoom ? .fieldAngleAdjust : .imageZoom
+  }
+  
+  @IBAction func zoominTapped(_ sender: Any) {
+    currentZoom *= 2
+    updateButtonStatus()
+  }
+
+  @IBAction func zoomoutTapped(_ sender: Any) {
+    currentZoom /= 2
+    updateButtonStatus()
+  }
+  
+  private func updateButtonStatus() {
+    let maxZoom = Int(NSDecimalNumber(decimal: pow(2, Int(log2(cameraManager!.getMaxZoom()!)))))
+    zoomoutButton.isEnabled = currentZoom > 1
+    zoominButton.isEnabled = currentZoom < maxZoom
   }
   
   /**

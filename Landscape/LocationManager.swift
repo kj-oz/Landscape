@@ -88,17 +88,22 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
   }
   
   func locationManager(_ manager: CLLocationManager, didUpdateLocations locations:[CLLocation]) {
-    let newLocation = locations.last!.coordinate
-    let (distance, _) = calcDistanceAndAngle(from: newLocation, to: prevLocation)
-    if distance > distanceFilter {
-      renderer!.updateLocation(location: newLocation)
+    let location = locations.last!
+    if  Date().timeIntervalSince(location.timestamp) < 60.0 {
+      let newLocation = location.coordinate
+      let (distance, _) = calcDistanceAndAngle(from: newLocation, to: prevLocation)
+      if distance > distanceFilter {
+        renderer!.updateLocation(location: newLocation)
+      }
+      prevLocation = newLocation
     }
-    prevLocation = newLocation
   }
   
   
   func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
-    renderer!.updateHeading(heading: Double(newHeading.trueHeading))
+    if Date().timeIntervalSince(newHeading.timestamp) < 60.0 && newHeading.trueHeading >= 0.0 {
+      renderer!.updateHeading(heading: Double(newHeading.trueHeading))
+    }
   }
   
   func viewWillTransition(to size: CGSize) {

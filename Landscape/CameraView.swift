@@ -24,12 +24,12 @@ class CameraView: UIView {
     }
   }
   
-  func addDecorationLayer() -> CALayer {
-    let newLayer = CALayer()
-    newLayer.frame = self.bounds
-    self.layer.addSublayer(newLayer)
-    return newLayer
-  }
+//  func addDecorationLayer() -> CALayer {
+//    let newLayer = CALayer()
+//    newLayer.frame = self.bounds
+//    self.layer.addSublayer(newLayer)
+//    return newLayer
+//  }
   
   // MARK: UIView
   override class var layerClass: AnyClass {

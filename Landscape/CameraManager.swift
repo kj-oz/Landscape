@@ -24,6 +24,11 @@ class CameraManager: NSObject {
   // 対象のビュー
   private weak var cameraView: CameraView? = nil
   
+  private let maxZoom: CGFloat = 8
+  
+  
+  private var camera: AVCaptureDevice?
+
   // ビデオ・セッション
   private let session = AVCaptureSession()
   
@@ -39,6 +44,8 @@ class CameraManager: NSObject {
   // MARK: KVO and Notifications
   private var sessionRunningObserveContext = 0
   
+  private var baseSize = CGSize.zero
+  
   /**
    *
    *
@@ -49,6 +56,7 @@ class CameraManager: NSObject {
     self.cameraView = cameraView
     cameraView.session = session
     cameraView.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
+    baseSize = cameraView.frame.size
     
     sessionQueue.async { [unowned self] in
       self.configureSession()
@@ -81,6 +89,7 @@ class CameraManager: NSObject {
       }
       
       videoPreviewLayerConnection.videoOrientation = newVideoOrientation
+      baseSize = size
     }
   }
   
@@ -96,15 +105,13 @@ class CameraManager: NSObject {
     session.sessionPreset = AVCaptureSessionPresetPhoto
     
     do {
-      var defaultVideoDevice: AVCaptureDevice?
-      
       if let dualCameraDevice = AVCaptureDevice.defaultDevice(withDeviceType: .builtInDuoCamera, mediaType: AVMediaTypeVideo, position: .back) {
-        defaultVideoDevice = dualCameraDevice
+        camera = dualCameraDevice
       } else if let backCameraDevice = AVCaptureDevice.defaultDevice(withDeviceType: .builtInWideAngleCamera, mediaType: AVMediaTypeVideo, position: .back) {
-        defaultVideoDevice = backCameraDevice
+        camera = backCameraDevice
       }
       
-      let videoDeviceInput = try AVCaptureDeviceInput(device: defaultVideoDevice)
+      let videoDeviceInput = try AVCaptureDeviceInput(device: camera)
       
       if session.canAddInput(videoDeviceInput) {
         session.addInput(videoDeviceInput)
@@ -204,5 +211,20 @@ class CameraManager: NSObject {
    */
   func sessionInterruptionEnded(notification: NSNotification) {
     print("Capture session interruption ended")
+  }
+  
+  func getMaxZoom() -> CGFloat? {
+    if let activeFormat = camera?.activeFormat {
+      return CGFloat(min(activeFormat.videoMaxZoomFactor, self.maxZoom))
+    }
+    return nil
+  }
+  
+  func setZoom(_ zoom: CGFloat) {
+    // camera.videoZoomFactorを設定しても、ちょうど指定した倍率にはならないため、Viewのサイズで調整
+    // decorationLayerの位置はSceneRenderer側で調整
+    let originFactor = -0.5 * (zoom - 1.0)
+    cameraView!.frame = CGRect(x: baseSize.width * originFactor, y: baseSize.height * originFactor,
+                               width: baseSize.width * zoom, height: baseSize.height * zoom)
   }
 }

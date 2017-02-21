@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11542" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11524"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -25,17 +25,78 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </view>
+                            <view opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="TKp-rf-c0o">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                            </view>
+                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1cN-A0-bnU">
+                                <rect key="frame" x="0.0" y="0.0" width="132" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="3Oy-H5-s8z"/>
+                                    <constraint firstAttribute="width" constant="132" id="Pke-kw-Pad"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="18"/>
+                                <state key="normal" title="ズーム：1">
+                                    <color key="titleColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
+                                <state key="disabled">
+                                    <color key="titleColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="targetTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="2M3-Cg-Opa"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hOl-df-sJS">
+                                <rect key="frame" x="309" y="571" width="66" height="66"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="66" id="JJd-Fw-4hi"/>
+                                    <constraint firstAttribute="width" constant="66" id="Orr-BT-w7w"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="36"/>
+                                <state key="normal" title="＋">
+                                    <color key="titleColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="zoominTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="iYp-dS-fPz"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5bh-nF-7FU">
+                                <rect key="frame" x="243" y="571" width="66" height="66"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="66" id="Eel-DL-eny"/>
+                                    <constraint firstAttribute="width" constant="66" id="YCp-9B-pbw"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="36"/>
+                                <state key="normal" title="ー">
+                                    <color key="titleColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="zoomoutTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="gXw-f1-6yK"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="TKp-rf-c0o" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="8BH-zt-rVd"/>
                             <constraint firstAttribute="trailing" secondItem="xAG-EH-e1F" secondAttribute="trailing" id="BjO-hh-uqe"/>
+                            <constraint firstItem="TKp-rf-c0o" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="Ice-AI-SBG"/>
+                            <constraint firstAttribute="trailing" secondItem="5bh-nF-7FU" secondAttribute="trailing" constant="66" id="YV7-C3-WOq"/>
+                            <constraint firstAttribute="trailing" secondItem="hOl-df-sJS" secondAttribute="trailing" id="iDE-2Q-ge8"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="5bh-nF-7FU" secondAttribute="bottom" constant="30" id="jBL-d1-8c8"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="xAG-EH-e1F" secondAttribute="bottom" id="jkt-hX-sVl"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="hOl-df-sJS" secondAttribute="bottom" constant="30" id="jzL-qk-aqQ"/>
                             <constraint firstItem="xAG-EH-e1F" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="mvE-yd-pLY"/>
+                            <constraint firstAttribute="trailing" secondItem="TKp-rf-c0o" secondAttribute="trailing" id="nbS-Xb-yRt"/>
+                            <constraint firstAttribute="bottom" secondItem="TKp-rf-c0o" secondAttribute="bottom" id="rgM-Ss-eyN"/>
                             <constraint firstItem="xAG-EH-e1F" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="wWF-r6-8w3"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="annotationView" destination="TKp-rf-c0o" id="pvf-eL-RPJ"/>
                         <outlet property="cameraView" destination="xAG-EH-e1F" id="e24-mH-zxA"/>
+                        <outlet property="targetButton" destination="1cN-A0-bnU" id="aqi-PZ-S1z"/>
+                        <outlet property="zoominButton" destination="hOl-df-sJS" id="GXc-oX-90z"/>
+                        <outlet property="zoomoutButton" destination="5bh-nF-7FU" id="SdM-WJ-8ZK"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

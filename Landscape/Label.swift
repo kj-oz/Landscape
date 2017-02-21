@@ -14,7 +14,7 @@ import CoreLocation
  */
 class Label {
   // ラベルに表示する文字サイズ
-  static let fontSize: CGFloat = 12.0
+  static let font = UIFont.systemFont(ofSize: 12.0)
   
   // ラベルの文字と枠間のパディング
   static let padding: CGFloat = 3.0
@@ -26,8 +26,6 @@ class Label {
   let poi: Poi
   
   let text: String
-  
-  let height: Double
   
   //
   let group: Bool
@@ -47,13 +45,12 @@ class Label {
   }
   
   // コンストラクタ
-  init(poi: Poi, group: Bool, groupHeight: Double?, params: RenderingParams) {
+  init(poi: Poi, group: Bool, params: RenderingParams) {
     self.poi = poi
     self.group = group
-    self.height = group ? groupHeight! : poi.height
     point = params.calcX(of: poi.azimuth)
     text = group ? poi.group! + " ▶" : poi.name
-    width = text.size(attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: Label.fontSize)]).width + 2 * Label.padding
+    width = text.size(attributes: [NSFontAttributeName: Label.font]).width + 2 * Label.padding
   }
 }
 
