@@ -46,6 +46,8 @@ class CameraManager: NSObject {
   
   private var baseSize = CGSize.zero
   
+  private var currentZoom: CGFloat = 1.0
+  
   /**
    *
    *
@@ -221,10 +223,11 @@ class CameraManager: NSObject {
   }
   
   func setZoom(_ zoom: CGFloat) {
-    // camera.videoZoomFactorを設定しても、ちょうど指定した倍率にはならないため、Viewのサイズで調整
-    // decorationLayerの位置はSceneRenderer側で調整
-    let originFactor = -0.5 * (zoom - 1.0)
-    cameraView!.frame = CGRect(x: baseSize.width * originFactor, y: baseSize.height * originFactor,
-                               width: baseSize.width * zoom, height: baseSize.height * zoom)
+    // camera.videoZoomFactorを設定しても、ちょうど指定した倍率にはならないため、Viewのtransformで調整
+    // transformによる変形はViewの中心を原点に働く
+    let scale = zoom / currentZoom
+    cameraView!.transform = cameraView!.transform.scaledBy(x: scale, y: scale)
+    
+    currentZoom = zoom
   }
 }

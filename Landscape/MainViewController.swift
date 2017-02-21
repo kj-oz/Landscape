@@ -21,6 +21,8 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   
   // カメラの映像を表示するビュー
   @IBOutlet weak var cameraView: CameraView!
+  
+  // 各種情報を表示するビュー
   @IBOutlet weak var annotationView: UIView!
   
   @IBOutlet weak var zoominButton: UIButton!
@@ -56,9 +58,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     
     // 各種オブジェクトの初期化
     cameraManager = CameraManager(cameraView: cameraView!)
-    let layer = annotationView.layer
-    renderer = SceneRenderer(layer: layer)
-    
+    renderer = SceneRenderer(layer: annotationView.layer)
     locationManager = LocationManager(renderer: renderer!)
 
     // 画面タップでシャッターを切るための設定
@@ -102,7 +102,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     print("frame: \(view.frame.size), bounds: \(view.bounds.size)")
     
     if UIDevice.current.orientation == UIDeviceOrientation.portrait {
-      // 他の向きの場合はTransitイベントが発生するが、Portraitだけは発生しない
+      // 他の向きの場合はTransitイベントが発生するが、Portraitの場合は発生しない
       viewWillTransition(to: view.bounds.size)
     }
   }
@@ -134,12 +134,20 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     print("transit to: \(size)")
     cameraManager!.viewWillTransition(to: size)
     locationManager!.viewWillTransition(to: size)
+  }
+  
+  // 各コントロールのレイアウト後に呼び出される
+  // ボタン位置の変更はここでないと効果がない
+  override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    
+    let size = view.bounds.size
     let buttonSize = targetButton.bounds.size
     if size.width > size.height {
-      targetButton.frame = CGRect(x: size.width - buttonSize.width - 132, y: 85,
+      targetButton.frame = CGRect(x: size.width - buttonSize.width, y: size.height - 140,
                                   width: buttonSize.width, height: buttonSize.height)
     } else {
-      targetButton.frame = CGRect(x: size.width - buttonSize.width, y: 140,
+      targetButton.frame = CGRect(x: size.width - buttonSize.width - 132, y: size.height - 85,
                                   width: buttonSize.width, height: buttonSize.height)
     }
   }
