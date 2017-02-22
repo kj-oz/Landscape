@@ -63,6 +63,7 @@ class PoiRenderer: NSObject {
   // 引出し線のPOI部鉛直線の長さ
   private let leadLinePointLength: CGFloat = 10.0
   
+  
   private let infoBoxRenderer = InfoBoxRenderer()
 
   

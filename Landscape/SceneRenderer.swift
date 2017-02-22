@@ -21,11 +21,21 @@ struct RenderingParams {
   // 画面の幅の1/2（ピクセル値）
   private var w_2: CGFloat = 0.0
   
+  // 画面のアスペクト比
+  private var aspectRatio = 1.0
+  
   // 長辺方向の画角
-  private var fieldAngleH = 0.0
+  var fieldAngleH = 0.0 {
+    didSet {
+      print(fieldAngleH)
+      fieldAngleV = toDegree(atan(aspectRatio * tan(toRadian(fieldAngleH / 2.0)))) * 2.0
+      updateFieldAngleBase()
+    }
+  }
   
   // 短辺方向の画角
   private var fieldAngleV = 0.0
+  
   
   // デバイスの背面の向き
   var heading: Double? {
@@ -37,7 +47,6 @@ struct RenderingParams {
   var zoom: Double = 1.0 {
     didSet {
       updateFieldAngle()
-      updateAngleRange()
     }
   }
   
@@ -54,7 +63,7 @@ struct RenderingParams {
   }
   
   // 水平方向の画角
-  private var fieldAngleBase = 0.0
+//  private var fieldAngleBase = 0.0
   private var fieldAngle_2 = 0.0
   
   // 画面のサイズ
@@ -83,8 +92,10 @@ struct RenderingParams {
     self.size = size
     let h = Double(max(size.width, size.height))
     let v = Double(min(size.width, size.height))
+    aspectRatio = v / h
     fieldAngleH = getFieldAngle()
-    fieldAngleV = toDegree(atan(v / h * tan(toRadian(fieldAngleH / 2.0)))) * 2.0
+    // initの中の設定ではdidSetは呼び出sれない
+    fieldAngleV = toDegree(atan(aspectRatio * tan(toRadian(fieldAngleH / 2.0)))) * 2.0
   }
   
   /**
@@ -95,11 +106,41 @@ struct RenderingParams {
    */
   mutating func setViewParameter(size: CGSize) {
     self.size = size
-    let fieldAngle = size.width > size.height ? fieldAngleH : fieldAngleV
-    tanFA_2Base = tan(toRadian(fieldAngle / 2.0))
-    
     w_2 = size.width / 2
+    
+    updateFieldAngleBase()
+  }
+  
+  private mutating func updateFieldAngleBase() {
+    let fieldAngleBase = size.width > size.height ? fieldAngleH : fieldAngleV
+    tanFA_2Base = tan(toRadian(fieldAngleBase / 2.0))
+    
     updateFieldAngle()
+  }
+  
+  /**
+   *
+   */
+  private mutating func updateFieldAngle() {
+    tanFA_2 = tanFA_2Base / zoom
+    fieldAngle_2 = toDegree(atan(tanFA_2))
+    updateAngleRange()
+  }
+  
+  /**
+   *
+   */
+  private mutating func updateAngleRange() {
+    if let heading = heading {
+      _startAngle = heading - fieldAngle_2
+      if _startAngle < 0 {
+        _startAngle += 360
+      }
+      _endAngle = heading + fieldAngle_2
+      if _endAngle > 360 {
+        _endAngle -= 360
+      }
+    }
   }
   
   /**
@@ -116,22 +157,6 @@ struct RenderingParams {
       angle -= 360
     }
     return w_2 * CGFloat(1 + tan(toRadian(angle)) / tanFA_2)
-  }
-  
-  private mutating func updateFieldAngle() {
-    tanFA_2 = tanFA_2Base / zoom
-    fieldAngle_2 = toDegree(atan(tanFA_2))
-  }
-  
-  private mutating func updateAngleRange() {
-    _startAngle = heading! - fieldAngle_2
-    if _startAngle < 0 {
-      _startAngle += 360
-    }
-    _endAngle = heading! + fieldAngle_2
-    if _endAngle > 360 {
-      _endAngle -= 360
-    }
   }
   
   /**
@@ -180,6 +205,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
     layer.delegate = self
     
     params.setViewParameter(size: layer.frame.size)
+    poiRenderer.setViewParameter(params)
   }
   
   /**
@@ -210,23 +236,20 @@ class SceneRenderer: NSObject, CALayerDelegate {
    * - parameter to 機器の画面の（機器の向きに準じた）サイズ
    */
   func changeOrientation(to size: CGSize) {
-//    layer!.bounds = CGRect(x: 0, y: 0, width: size.width, height: size.height)
-//    adjustLayerPosition()
     params.setViewParameter(size: size)
     poiRenderer.setViewParameter(params)
     layer!.setNeedsDisplay()
   }
   
   func zoom(_ zoom: Double) {
-//    adjustLayerPosition()
     params.zoom = zoom
     layer!.setNeedsDisplay()
   }
   
-//  private func adjustLayerPosition() {
-//    let parentSize = layer!.superlayer!.bounds.size
-//    layer!.position = CGPoint(x: parentSize.width * 0.5, y: parentSize.height * 0.5)
-//  }
+  func adjustFieldAngle(delta: Double) {
+    params.fieldAngleH += delta
+    layer!.setNeedsDisplay()
+  }
   
   /**
    * 機器の縦横の変更時に呼び出される

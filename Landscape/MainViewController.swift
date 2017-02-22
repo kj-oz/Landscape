@@ -12,12 +12,15 @@ import UIKit
  * メイン画面のコントローラ
  */
 class MainViewController: UIViewController, UIGestureRecognizerDelegate {
+  
   enum TargetActionType {
     case imageZoom
     case fieldAngleAdjust
   }
 
   private var targetActionType: TargetActionType = .imageZoom
+  
+  private let fieldAngleDelta = 0.5
   
   // カメラの映像を表示するビュー
   @IBOutlet weak var cameraView: CameraView!
@@ -39,6 +42,8 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
       }
     }
   }
+  
+  
   
   // アプリ名称
   private let appName = "風景ガイド"
@@ -159,22 +164,35 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   
   @IBAction func targetTapped(_ sender: Any) {
     targetActionType = targetActionType == .imageZoom ? .fieldAngleAdjust : .imageZoom
+    updateButtonStatus()
   }
   
   @IBAction func zoominTapped(_ sender: Any) {
-    currentZoom *= 2
+    if targetActionType == .imageZoom {
+      currentZoom *= 2
+    } else {
+      renderer!.adjustFieldAngle(delta: fieldAngleDelta)
+    }
     updateButtonStatus()
   }
 
   @IBAction func zoomoutTapped(_ sender: Any) {
-    currentZoom /= 2
+    if targetActionType == .imageZoom {
+      currentZoom /= 2
+    } else {
+      renderer!.adjustFieldAngle(delta: -fieldAngleDelta)
+    }
     updateButtonStatus()
   }
   
   private func updateButtonStatus() {
-    let maxZoom = Int(NSDecimalNumber(decimal: pow(2, Int(log2(cameraManager!.getMaxZoom()!)))))
-    zoomoutButton.isEnabled = currentZoom > 1
-    zoominButton.isEnabled = currentZoom < maxZoom
+    if targetActionType == .imageZoom {
+      let maxZoom = Int(NSDecimalNumber(decimal: pow(2, Int(log2(cameraManager!.getMaxZoom()!)))))
+      zoomoutButton.isEnabled = currentZoom > 1
+      zoominButton.isEnabled = currentZoom < maxZoom
+    } else {
+      
+    }
   }
   
   /**
