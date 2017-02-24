@@ -22,10 +22,7 @@ class CameraManager: NSObject {
   }
   
   // 対象のビュー
-  private weak var cameraView: CameraView? = nil
-  
-  private let maxZoom: CGFloat = 8
-  
+  private var cameraView: CameraView
   
   private var camera: AVCaptureDevice?
 
@@ -44,9 +41,28 @@ class CameraManager: NSObject {
   // MARK: KVO and Notifications
   private var sessionRunningObserveContext = 0
   
-  private var baseSize = CGSize.zero
+  var zoom: CGFloat = 1.0 {
+    didSet {
+      // camera.videoZoomFactorを設定しても、ちょうど指定した倍率にはならないため、Viewのtransformで調整
+      // transformによる変形はViewの中心を原点に働く
+      let scale = zoom / oldValue
+      if zoom == 1.0 {
+        cameraView.transform = CGAffineTransform.identity
+      } else {
+        cameraView.transform = cameraView.transform.scaledBy(x: scale, y: scale)
+      }
+    }
+  }
   
-  private var currentZoom: CGFloat = 1.0
+  private let appMaxZoom: CGFloat = 8
+  
+  var maxZoom: CGFloat {
+    if let activeFormat = camera?.activeFormat {
+      return CGFloat(min(activeFormat.videoMaxZoomFactor, appMaxZoom))
+    }
+    return appMaxZoom
+  }
+  
   
   /**
    *
@@ -54,11 +70,11 @@ class CameraManager: NSObject {
    * - parameter cameraView:
    */
   init(cameraView: CameraView) {
-    super.init()
     self.cameraView = cameraView
+    super.init()
     cameraView.session = session
     cameraView.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
-    baseSize = cameraView.frame.size
+//    baseSize = cameraView.frame.size
     
     sessionQueue.async { [unowned self] in
       self.configureSession()
@@ -84,14 +100,14 @@ class CameraManager: NSObject {
   }
   
   func viewWillTransition(to size: CGSize) {
-    if let videoPreviewLayerConnection = cameraView!.previewLayer.connection {
+    if let videoPreviewLayerConnection = cameraView.previewLayer.connection {
       let deviceOrientation = UIDevice.current.orientation
       guard let newVideoOrientation = deviceOrientation.videoOrientation, deviceOrientation.isPortrait || deviceOrientation.isLandscape else {
         return
       }
       
       videoPreviewLayerConnection.videoOrientation = newVideoOrientation
-      baseSize = size
+//      baseSize = size
     }
   }
   
@@ -126,7 +142,7 @@ class CameraManager: NSObject {
             }
           }
           
-          self.cameraView!.previewLayer.connection.videoOrientation = initialVideoOrientation
+          self.cameraView.previewLayer.connection.videoOrientation = initialVideoOrientation
         }
       } else {
         print("Could not add video device input to the session")
@@ -220,14 +236,5 @@ class CameraManager: NSObject {
       return CGFloat(min(activeFormat.videoMaxZoomFactor, self.maxZoom))
     }
     return nil
-  }
-  
-  func setZoom(_ zoom: CGFloat) {
-    // camera.videoZoomFactorを設定しても、ちょうど指定した倍率にはならないため、Viewのtransformで調整
-    // transformによる変形はViewの中心を原点に働く
-    let scale = zoom / currentZoom
-    cameraView!.transform = cameraView!.transform.scaledBy(x: scale, y: scale)
-    
-    currentZoom = zoom
   }
 }

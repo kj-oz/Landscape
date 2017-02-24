@@ -26,14 +26,14 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
   var heading: CLHeading?
   
   // 画面描画オブジェクト
-  var renderer: SceneRenderer?
+  var renderer: SceneRenderer
   
   //
   var prevLocation = CLLocationCoordinate2D()
   
   init(renderer: SceneRenderer) {
-    super.init()
     self.renderer = renderer
+    super.init()
 
     if supportsLocation {
       
@@ -93,7 +93,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
       let newLocation = location.coordinate
       let (distance, _) = calcDistanceAndAngle(from: newLocation, to: prevLocation)
       if distance > distanceFilter {
-        renderer!.updateLocation(location: newLocation)
+        renderer.updateLocation(location: newLocation)
       }
       prevLocation = newLocation
     }
@@ -102,13 +102,13 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
   
   func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
     if Date().timeIntervalSince(newHeading.timestamp) < 60.0 && newHeading.trueHeading >= 0.0 {
-      renderer!.updateHeading(heading: Double(newHeading.trueHeading))
+      renderer.updateHeading(heading: Double(newHeading.trueHeading))
     }
   }
   
   func viewWillTransition(to size: CGSize) {
     lm.headingOrientation = UIDevice.current.orientation.headingOrientation
-    renderer!.changeOrientation(to: size)
+    renderer.changeOrientation(to: size)
   }
   
   /**

@@ -15,8 +15,8 @@ import CoreLocation
 struct RenderingParams {
   
   // 画角の1/2のタンジェント
-  private var tanFA_2Base: Double = 0.0
-  private var tanFA_2: Double = 0.0
+  private var tanFA_2Base: Double = 0.0   // ズームなし
+  private var tanFA_2: Double = 0.0       // ズーム考慮
   
   // 画面の幅の1/2（ピクセル値）
   private var w_2: CGFloat = 0.0
@@ -44,6 +44,7 @@ struct RenderingParams {
     }
   }
   
+  // ズーム
   var zoom: Double = 1.0 {
     didSet {
       updateFieldAngle()
@@ -62,12 +63,17 @@ struct RenderingParams {
     return _endAngle
   }
   
-  // 水平方向の画角
-//  private var fieldAngleBase = 0.0
+  // 画面（横方向）の画角の1/2
   private var fieldAngle_2 = 0.0
   
   // 画面のサイズ
-  private var size = CGSize.zero
+  var size:CGSize {
+    didSet {
+      w_2 = size.width / 2
+      updateFieldAngleBase()
+    }
+  }
+  
   var width: CGFloat {
     return size.width
   }
@@ -82,6 +88,11 @@ struct RenderingParams {
   
   // 描画コンテキスト
   var context: CGContext?
+  
+  // カメラの（横長画像時の）画角
+  private var defaultFieldAngle: Double {
+    return 62.0
+  }
 
   /**
    * コンストラクタ
@@ -93,33 +104,25 @@ struct RenderingParams {
     let h = Double(max(size.width, size.height))
     let v = Double(min(size.width, size.height))
     aspectRatio = v / h
-    fieldAngleH = getFieldAngle()
+    fieldAngleH = defaultFieldAngle
+    
     // initの中の設定ではdidSetは呼び出sれない
     fieldAngleV = toDegree(atan(aspectRatio * tan(toRadian(fieldAngleH / 2.0)))) * 2.0
   }
   
   /**
-   * 画面のサイズに影響を受けるパラメータを設定する
-   * 画面の向きが変わった際に呼び出される
-   *
-   * -parameter size 画面のサイズ
+   * ズーム1.0のときの画角の更新に伴う処理
+   * （画面の回転、画角の調整）
    */
-  mutating func setViewParameter(size: CGSize) {
-    self.size = size
-    w_2 = size.width / 2
-    
-    updateFieldAngleBase()
-  }
-  
   private mutating func updateFieldAngleBase() {
     let fieldAngleBase = size.width > size.height ? fieldAngleH : fieldAngleV
     tanFA_2Base = tan(toRadian(fieldAngleBase / 2.0))
-    
     updateFieldAngle()
   }
   
   /**
-   *
+   * ズームを考慮した画角の更新に伴う処理
+   * （ズーム変更時）
    */
   private mutating func updateFieldAngle() {
     tanFA_2 = tanFA_2Base / zoom
@@ -128,7 +131,7 @@ struct RenderingParams {
   }
   
   /**
-   *
+   * 端末の向きの変更時の処理
    */
   private mutating func updateAngleRange() {
     if let heading = heading {
@@ -159,14 +162,14 @@ struct RenderingParams {
     return w_2 * CGFloat(1 + tan(toRadian(angle)) / tanFA_2)
   }
   
-  /**
-   * 添付のカメラの（横長画像時の）画角を得る
-   *
-   * -returns 横長画像時の画角
-   */
-  private func getFieldAngle() -> Double {
-    return 62.0
-  }
+//  /**
+//   * 添付のカメラの（横長画像時の）画角を得る
+//   *
+//   * -returns 横長画像時の画角
+//   */
+//  private func getFieldAngle() -> Double {
+//    return 62.0
+//  }
 }
 
 /**
@@ -187,7 +190,29 @@ class SceneRenderer: NSObject, CALayerDelegate {
   private var params: RenderingParams
   
   // 描画対象のレイヤ
-  private var layer: CALayer?
+  private var layer: CALayer
+  
+  // ズーム
+  var zoom: Double {
+    get {
+      return params.zoom
+    }
+    set {
+      params.zoom = newValue
+      layer.setNeedsDisplay()
+    }
+  }
+  
+  // 画角
+  var fieldAngle: Double {
+    get {
+      return params.fieldAngleH
+    }
+    set {
+      params.fieldAngleH = fieldAngle
+      layer.setNeedsDisplay()
+    }
+  }
   
   /**
    * コンストラクタ
@@ -199,12 +224,11 @@ class SceneRenderer: NSObject, CALayerDelegate {
     poiManager = PoiManager()
     directionRenderer = DirectionRenderer()
     poiRenderer = PoiRenderer(poiManager: poiManager)
+    self.layer = layer
     super.init()
     
-    self.layer = layer
     layer.delegate = self
-    
-    params.setViewParameter(size: layer.frame.size)
+    params.size = layer.frame.size
     poiRenderer.setViewParameter(params)
   }
   
@@ -217,7 +241,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
   func updateLocation(location: CLLocationCoordinate2D) {
     // 対象POIの再計算
     poiManager.setCurrentPosition(position: location)
-    layer!.setNeedsDisplay()
+    layer.setNeedsDisplay()
   }
   
   /**
@@ -227,7 +251,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
    */
   func updateHeading(heading: Double) {
     params.heading = heading
-    layer!.setNeedsDisplay()
+    layer.setNeedsDisplay()
   }
   
   /**
@@ -236,19 +260,9 @@ class SceneRenderer: NSObject, CALayerDelegate {
    * - parameter to 機器の画面の（機器の向きに準じた）サイズ
    */
   func changeOrientation(to size: CGSize) {
-    params.setViewParameter(size: size)
+    params.size = size
     poiRenderer.setViewParameter(params)
-    layer!.setNeedsDisplay()
-  }
-  
-  func zoom(_ zoom: Double) {
-    params.zoom = zoom
-    layer!.setNeedsDisplay()
-  }
-  
-  func adjustFieldAngle(delta: Double) {
-    params.fieldAngleH += delta
-    layer!.setNeedsDisplay()
+    layer.setNeedsDisplay()
   }
   
   /**
@@ -258,7 +272,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
    */
   func tapped(at point: CGPoint) {
     poiRenderer.tapped(at: point)
-    layer!.setNeedsDisplay()
+    layer.setNeedsDisplay()
   }
   
   
