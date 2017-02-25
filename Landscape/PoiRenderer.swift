@@ -44,12 +44,13 @@ class PoiRenderer: NSObject {
   private let labelHeight: CGFloat
   
   // ラベルの色
-  private let labelColor0_1000 = UIColor(red: 0, green: 0.8, blue:1, alpha: 1).cgColor
-  private let labelColor1000_1500 = UIColor(red: 0.5, green: 1, blue:0.8, alpha: 1).cgColor
-  private let labelColor1500_2000 = UIColor(red: 0.7, green: 1, blue:0.1, alpha: 1).cgColor
-  private let labelColor2000_2500 = UIColor.yellow.cgColor
-  private let labelColor2500_3000 = UIColor.orange.cgColor
-  private let labelColor3000_ = UIColor.red.cgColor
+  private let labelColor0_1000 = UIColor(red: 0.0, green: 0.8, blue:1.0, alpha: 1).cgColor
+  private let labelColor1000_1500 = UIColor(red: 0.5, green: 1.0, blue:0.8, alpha: 1).cgColor
+  private let labelColor1500_2000 = UIColor(red: 0.7, green: 1.0, blue:0.1, alpha: 1).cgColor
+  private let labelColor2000_2500 = UIColor(red: 1.0, green: 0.9, blue:0.1, alpha: 1).cgColor
+  private let labelColor2500_3000 = UIColor(red: 1.0, green: 0.5, blue:0.1, alpha: 1).cgColor
+  private let labelColor3000_ = UIColor(red: 0.7, green: 0.5, blue:0.3, alpha: 1).cgColor
+
   
   // ラベルの文字色
   private let labelFontColor = UIColor.black
@@ -116,7 +117,7 @@ class PoiRenderer: NSObject {
   }
   
   private func createLabels(pois: [Poi], params: RenderingParams) {
-    print("■view: w \(params.width)")
+    //print("■view: w \(params.width)")
     var rows: [LabelRow] = []
     let depth = leadLinePointHeight - (labelHeight + Label.spacing) * CGFloat(rowCountMax)
     for i in 0 ..< rowCountMax {
@@ -254,7 +255,7 @@ class PoiRenderer: NSObject {
   }
   
   class InfoBoxRenderer {
-    private let boxColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5).cgColor
+    private let boxColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1).cgColor
     private let fontColor = UIColor.black
     private let titleFont = UIFont.systemFont(ofSize: 16)
     private let sentenceFont = UIFont.systemFont(ofSize: 14)
@@ -269,7 +270,7 @@ class PoiRenderer: NSObject {
       let itemSeparator: String
       
       if params.isPortrait {
-        y = params.height - 260
+        y = params.height - 315
         x = 20
         height = 155
         width = params.width - 40
@@ -278,7 +279,7 @@ class PoiRenderer: NSObject {
         y = params.height - 170
         x = 20
         height = 120
-        width = params.width - 160
+        width = params.width - 238
         itemSeparator = "　"
       }
       

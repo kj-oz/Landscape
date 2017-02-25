@@ -51,7 +51,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
       return renderer.fieldAngle
     }
     set {
-      renderer.fieldAngle = fieldAngle
+      renderer.fieldAngle = newValue
     }
   }
   
@@ -119,6 +119,8 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
       // 他の向きの場合はTransitイベントが発生するが、Portraitの場合は発生しない
       viewWillTransition(to: view.bounds.size)
     }
+
+    updateButtonStatus()
   }
   
   // ビューが画面から隠される直前に呼び出される
@@ -150,21 +152,21 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     locationManager.viewWillTransition(to: size)
   }
   
-  // 各コントロールのレイアウト後に呼び出される
-  // ボタン位置の変更はここでないと効果がない
-  override func viewDidLayoutSubviews() {
-    super.viewDidLayoutSubviews()
-    
-    let size = view.bounds.size
-    let buttonSize = targetButton.bounds.size
-    if size.width > size.height {
-      targetButton.frame = CGRect(x: size.width - buttonSize.width, y: size.height - 140,
-                                  width: buttonSize.width, height: buttonSize.height)
-    } else {
-      targetButton.frame = CGRect(x: size.width - buttonSize.width - 132, y: size.height - 85,
-                                  width: buttonSize.width, height: buttonSize.height)
-    }
-  }
+//  // 各コントロールのレイアウト後に呼び出される
+//  // ボタン位置の変更はここでないと効果がない
+//  override func viewDidLayoutSubviews() {
+//    super.viewDidLayoutSubviews()
+//    
+//    let size = view.bounds.size
+//    let buttonSize = targetButton.bounds.size
+//    if size.width > size.height {
+//      targetButton.frame = CGRect(x: size.width - buttonSize.width, y: size.height - 140,
+//                                  width: buttonSize.width, height: buttonSize.height)
+//    } else {
+//      targetButton.frame = CGRect(x: size.width - buttonSize.width - 132, y: size.height - 85,
+//                                  width: buttonSize.width, height: buttonSize.height)
+//    }
+//  }
   
   // ステータスバーは表示しない
   override var prefersStatusBarHidden: Bool {
@@ -173,6 +175,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   
   @IBAction func targetTapped(_ sender: Any) {
     targetActionType = targetActionType == .imageZoom ? .fieldAngleAdjust : .imageZoom
+    print("□TARGET Tapped.")
     updateButtonStatus()
   }
   
@@ -180,8 +183,11 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     if targetActionType == .imageZoom {
       zoom *= 2
     } else {
+      print("old \(fieldAngle)")
       fieldAngle += fieldAngleDelta
+      print("new \(fieldAngle)")
     }
+    print("□ZOOMIN Tapped.")
     updateButtonStatus()
   }
 
@@ -189,8 +195,11 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     if targetActionType == .imageZoom {
       zoom /= 2
     } else {
+      print("old \(fieldAngle)")
       fieldAngle -= fieldAngleDelta
+      print("new \(fieldAngle)")
     }
+    print("□ZOOMOUT Tapped.")
     updateButtonStatus()
   }
   
@@ -201,7 +210,9 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
       zoominButton.isEnabled = zoom < maxZoom
       targetButton.setTitle("ズーム：\(zoom) 倍", for: .normal)
     } else {
-      targetButton.setTitle(String(format: "水平画角：%.1f 度", fieldAngle), for: .normal)
+      zoomoutButton.isEnabled = true
+      zoominButton.isEnabled = true
+      targetButton.setTitle(String(format: "水平画角：%.1f°", fieldAngle), for: .normal)
     }
   }
   

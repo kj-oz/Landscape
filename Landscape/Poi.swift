@@ -130,7 +130,7 @@ class PoiManager {
    */
   func getVisiblePois(startAzimuth: Double, endAzimuth: Double) -> [Poi] {
     let filtered = candidates.filter({ $0.isInside(fromAzimuth: startAzimuth, toAzimuth: endAzimuth) })
-    print("angle filtered: \(filtered.count) (\(startAzimuth) - \(endAzimuth))")
+    //print("angle filtered: \(filtered.count) (\(startAzimuth) - \(endAzimuth))")
     return filtered
   }
   

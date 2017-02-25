@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		31223BE11E3CD4EF009874ED /* Label.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31223BE01E3CD4EF009874ED /* Label.swift */; };
 		31ACCB021E2522A900AFDC09 /* Poi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31ACCB011E2522A900AFDC09 /* Poi.swift */; };
+		31B423A61E607F90002D2582 /* CustomButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B423A51E607F90002D2582 /* CustomButton.swift */; };
 		31C9C1811E1D2DD100DD5842 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31C9C1801E1D2DD100DD5842 /* AppDelegate.swift */; };
 		31C9C1831E1D2DD100DD5842 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31C9C1821E1D2DD100DD5842 /* MainViewController.swift */; };
 		31C9C1861E1D2DD100DD5842 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 31C9C1841E1D2DD100DD5842 /* Main.storyboard */; };
@@ -27,6 +28,7 @@
 /* Begin PBXFileReference section */
 		31223BE01E3CD4EF009874ED /* Label.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Label.swift; sourceTree = "<group>"; };
 		31ACCB011E2522A900AFDC09 /* Poi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Poi.swift; sourceTree = "<group>"; };
+		31B423A51E607F90002D2582 /* CustomButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomButton.swift; sourceTree = "<group>"; };
 		31C9C17D1E1D2DD100DD5842 /* Landscape.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Landscape.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		31C9C1801E1D2DD100DD5842 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		31C9C1821E1D2DD100DD5842 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = MainViewController.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -90,6 +92,7 @@
 				31E325311E3A3AC1000203EC /* Util.swift */,
 				31223BE01E3CD4EF009874ED /* Label.swift */,
 				31D29EA41E45AC2000835A4B /* FileUtil.swift */,
+				31B423A51E607F90002D2582 /* CustomButton.swift */,
 			);
 			path = Landscape;
 			sourceTree = "<group>";
@@ -167,6 +170,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				31B423A61E607F90002D2582 /* CustomButton.swift in Sources */,
 				31ACCB021E2522A900AFDC09 /* Poi.swift in Sources */,
 				31C9C1931E1D302900DD5842 /* CameraView.swift in Sources */,
 				31C9C1831E1D2DD100DD5842 /* MainViewController.swift in Sources */,

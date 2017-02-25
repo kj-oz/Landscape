@@ -27,7 +27,6 @@ struct RenderingParams {
   // 長辺方向の画角
   var fieldAngleH = 0.0 {
     didSet {
-      print(fieldAngleH)
       fieldAngleV = toDegree(atan(aspectRatio * tan(toRadian(fieldAngleH / 2.0)))) * 2.0
       updateFieldAngleBase()
     }
@@ -209,7 +208,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
       return params.fieldAngleH
     }
     set {
-      params.fieldAngleH = fieldAngle
+      params.fieldAngleH = newValue
       layer.setNeedsDisplay()
     }
   }
