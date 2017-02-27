@@ -20,10 +20,14 @@ import UIKit
   @IBInspectable var borderColor: UIColor = UIColor.clear
   @IBInspectable var borderWidth: CGFloat = 0.0
   
-  // 背景
+  // Disableになる前の背景色
   private var originalBackgroundColor = UIColor.white
+  
+  // Disable時の背景色
   @IBInspectable var disabledBackgroundColor: UIColor?
   
+  // 描画時に呼び出される
+  // この中で背景色を変えてもうまくいかないので、プロパティの変更を監視して設定
   override func draw(_ rect: CGRect) {
     // 角丸
     layer.cornerRadius = cornerRadius
@@ -36,31 +40,26 @@ import UIKit
     super.draw(rect)
   }
   
+  // 背景色プロパティ
   override var backgroundColor: UIColor? {
     didSet {
       if isEnabled {
+        // Enable時の設定値を記憶する
         originalBackgroundColor = backgroundColor!
       }
     }
   }
   
+  // 使用可・不可の状態のプロパティ
   override var isEnabled: Bool {
     didSet {
+      // 設定時・解除時に背景色を変更
       if isEnabled {
         backgroundColor = originalBackgroundColor
       } else {
         backgroundColor = disabledBackgroundColor
       }
     }
-  }
-  
-  private func col(_ color: UIColor) -> String {
-    var red: CGFloat = 0
-    var green: CGFloat = 0
-    var blue: CGFloat = 0
-    var alpha: CGFloat = 0
-    color.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-    return String(format: "%.1f %.1f %.1f %.1f", red, green, blue, alpha)
   }
 }
 

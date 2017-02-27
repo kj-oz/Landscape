@@ -48,9 +48,8 @@ class PoiRenderer: NSObject {
   private let labelColor1000_1500 = UIColor(red: 0.5, green: 1.0, blue:0.8, alpha: 1).cgColor
   private let labelColor1500_2000 = UIColor(red: 0.7, green: 1.0, blue:0.1, alpha: 1).cgColor
   private let labelColor2000_2500 = UIColor(red: 1.0, green: 0.9, blue:0.1, alpha: 1).cgColor
-  private let labelColor2500_3000 = UIColor(red: 1.0, green: 0.5, blue:0.1, alpha: 1).cgColor
-  private let labelColor3000_ = UIColor(red: 0.7, green: 0.5, blue:0.3, alpha: 1).cgColor
-
+  private let labelColor2500_3000 = UIColor(red: 1.0, green: 0.6, blue:0.2, alpha: 1).cgColor
+  private let labelColor3000_ = UIColor(red: 0.8, green: 0.4, blue:0.2, alpha: 1).cgColor
   
   // ラベルの文字色
   private let labelFontColor = UIColor.black

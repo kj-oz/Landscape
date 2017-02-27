@@ -12,12 +12,15 @@ import UIKit
  * メイン画面のコントローラ
  */
 class MainViewController: UIViewController, UIGestureRecognizerDelegate {
-  
+  /**
+   * ズームボタン押下時の処理
+   */
   enum TargetActionType {
-    case imageZoom
-    case fieldAngleAdjust
+    case imageZoom          // ズーム
+    case fieldAngleAdjust   // 画角の調整
   }
 
+  // ズームボタン押下時の処理
   private var targetActionType: TargetActionType = .imageZoom
   
   // 画角調整時にボタン1タップで変更する画角
@@ -26,7 +29,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   // カメラの映像を表示するビュー
   @IBOutlet weak var cameraView: CameraView!
   
-  // 各種情報を表示するビュー
+  // POIの情報を表示するビュー
   @IBOutlet weak var annotationView: UIView!
   
   // 各種ボタン
@@ -78,7 +81,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     
     fieldAngle = renderer.fieldAngle
 
-    // 画面タップでシャッターを切るための設定
+    // 画面タップ
     let tapGesture = UITapGestureRecognizer(target: self,
                                             action: #selector(MainViewController.tapped(sender:)))
     tapGesture.delegate = self;
@@ -92,29 +95,14 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     super.viewWillAppear(animated)
     
     // カメラセッションの状態を確認
-    switch cameraManager.setupResult {
-    case .success:
+    if checkCameraService() {
       cameraManager.startSession()
-      
-    case .notAuthorized:
-      let message = "\(self.appName)はカメラを使用する許可を与えられていません。\n" + "設定＞プライバシーで許可を与えてください。"
-      showWarning(message: message, requireAuthorization: true)
-      
-    case .configurationFailed:
-      showWarning(message: "カメラ画像を取得できません。")
     }
     
     // 位置情報関係の状態を確認
-    if !locationManager.supportsLocation {
-      showWarning(message: "この端末では位置情報を利用できません。")
-    } else if !(locationManager.authorizationStatus == .authorizedWhenInUse ||
-        locationManager.authorizationStatus == .authorizedAlways) {
-      let message = "\(self.appName)は位置情報を使用する許可を与えられていません。\n" + "設定＞プライバシーで許可を与えてください。"
-      showWarning(message: message, requireAuthorization: true)
-    }
+    checkLocationService()
     
     print("frame: \(view.frame.size), bounds: \(view.bounds.size)")
-    
     if UIDevice.current.orientation == UIDeviceOrientation.portrait {
       // 他の向きの場合はTransitイベントが発生するが、Portraitの場合は発生しない
       viewWillTransition(to: view.bounds.size)
@@ -143,66 +131,51 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   // 画面が回転する直前に呼び出される
   override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
     super.viewWillTransition(to: size, with: coordinator)
+    
     viewWillTransition(to: size)
   }
   
+  /**
+   * 画面回転時に、各オブジェクトにそれを通知する
+   */
   private func viewWillTransition(to size: CGSize) {
     print("transit to: \(size)")
     cameraManager.viewWillTransition(to: size)
     locationManager.viewWillTransition(to: size)
   }
   
-//  // 各コントロールのレイアウト後に呼び出される
-//  // ボタン位置の変更はここでないと効果がない
-//  override func viewDidLayoutSubviews() {
-//    super.viewDidLayoutSubviews()
-//    
-//    let size = view.bounds.size
-//    let buttonSize = targetButton.bounds.size
-//    if size.width > size.height {
-//      targetButton.frame = CGRect(x: size.width - buttonSize.width, y: size.height - 140,
-//                                  width: buttonSize.width, height: buttonSize.height)
-//    } else {
-//      targetButton.frame = CGRect(x: size.width - buttonSize.width - 132, y: size.height - 85,
-//                                  width: buttonSize.width, height: buttonSize.height)
-//    }
-//  }
-  
   // ステータスバーは表示しない
   override var prefersStatusBarHidden: Bool {
     return true
   }
   
+  // 処理切り替えボタンタップ時
   @IBAction func targetTapped(_ sender: Any) {
     targetActionType = targetActionType == .imageZoom ? .fieldAngleAdjust : .imageZoom
-    print("□TARGET Tapped.")
     updateButtonStatus()
   }
   
+  // プラスボタンタップ時
   @IBAction func zoominTapped(_ sender: Any) {
     if targetActionType == .imageZoom {
-      zoom *= 2
+      UIView.animate(withDuration: 0.5, animations: { self.zoom *= 2 })
     } else {
-      print("old \(fieldAngle)")
       fieldAngle += fieldAngleDelta
-      print("new \(fieldAngle)")
     }
-    print("□ZOOMIN Tapped.")
     updateButtonStatus()
   }
 
+  // マイナスボタンタップ時
   @IBAction func zoomoutTapped(_ sender: Any) {
     if targetActionType == .imageZoom {
-      zoom /= 2
+      UIView.animate(withDuration: 0.5, animations: { self.zoom /= 2 })
     } else {
-      print("old \(fieldAngle)")
       fieldAngle -= fieldAngleDelta
-      print("new \(fieldAngle)")
     }
-    print("□ZOOMOUT Tapped.")
     updateButtonStatus()
   }
   
+  // 各種ボタンの状態の更新
   private func updateButtonStatus() {
     if targetActionType == .imageZoom {
       let maxZoom = Int(NSDecimalNumber(decimal: pow(2, Int(log2(cameraManager.getMaxZoom()!)))))
@@ -233,8 +206,43 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     self.present(alertController, animated: true, completion: nil)
   }
   
-  // タップイベント.
+  // 画面タップ時
   func tapped(sender: UITapGestureRecognizer) {
     renderer.tapped(at: sender.location(in: self.view))
+  }
+  
+  /**
+   * カメラの状態をチェックする
+   *
+   * - returns true: 正常に終了、false: 何らか失敗している
+   */
+  private func checkCameraService() -> Bool {
+    // カメラセッションの状態を確認
+    switch cameraManager.setupResult {
+    case .success:
+      return true
+      
+    case .notAuthorized:
+      let message = "\(self.appName)はカメラを使用する許可を与えられていません。\n" + "設定＞プライバシーで許可を与えてください。"
+      showWarning(message: message, requireAuthorization: true)
+      
+    case .configurationFailed:
+      showWarning(message: "カメラ画像を取得できません。")
+    }
+    return false
+  }
+  
+  /**
+   * 位置情報サービスの状態をチェックする
+   */
+  private func checkLocationService() {
+    // 位置情報関係の状態を確認
+    if !locationManager.supportsLocation {
+      showWarning(message: "この端末では位置情報を利用できません。")
+    } else if !(locationManager.authorizationStatus == .authorizedWhenInUse ||
+      locationManager.authorizationStatus == .authorizedAlways) {
+      let message = "\(self.appName)は位置情報を使用する許可を与えられていません。\n" + "設定＞プライバシーで許可を与えてください。"
+      showWarning(message: message, requireAuthorization: true)
+    }
   }
 }

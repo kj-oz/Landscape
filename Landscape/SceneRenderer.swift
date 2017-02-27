@@ -213,6 +213,17 @@ class SceneRenderer: NSObject, CALayerDelegate {
     }
   }
   
+  // 方位
+  var heading: Double? {
+    get {
+      return params.heading
+    }
+    set {
+      params.heading = newValue
+      layer.setNeedsDisplay()
+    }
+  }
+  
   /**
    * コンストラクタ
    *
@@ -243,15 +254,15 @@ class SceneRenderer: NSObject, CALayerDelegate {
     layer.setNeedsDisplay()
   }
   
-  /**
-   * 向きの変更時に呼び出される
-   *
-   * - parameter heading 機器の（背面の）方位
-   */
-  func updateHeading(heading: Double) {
-    params.heading = heading
-    layer.setNeedsDisplay()
-  }
+//  /**
+//   * 向きの変更時に呼び出される
+//   *
+//   * - parameter heading 機器の（背面の）方位
+//   */
+//  func updateHeading(heading: Double) {
+//    params.heading = heading
+//    layer.setNeedsDisplay()
+//  }
   
   /**
    * 機器の縦横の変更時に呼び出される

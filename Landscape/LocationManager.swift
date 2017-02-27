@@ -18,15 +18,16 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     CLLocationManager.locationServicesEnabled()
   
   // 位置情報サービス
-  let lm = CLLocationManager()
+  private let lm = CLLocationManager()
   
-  let distanceFilter = 100.0
+  private let distanceFilter = 100.0
   
-  // デバイスの背面の指す方位
-  var heading: CLHeading?
+  private let headingFilter = 2.0
+  
+  private let timeTolerance = 60.0
   
   // 画面描画オブジェクト
-  var renderer: SceneRenderer
+  private var renderer: SceneRenderer
   
   //
   var prevLocation = CLLocationCoordinate2D()
@@ -89,7 +90,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
   
   func locationManager(_ manager: CLLocationManager, didUpdateLocations locations:[CLLocation]) {
     let location = locations.last!
-    if  Date().timeIntervalSince(location.timestamp) < 60.0 {
+    if  Date().timeIntervalSince(location.timestamp) < timeTolerance {
       let newLocation = location.coordinate
       let (distance, _) = calcDistanceAndAngle(from: newLocation, to: prevLocation)
       if distance > distanceFilter {
@@ -101,8 +102,10 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
   
   
   func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
-    if Date().timeIntervalSince(newHeading.timestamp) < 60.0 && newHeading.trueHeading >= 0.0 {
-      renderer.updateHeading(heading: Double(newHeading.trueHeading))
+    if Date().timeIntervalSince(newHeading.timestamp) < timeTolerance
+        && newHeading.trueHeading >= 0.0 {
+      UIView.animate(withDuration: 1.0,
+                     animations: { self.renderer.heading = Double(newHeading.trueHeading) })
     }
   }
   
@@ -116,7 +119,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
    */
   func startHeadingService() {
     lm.headingOrientation = UIDevice.current.orientation.headingOrientation
-    lm.headingFilter = 5.0
+    lm.headingFilter = headingFilter
     lm.startUpdatingHeading()
   }
   
