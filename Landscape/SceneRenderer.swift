@@ -294,6 +294,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
     ctx.saveGState()
     UIGraphicsPushContext(ctx)
     params.context = ctx
+    print(">>render \(Date().debugDescription)")
     
     // 方位の描画
     directionRenderer.draw(params: params)
