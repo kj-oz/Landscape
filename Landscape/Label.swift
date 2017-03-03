@@ -22,16 +22,28 @@ class Label {
   // ラベルの間隔
   static let spacing: CGFloat = 9.0
   
-  // 対象の地物
-  let poi: Poi
+  static let height = "国".size(attributes:
+    [NSFontAttributeName: Label.font]).height + 2 * Label.padding
   
+  // ラベルの色
+  private let labelColor0_1000 = UIColor(red: 0.0, green: 0.8, blue:1.0, alpha: 1).cgColor
+  private let labelColor1000_1500 = UIColor(red: 0.5, green: 1.0, blue:0.8, alpha: 1).cgColor
+  private let labelColor1500_2000 = UIColor(red: 0.7, green: 1.0, blue:0.1, alpha: 1).cgColor
+  private let labelColor2000_2500 = UIColor(red: 1.0, green: 0.9, blue:0.1, alpha: 1).cgColor
+  private let labelColor2500_3000 = UIColor(red: 1.0, green: 0.6, blue:0.2, alpha: 1).cgColor
+  private let labelColor3000_ = UIColor(red: 0.8, green: 0.4, blue:0.2, alpha: 1).cgColor
+  
+  // ラベルの文字色
+  private let labelFontColor = UIColor.black
+
+  let source: LabelSource
+
   let text: String
   
-  //
-  let group: Bool
-  
+  var image: UIImage!
+
   // 対象地物の位置の画面への投影のx座標
-  let point: CGFloat
+  var point: CGFloat = 0.0
   
   // ラベルの枠長方形の幅
   let width: CGFloat
@@ -45,13 +57,67 @@ class Label {
   }
   
   // コンストラクタ
-  init(poi: Poi, group: Bool, params: RenderingParams) {
-    self.poi = poi
-    self.group = group
-    point = params.calcX(of: poi.azimuth)
-    text = group ? poi.group! + " ▶" : poi.name
+  init(of poi: Poi) {
+    self.source = poi
+    text = poi.name
     width = text.size(attributes: [NSFontAttributeName: Label.font]).width + 2 * Label.padding
+    image = createImage()
   }
+  
+  // コンストラクタ
+  init(of group: PoiGroup) {
+    self.source = group
+    text = group.name + " ▶"
+    width = text.size(attributes: [NSFontAttributeName: Label.font]).width + 2 * Label.padding
+    image = createImage()
+  }
+  
+  private func createImage() -> UIImage {
+    // 1x1のbitmapを作成
+    let rect = CGRect(x: 0, y: 0, width: width, height: Label.height)
+    UIGraphicsBeginImageContext(rect.size)
+    let context = UIGraphicsGetCurrentContext()!
+    context.translateBy(x: 0.0, y: Label.height)
+    context.scaleBy(x: 1.0, y: -1.0)
+    
+    // bitmapを塗りつぶし
+    context.setFillColor(getColor())
+    context.fill(rect)
+    
+    UIGraphicsPushContext(context)
+    let paragraphStyle = NSMutableParagraphStyle()
+    paragraphStyle.alignment = .center
+    let attrs = [NSFontAttributeName: Label.font,
+                         NSParagraphStyleAttributeName: paragraphStyle,
+                         NSForegroundColorAttributeName: labelFontColor]
+    text.draw(with: CGRect(x: 0, y: Label.padding,
+                                 width: width, height: Label.height),
+                    options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
+    UIGraphicsPopContext()
+
+    let image = UIGraphicsGetImageFromCurrentImageContext()!
+    UIGraphicsEndImageContext()
+    return image
+  }
+  
+  func getColor() -> CGColor {
+    let height = source.height
+    switch height {
+    case 0 ..< 1000:
+      return labelColor0_1000
+    case 1000 ..< 1500:
+      return labelColor1000_1500
+    case 1500 ..< 2000:
+      return labelColor1500_2000
+    case 2000 ..< 2500:
+      return labelColor2000_2500
+    case 2500 ..< 3000:
+      return labelColor2500_3000
+    default:
+      return labelColor3000_
+    }
+  }
+  
 }
 
 /**

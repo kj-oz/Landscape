@@ -18,14 +18,53 @@ enum PoiType {
   case userDefined
 }
 
+protocol LabelSource {
+  var name: String { get }
+  var type: PoiType { get }
+  var height: Double { get }
+  var azimuth: Double { get }
+  var distance: Double { get }
+}
+
+class PoiGroup: Hashable, LabelSource {
+  static func == (lhs: PoiGroup, rhs: PoiGroup) -> Bool {
+    return lhs.name == rhs.name
+  }
+  
+  let name: String
+  var poi: Poi!
+  var height = 0.0
+  lazy var label: Label = Label(of: self)
+  
+  var hashValue: Int {
+    return name.hashValue
+  }
+  
+  var type: PoiType {
+    return poi.type
+  }
+  
+  var azimuth: Double {
+    return poi.azimuth
+  }
+  
+  var distance: Double {
+    return poi.distance
+  }
+  
+  init(name: String) {
+    self.name = name
+  }
+}
+
 /**
  * POI
  */
-class Poi {
+class Poi: LabelSource {
   
   let name: String
   let detail: String?
-  let group: String?
+  let group: PoiGroup?
   let height: Double
   let location: CLLocationCoordinate2D
   let type: PoiType
@@ -33,6 +72,8 @@ class Poi {
   var azimuth = 0.0
   var distance = 0.0
   var elevation = 0.0
+  lazy var label: Label = Label(of: self)
+
   
   var debugString: String {
     let nameStr = group != nil ? "\(name)(\(group!))" : "\(name)"
@@ -40,7 +81,7 @@ class Poi {
     return "\(nameStr), \(locStr), \(height), \(distance), \(azimuth), \(elevation)"
   }
   
-  init(name: String, detail: String?, group: String?, height: Double,
+  init(name: String, detail: String?, group: PoiGroup?, height: Double,
        location: CLLocationCoordinate2D, type: PoiType, famous: Bool) {
     self.name = name
     self.detail = detail
@@ -88,9 +129,9 @@ class Poi {
 class PoiManager {
   let minElevation = 0.01
   let maxDistance = 50_000.0
-  var poiList: [Poi] = []
+  var pois: [Poi] = []
   var candidates: [Poi] = []
-  var groups: [String : Double] = [:]
+  var groups: [String : PoiGroup] = [:]
   
   init() {
     loadPois()
@@ -104,7 +145,7 @@ class PoiManager {
   func setCurrentPosition(position: CLLocationCoordinate2D) {
     print("origin: \(position.longitude)/\(position.latitude)")
     
-    candidates = poiList.filter({
+    candidates = pois.filter({
       $0.calcVector(from: position)
       // print($0.debugString)
       if $0.type == .userDefined {
@@ -133,13 +174,9 @@ class PoiManager {
     //print("angle filtered: \(filtered.count) (\(startAzimuth) - \(endAzimuth))")
     return filtered
   }
-  
-  func getHeight(of group: String) -> Double? {
-    return groups[group]
-  }
-  
+    
   func loadPois() {
-    poiList = []
+    pois = []
     
     let docDir = FileUtil.documentDir
     let path = docDir.appending("/mountain.csv")
@@ -154,25 +191,30 @@ class PoiManager {
         if parts[11] == "☓" {
           continue
         }
-        let group = parts[5].isEmpty ? nil : parts[5]
+        let groupName = parts[5].isEmpty ? nil : parts[5]
+        let height = Double(parts[6])!
+        
+        var group: PoiGroup?
+        if let groupName = groupName {
+          if let g = groups[groupName] {
+            group = g
+            group!.height = max(height, group!.height)
+          } else {
+            group = PoiGroup(name: groupName)
+            group!.height = height
+            groups[groupName] = group!
+          }
+        }
+
         let coord = CLLocationCoordinate2D(latitude: CLLocationDegrees(parts[7])!,
                                            longitude: CLLocationDegrees(parts[8])!)
         let famous = !parts[11].isEmpty
         let detail = parts[2] + "," + parts[3] + "," + parts[4] + "," +
-          parts[9] + "," + parts[10] + "," + parts[11]
-        let poi = Poi(name: parts[1], detail: detail, group: group, height: Double(parts[6])!,
+            parts[9] + "," + parts[10] + "," + parts[11]
+        let poi = Poi(name: parts[1], detail: detail, group: group, height: height,
                       location: coord, type: .mountain, famous: famous)
-        poiList.append(poi)
+        pois.append(poi)
         
-        if let group = group {
-          if let height = groups[group] {
-            if poi.height > height {
-              groups[group] = poi.height
-            }
-          } else {
-            groups[group] = poi.height
-          }
-        }
       }
       
     }

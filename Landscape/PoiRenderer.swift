@@ -20,7 +20,7 @@ class PoiRenderer: NSObject {
   private var poiManager: PoiManager
   
   // その時点で選択されているグループ名
-  private var selectedGroup: String?
+  private var selectedGroup: PoiGroup?
   
   // その時点で選択されているPOI
   private var selectedPoi: Poi?
@@ -47,7 +47,7 @@ class PoiRenderer: NSObject {
   private let labelColor0_1000 = UIColor(red: 0.0, green: 0.8, blue:1.0, alpha: 1).cgColor
   private let labelColor1000_1500 = UIColor(red: 0.5, green: 1.0, blue:0.8, alpha: 1).cgColor
   private let labelColor1500_2000 = UIColor(red: 0.7, green: 1.0, blue:0.1, alpha: 1).cgColor
-  private let labelColor2000_2500 = UIColor(red: 1.0, green: 0.9, blue:0.1, alpha: 1).cgColor
+  private let labelColor2000_2500 = UIColor(red: 1.0, green: 0.9,blue:0.1, alpha: 1).cgColor
   private let labelColor2500_3000 = UIColor(red: 1.0, green: 0.6, blue:0.2, alpha: 1).cgColor
   private let labelColor3000_ = UIColor(red: 0.8, green: 0.4, blue:0.2, alpha: 1).cgColor
   
@@ -80,11 +80,11 @@ class PoiRenderer: NSObject {
   
   func tapped(at point: CGPoint) {
     if let label = findLabel(at: point) {
-      if label.group {
-        selectedGroup = label.poi.group
+      if let group = label.source as? PoiGroup {
+        selectedGroup = group
         selectedPoi = nil
       } else {
-        selectedPoi = label.poi
+        selectedPoi = label.source as? Poi
       }
     } else {
       if selectedPoi != nil {
@@ -116,35 +116,37 @@ class PoiRenderer: NSObject {
   }
   
   private func createLabels(pois: [Poi], params: RenderingParams) {
-    //print("■view: w \(params.width)")
     var rows: [LabelRow] = []
     let depth = leadLinePointHeight - (labelHeight + Label.spacing) * CGFloat(rowCountMax)
     for i in 0 ..< rowCountMax {
       rows.append(LabelRow(length: params.width,
                            depth: depth + CGFloat(i) * (labelHeight + Label.spacing)))
     }
-    var groups = Set<String>()
+    var groups = Set<PoiGroup>()
     var labels: [Label] = []
     for poi in pois {
       let label: Label
       if let selectedGroup = selectedGroup {
-        if poi.group != selectedGroup {
+        if let group = poi.group, group === selectedGroup {
+          label = poi.label
+        } else {
           continue
         }
-        label = Label(poi: poi, group: false, params: params)
       } else if let group = poi.group {
         if groups.contains(group) {
           continue
         }
-        label = Label(poi: poi, group: true, params: params)
+        group.poi = poi
         groups.insert(group)
+        label = group.label
       } else {
-        label = Label(poi: poi, group: false, params: params)
+        label = poi.label
       }
+      label.point = params.calcX(of: poi.azimuth)
       labels.append(label)
       // print("label: \(label.text) \(poi.azimuth) c:\(label.point) w:\(label.width)")
     }
-    labels.sort(by: { $0.poi.distance < $1.poi.distance})
+    labels.sort(by: { $0.source.distance < $1.source.distance})
     
     var startRow = 0
     labels: for label in labels {
@@ -165,12 +167,6 @@ class PoiRenderer: NSObject {
   
   private func drawLabels(params: RenderingParams) {
     let ctx = params.context!
-    let paragraphStyle = NSMutableParagraphStyle()
-    paragraphStyle.alignment = .center
-    var attrs = [NSFontAttributeName: Label.font,
-                 NSParagraphStyleAttributeName: paragraphStyle,
-                 NSForegroundColorAttributeName: labelFontColor]
-    
     var lineSpacing = Label.spacing
     if rows.count < rowCountMax {
       lineSpacing += (Label.spacing + labelHeight) / CGFloat(rows.count)
@@ -183,10 +179,10 @@ class PoiRenderer: NSObject {
       // print("ROW-\(index)")
       let y = rowTopHeight + (labelHeight + lineSpacing) * CGFloat(index)
       for label in row.labels {
-        let color = getColor(of: label)
-        ctx.setFillColor(color)
-        ctx.fill(CGRect(x: label.left, y: y, width: label.width, height: labelHeight))
+        ctx.draw(label.image.cgImage!, in:
+            CGRect(x: label.left, y: y, width: label.width, height: labelHeight))
         
+        let color = label.getColor()
         ctx.setStrokeColor(color)
         let x: CGFloat
         if label.point > label.right {
@@ -201,31 +197,7 @@ class PoiRenderer: NSObject {
         ctx.addLine(to: CGPoint(x: label.point, y: leadLinePointHeight))
         ctx.addLine(to: CGPoint(x: label.point, y: leadLinePointHeight + leadLinePointLength))
         ctx.strokePath()
-        
-        attrs[NSFontAttributeName] = Label.font
-        label.text.draw(with: CGRect(x: label.left, y: y + Label.padding,
-                                     width: label.width, height: labelHeight),
-                        options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
-        // print("\(label.text): L \(label.left) W \(label.width) C \(label.point) E \(label.poi.elevation)")
       }
-    }
-  }
-  
-  private func getColor(of label: Label) -> CGColor {
-    let height = label.group ? poiManager.getHeight(of: label.poi.group!)! : label.poi.height
-    switch height {
-    case 0 ..< 1000:
-      return labelColor0_1000
-    case 1000 ..< 1500:
-      return labelColor1000_1500
-    case 1500 ..< 2000:
-      return labelColor1500_2000
-    case 2000 ..< 2500:
-      return labelColor2000_2500
-    case 2500 ..< 3000:
-      return labelColor2500_3000
-    default:
-      return labelColor3000_
     }
   }
   
