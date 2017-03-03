@@ -8,13 +8,15 @@
 
 import UIKit
 
-class DirectionRenderer: NSObject {
+class DirectionRenderer {
   
   // 方位文字列
   private let directions = ["北", "北北東", "北東", "東北東",
                             "東", "東南東", "南東", "南南東",
                             "南", "南南西", "南西", "西南西",
                             "西", "西北西", "北西", "北北西"]
+  
+  private var dirImages: [UIImage] = []
   
   // 方位文字列のフォント
   private let dirFont1 = UIFont.systemFont(ofSize: 16)
@@ -48,13 +50,57 @@ class DirectionRenderer: NSObject {
   // 方位文字列の高さ
   private let dirHeight: CGFloat
   
+  private let dirSpacing: CGFloat = 2.0
+  
   /**
    * コンストラクタ
    */
-  override init() {
+  init() {
     tickCount = Int(360.0 / tickPitch)
     tickPerDir = tickCount / directions.count
     dirHeight = bandHeight - longTickLength
+    
+    createImages()
+  }
+  
+  private func createImages() {
+    let paragraphStyle = NSMutableParagraphStyle()
+    paragraphStyle.alignment = .center
+    var attrs = [NSParagraphStyleAttributeName: paragraphStyle] as [String : Any]
+    for i in 0 ..< directions.count {
+      let label = directions[i]
+      let font: UIFont
+      switch label.characters.count {
+      case 1:
+        font = dirFont1
+      case 2:
+        font = dirFont2
+      default:
+        font = dirFont3
+      }
+      attrs[NSFontAttributeName] = font
+      
+      let rect = CGRect(x: 0, y: 0, width: dirWidth, height: dirHeight)
+      UIGraphicsBeginImageContext(rect.size)
+      let context = UIGraphicsGetCurrentContext()!
+      context.translateBy(x: 0.0, y: dirHeight)
+      context.scaleBy(x: 1.0, y: -1.0)
+      
+      // bitmapを塗りつぶし
+      context.setFillColor(UIColor.white.cgColor)
+      context.fill(rect)
+      
+      UIGraphicsPushContext(context)
+      label.draw(with: CGRect(x: 0, y: dirHeight - dirSpacing - font.pointSize,
+                              width: dirWidth, height: dirHeight),
+                 options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
+      UIGraphicsPopContext()
+      
+      let image = UIGraphicsGetImageFromCurrentImageContext()!
+      dirImages.append(image)
+      
+      UIGraphicsEndImageContext()
+    }
   }
   
   /**
@@ -96,33 +142,20 @@ class DirectionRenderer: NSObject {
   private func drawTick(tickIndex: Int, params: RenderingParams) {
     let azimuth = Double(tickIndex) * tickPitch
     let x = params.calcX(of: azimuth)
+    let ctx = params.context!
     
     if tickIndex % tickPerDir == 0 {
-      let label = directions[tickIndex / tickPerDir]
-      let font: UIFont
-      switch label.characters.count {
-      case 1:
-        font = dirFont1
-      case 2:
-        font = dirFont2
-      default:
-        font = dirFont3
-      }
-      
-      let paragraphStyle = NSMutableParagraphStyle()
-      paragraphStyle.alignment = .center
-      let attrs = [NSFontAttributeName: font,
-                   NSParagraphStyleAttributeName: paragraphStyle] as [String : Any]
+      let image = dirImages[tickIndex / tickPerDir]
+      let rect = CGRect(x: x - dirWidth / 2, y: params.height - bandHeight,
+                        width: dirWidth, height: dirHeight)
       
       // 長目の目盛り　＋　文字列
-      params.context!.strokeLineSegments(between:
+      ctx.strokeLineSegments(between:
         [CGPoint(x: x, y: params.height - longTickLength), CGPoint(x: x, y: params.height)])
-      label.draw(with: CGRect(x: x - dirWidth / 2,
-                y: params.height - longTickLength - font.pointSize - 4, width: dirWidth,
-                height: dirHeight), options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
+      ctx.draw(image.cgImage!, in: rect)
     } else {
       // 短めの目盛り
-      params.context!.strokeLineSegments(between:
+      ctx.strokeLineSegments(between:
         [CGPoint(x: x, y: params.height - shortTickLength), CGPoint(x: x, y: params.height)])
     }
   }

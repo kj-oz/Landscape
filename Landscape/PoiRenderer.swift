@@ -11,7 +11,7 @@ import UIKit
 /**
  * POIの描画を担当するクラス
  */
-class PoiRenderer: NSObject {
+class PoiRenderer {
   
   // 対象POI選定時の画面端部の余裕角度
   private let angleMargin = 3.0

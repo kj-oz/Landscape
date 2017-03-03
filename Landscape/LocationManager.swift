@@ -104,6 +104,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
   func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
     if Date().timeIntervalSince(newHeading.timestamp) < timeTolerance
         && newHeading.trueHeading >= 0.0 {
+      print("▷▷ Heading:\(newHeading.trueHeading)")
       UIView.animate(withDuration: 1.0,
                      animations: { self.renderer.heading = Double(newHeading.trueHeading) })
     }

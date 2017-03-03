@@ -160,15 +160,6 @@ struct RenderingParams {
     }
     return w_2 * CGFloat(1 + tan(toRadian(angle)) / tanFA_2)
   }
-  
-//  /**
-//   * 添付のカメラの（横長画像時の）画角を得る
-//   *
-//   * -returns 横長画像時の画角
-//   */
-//  private func getFieldAngle() -> Double {
-//    return 62.0
-//  }
 }
 
 /**
@@ -190,6 +181,8 @@ class SceneRenderer: NSObject, CALayerDelegate {
   
   // 描画対象のレイヤ
   private var layer: CALayer
+  
+  private let startTime: Date
   
   // ズーム
   var zoom: Double {
@@ -219,6 +212,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
       return params.heading
     }
     set {
+      print("▶▶ heading:\(newValue!)")
       params.heading = newValue
       layer.setNeedsDisplay()
     }
@@ -235,6 +229,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
     directionRenderer = DirectionRenderer()
     poiRenderer = PoiRenderer(poiManager: poiManager)
     self.layer = layer
+    startTime = Date()
     super.init()
     
     layer.delegate = self
@@ -253,16 +248,6 @@ class SceneRenderer: NSObject, CALayerDelegate {
     poiManager.setCurrentPosition(position: location)
     layer.setNeedsDisplay()
   }
-  
-//  /**
-//   * 向きの変更時に呼び出される
-//   *
-//   * - parameter heading 機器の（背面の）方位
-//   */
-//  func updateHeading(heading: Double) {
-//    params.heading = heading
-//    layer.setNeedsDisplay()
-//  }
   
   /**
    * 機器の縦横の変更時に呼び出される
@@ -294,7 +279,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
     ctx.saveGState()
     UIGraphicsPushContext(ctx)
     params.context = ctx
-    print(">>render \(Date().debugDescription)")
+    let start = Date()
     
     // 方位の描画
     directionRenderer.draw(params: params)
@@ -302,6 +287,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
     // POIの描画
     poiRenderer.draw(params: params)
     
+    print(">>render \(start.timeIntervalSince(startTime))  - \(Date().timeIntervalSince(start))")
     UIGraphicsPopContext()
     ctx.restoreGState()
   }
