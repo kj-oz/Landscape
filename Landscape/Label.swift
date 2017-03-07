@@ -217,21 +217,84 @@ class LabelRow {
     var leftShift: CGFloat = 0    // 左のラベルを移動する量
     var rightShift: CGFloat = 0   // 右のラベルを移動する量
     
-    let space = leftSpace + rightSpace
-    let margin = leftMargin + rightMargin
-    if space < label.width {
-      // 現状のスペースでは不足の場合、足りない分の移動量を左右の確保可能量の比から算定
-      let delta = label.width - space
-      let leftdelta = delta * leftMargin / margin
-      let rightdelta = delta - leftdelta
-      leftShift += leftdelta
-      rightShift += rightdelta
-      label.left = label.point - (leftdelta + leftSpace)
+    let leftAvail = leftSpace + leftMargin
+    let rightAvail = rightSpace + rightMargin
+    let w_2 = label.width / 2.0
+    
+    if leftAvail > w_2 && rightAvail > w_2 {
+      if leftSpace < w_2 {
+        leftShift = w_2 - leftSpace
+      }
+      if rightSpace < w_2 {
+        rightShift = w_2 - rightSpace
+      }
+      label.left = label.point - w_2
+    } else if leftAvail < rightAvail {
+      leftShift = leftMargin
+      let rightW = label.width - leftAvail
+      if rightSpace < rightW {
+        rightShift = rightW - rightSpace
+      }
+      label.left = label.point - leftAvail
     } else {
-      // 現状のスペースで足りている場合、左右の割り振りをスペースの比から算定
-      let delta = space - label.width
-      label.left = label.point - leftSpace + delta / 2
+      rightShift = rightMargin
+      let leftW = label.width - rightAvail
+      if leftSpace < leftW {
+        leftShift = leftW - leftSpace
+      }
+      label.left = label.point - leftW
     }
+    
+//    if leftAvail > 0 && rightAvail > 0 {
+//      if leftAvail > w_2 && rightAvail > w_2 {
+//        if leftSpace < w_2 {
+//          leftShift = w_2 - leftSpace
+//        }
+//        if rightSpace < w_2 {
+//          rightShift = w_2 - rightSpace
+//        }
+//      } else if leftAvail < rightAvail {
+//        leftShift = leftMargin
+//        let rightW = label.width - leftAvail
+//        if rightSpace < rightW {
+//          rightShift = rightW - rightSpace
+//        }
+//      } else {
+//        rightShift = rightMargin
+//        let leftW = label.width - rightAvail
+//        if leftSpace < leftW {
+//          leftShift = leftW - leftSpace
+//        }
+//      }
+//    } else if leftAvail < 0 {
+//      leftShift = leftMargin
+//      let rightW = label.width - leftAvail
+//      if rightSpace < rightW {
+//        rightShift = rightW - rightSpace
+//      }
+//    } else {
+//      rightShift = rightMargin
+//      let leftW = label.width - rightAvail
+//      if leftSpace < leftW {
+//        leftShift = leftW - leftSpace
+//      }
+//    }
+    
+//    let space = leftSpace + rightSpace
+//    let margin = leftMargin + rightMargin
+//    if space < label.width {
+//      // 現状のスペースでは不足の場合、足りない分の移動量を左右の確保可能量の比から算定
+//      let delta = label.width - space
+//      let leftdelta = delta * leftMargin / margin
+//      let rightdelta = delta - leftdelta
+//      leftShift += leftdelta
+//      rightShift += rightdelta
+//      label.left = label.point - (leftdelta + leftSpace)
+//    } else {
+//      // 現状のスペースで足りている場合、左右の割り振りをスペースの比から算定
+//      let delta = space - label.width
+//      label.left = label.point - leftSpace + delta / 2
+//    }
     
     // 実際に移動させる
     if leftShift > 0.1 {
