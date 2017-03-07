@@ -136,6 +136,8 @@ struct RenderingParams {
     if let heading = heading {
       _startAngle = angleAdd(to: heading, delta: -fieldAngle_2)
       _endAngle = angleAdd(to: heading, delta: fieldAngle_2)
+      print(String(format:"▶ heading:%.3f (%.3f 〜 %.3f) %@",
+                   heading, _startAngle, _endAngle, isPortrait ? "P" : "L"))
     }
   }
   
@@ -201,7 +203,6 @@ class SceneRenderer: NSObject, CALayerDelegate {
       return params.heading
     }
     set {
-      print("▶▶ heading:\(newValue!)")
       params.heading = newValue
       layer.setNeedsDisplay()
     }

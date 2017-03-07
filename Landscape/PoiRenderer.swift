@@ -166,10 +166,24 @@ class PoiRenderer {
       lineSpacing += (Label.spacing + labelHeight) / CGFloat(rows.count)
     }
     
+//    var leftLabel: Label?
+//    var rightLabel: Label?
+    
     for (index, row) in rows.enumerated() {
       if row.labels.count == 0 {
         continue
       }
+      
+//      if let left = leftLabel, row.labels.first!.point > left.point {
+//      } else {
+//        leftLabel = row.labels.first!
+//      }
+//      
+//      if let right = rightLabel, row.labels.last!.point < right.point {
+//      } else {
+//        rightLabel = row.labels.last!
+//      }
+
       // print("ROW-\(index)")
       let y = rowTopHeight + (labelHeight + lineSpacing) * CGFloat(index)
       for label in row.labels {
@@ -193,6 +207,11 @@ class PoiRenderer {
         ctx.strokePath()
       }
     }
+    
+//    if let left = leftLabel, let right = rightLabel {
+//      print("> left :\(left.text) \(left.point) = \(left.source.azimuth)")
+//      print("> right:\(right.text) \(right.point) = \(right.source.azimuth)")
+//    }
   }
   
   private func findLabel(at point: CGPoint) -> Label? {

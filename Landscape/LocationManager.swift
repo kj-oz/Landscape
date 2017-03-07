@@ -156,8 +156,10 @@ class HeadingAnimator {
   // 直前の方位変更イベントの時刻
   private var prevEvent: Date?
   
+  // 描画間隔（30fps)
   private let renderingPeriod = 1.0 / 30.0
 
+  // 1回のイベントでの最大の描画回数
   private let numUpadateMax = 15.0
   
   
@@ -177,7 +179,7 @@ class HeadingAnimator {
         currentValue = renderer.heading!
       }
       let period = now.timeIntervalSince(prevEvent!)
-      let numUpdate = max(ceil(period / renderingPeriod), numUpadateMax)
+      let numUpdate = min(ceil(period / renderingPeriod), numUpadateMax)
       print("n:\(numUpdate)")
       
       delta = angle(from: currentValue, to: endValue) / numUpdate

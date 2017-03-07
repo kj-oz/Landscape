@@ -153,6 +153,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   @IBAction func targetTapped(_ sender: Any) {
     targetActionType = targetActionType == .imageZoom ? .fieldAngleAdjust : .imageZoom
     updateButtonStatus()
+    print("○ Target Button tapped: \(targetButton.title(for: .normal))")
   }
   
   // プラスボタンタップ時
@@ -163,6 +164,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
       fieldAngle += fieldAngleDelta
     }
     updateButtonStatus()
+    print("○ Zoomin Button tapped")
   }
 
   // マイナスボタンタップ時
@@ -173,6 +175,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
       fieldAngle -= fieldAngleDelta
     }
     updateButtonStatus()
+    print("○ Zoomout Button tapped")
   }
   
   // 各種ボタンの状態の更新
@@ -187,6 +190,11 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
       zoominButton.isEnabled = true
       targetButton.setTitle(String(format: "水平画角：%.1f°", fieldAngle), for: .normal)
     }
+  }
+  
+  // 画面タップ時
+  func tapped(sender: UITapGestureRecognizer) {
+    renderer.tapped(at: sender.location(in: self.view))
   }
   
   /**
@@ -204,11 +212,6 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
       }))
     }
     self.present(alertController, animated: true, completion: nil)
-  }
-  
-  // 画面タップ時
-  func tapped(sender: UITapGestureRecognizer) {
-    renderer.tapped(at: sender.location(in: self.view))
   }
   
   /**
