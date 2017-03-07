@@ -76,4 +76,23 @@ func calcDistanceAndAngle(from: CLLocationCoordinate2D, to: CLLocationCoordinate
   return (distance, angle)
 }
 
+func angle(from: Double, to: Double) -> Double {
+  var diff = to - from
+  if diff > 180.0 {
+    diff -= 360
+  } else if diff < -180.0 {
+    diff += 360
+  }
+  return diff
+}
+
+func angleAdd(to: Double, delta: Double) -> Double {
+  var add = to + delta
+  if add < 0 {
+    add += 360
+  } else if add > 360 {
+    add -= 360
+  }
+  return add
+}
 

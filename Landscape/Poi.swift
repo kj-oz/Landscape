@@ -109,17 +109,7 @@ class Poi: LabelSource {
   }
   
   func angle(from: Poi) -> Double {
-    return angle(from: from.azimuth)
-  }
-  
-  func angle(from: Double) -> Double {
-    var diff = azimuth - from
-    if diff > 180.0 {
-      diff = diff - 360
-    } else if diff < -180.0 {
-      diff = diff + 360
-    }
-    return diff
+    return Landscape.angle(from: from.azimuth, to: azimuth)
   }
 }
 

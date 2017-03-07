@@ -148,11 +148,11 @@ class DirectionRenderer {
       let image = dirImages[tickIndex / tickPerDir]
       let rect = CGRect(x: x - dirWidth / 2, y: params.height - bandHeight,
                         width: dirWidth, height: dirHeight)
+      ctx.draw(image.cgImage!, in: rect)
       
       // 長目の目盛り　＋　文字列
       ctx.strokeLineSegments(between:
         [CGPoint(x: x, y: params.height - longTickLength), CGPoint(x: x, y: params.height)])
-      ctx.draw(image.cgImage!, in: rect)
     } else {
       // 短めの目盛り
       ctx.strokeLineSegments(between:

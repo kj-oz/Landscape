@@ -96,14 +96,8 @@ class PoiRenderer {
   }
 
   func draw(params: RenderingParams) {
-    var startAzimuth = params.startAngle + angleMargin
-    if startAzimuth > 360.0 {
-      startAzimuth -= 360.0
-    }
-    var endAzimuth = params.endAngle - angleMargin
-    if endAzimuth < 0 {
-      endAzimuth += 360.0
-    }
+    let startAzimuth = angleAdd(to: params.startAngle, delta: angleMargin)
+    let endAzimuth = angleAdd(to: params.endAngle, delta: -angleMargin)
     let pois = poiManager.getVisiblePois(startAzimuth: startAzimuth, endAzimuth: endAzimuth)
         
     createLabels(pois: pois, params: params)

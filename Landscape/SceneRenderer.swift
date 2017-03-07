@@ -134,14 +134,8 @@ struct RenderingParams {
    */
   private mutating func updateAngleRange() {
     if let heading = heading {
-      _startAngle = heading - fieldAngle_2
-      if _startAngle < 0 {
-        _startAngle += 360
-      }
-      _endAngle = heading + fieldAngle_2
-      if _endAngle > 360 {
-        _endAngle -= 360
-      }
+      _startAngle = angleAdd(to: heading, delta: -fieldAngle_2)
+      _endAngle = angleAdd(to: heading, delta: fieldAngle_2)
     }
   }
   
@@ -152,13 +146,8 @@ struct RenderingParams {
    * -returns 画面上のX座標
    */
   func calcX(of azimuth: Double) -> CGFloat {
-    var angle = azimuth - heading!
-    if angle < -180 {
-      angle += 360
-    } else if angle > 180 {
-      angle -= 360
-    }
-    return w_2 * CGFloat(1 + tan(toRadian(angle)) / tanFA_2)
+    let a = angle(from: heading!, to: azimuth)
+    return w_2 * CGFloat(1 + tan(toRadian(a)) / tanFA_2)
   }
 }
 
@@ -180,7 +169,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
   private var params: RenderingParams
   
   // 描画対象のレイヤ
-  private var layer: CALayer
+  var layer: CALayer
   
   private let startTime: Date
   

@@ -22,18 +22,23 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
   
   private let distanceFilter = 100.0
   
-  private let headingFilter = 2.0
+  private let headingFilter = 1.0
   
   private let timeTolerance = 60.0
   
   // 画面描画オブジェクト
   private var renderer: SceneRenderer
   
+  private let animator: HeadingAnimator
+  
+//  private var updatingHeading = false
+  
   //
   var prevLocation = CLLocationCoordinate2D()
   
   init(renderer: SceneRenderer) {
     self.renderer = renderer
+    animator = HeadingAnimator(renderer: renderer)
     super.init()
 
     if supportsLocation {
@@ -104,9 +109,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
   func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
     if Date().timeIntervalSince(newHeading.timestamp) < timeTolerance
         && newHeading.trueHeading >= 0.0 {
-      print("▷▷ Heading:\(newHeading.trueHeading)")
-      UIView.animate(withDuration: 1.0,
-                     animations: { self.renderer.heading = Double(newHeading.trueHeading) })
+      animator.animate(to: Double(newHeading.trueHeading))
     }
   }
   
@@ -131,6 +134,83 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     lm.desiredAccuracy = kCLLocationAccuracyBest
     lm.distanceFilter = distanceFilter
     lm.startUpdatingLocation()
+  }
+}
+
+class HeadingAnimator {
+  // 描画オブジェクト
+  private let renderer: SceneRenderer
+  
+  // 現在の方位
+  private var currentValue = 0.0
+  
+  // 1回の描画での方位の増加値
+  private var delta = 0.0
+  
+  // 最終方位
+  private var endValue = 0.0
+
+  // 直前の描画の時刻
+  private var prevUpdate: Date?
+  
+  // 直前の方位変更イベントの時刻
+  private var prevEvent: Date?
+  
+  private let renderingPeriod = 1.0 / 30.0
+
+  private let numUpadateMax = 15.0
+  
+  
+  init(renderer: SceneRenderer) {
+    self.renderer = renderer
+  }
+  
+  func animate(to: Double) {
+    print("▷▷ Heading:\(to)  ", terminator: "")
+    endValue = to
+    let now = Date()
+    if renderer.heading == nil {
+      renderer.heading = endValue
+      print("")
+    } else {
+      if delta == 0.0 {
+        currentValue = renderer.heading!
+      }
+      let period = now.timeIntervalSince(prevEvent!)
+      let numUpdate = max(ceil(period / renderingPeriod), numUpadateMax)
+      print("n:\(numUpdate)")
+      
+      delta = angle(from: currentValue, to: endValue) / numUpdate
+      prevUpdate = nil
+      
+      let displayLink = CADisplayLink(target: self, selector: #selector(updateHeading(link:)))
+      displayLink.add(to: .current, forMode: .commonModes)
+    }
+    prevEvent = now
+  }
+  
+  @objc func updateHeading(link: AnyObject) {
+    currentValue = angleAdd(to: currentValue, delta: delta)
+    if abs(currentValue - endValue) < 0.01 {
+      link.invalidate()
+      delta = 0.0
+    } else {
+      let now = Date()
+      if let prev = prevUpdate {
+        let time = now.timeIntervalSince(prev)
+        let delay = renderingPeriod - time
+        if delay > 0 {
+          DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            print("delay:\(delay)")
+            self.prevUpdate = Date()
+            self.renderer.heading = self.currentValue
+            return
+          }
+        }
+      }
+      prevUpdate = now
+      renderer.heading = currentValue
+    }
   }
   
 }
