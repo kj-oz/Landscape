@@ -9,9 +9,7 @@
 import UIKit
 import CoreLocation
 
-/**
- * 画面上の地物の名称の表示
- */
+/// 画面上の地物の名称の表示
 class Label {
   // ラベルに表示する文字サイズ
   static let font = UIFont.systemFont(ofSize: 12.0)
@@ -22,24 +20,47 @@ class Label {
   // ラベルの間隔
   static let spacing: CGFloat = 9.0
   
+  // ラベルの高さ
   static let height = "国".size(attributes:
     [NSFontAttributeName: Label.font]).height + 2 * Label.padding
   
-  // ラベルの色
-  private let labelColor0_1000 = UIColor(red: 0.0, green: 0.8, blue:1.0, alpha: 1).cgColor
-  private let labelColor1000_1500 = UIColor(red: 0.5, green: 1.0, blue:0.8, alpha: 1).cgColor
-  private let labelColor1500_2000 = UIColor(red: 0.7, green: 1.0, blue:0.1, alpha: 1).cgColor
-  private let labelColor2000_2500 = UIColor(red: 1.0, green: 0.9, blue:0.1, alpha: 1).cgColor
-  private let labelColor2500_3000 = UIColor(red: 1.0, green: 0.6, blue:0.2, alpha: 1).cgColor
-  private let labelColor3000_ = UIColor(red: 0.8, green: 0.4, blue:0.2, alpha: 1).cgColor
+  // ラベルの色の選択肢
+  private let color0000_1000 = UIColor(red: 0.0, green: 0.8, blue:1.0, alpha: 1).cgColor
+  private let color1000_1500 = UIColor(red: 0.5, green: 1.0, blue:0.8, alpha: 1).cgColor
+  private let color1500_2000 = UIColor(red: 0.7, green: 1.0, blue:0.1, alpha: 1).cgColor
+  private let color2000_2500 = UIColor(red: 1.0, green: 0.9, blue:0.1, alpha: 1).cgColor
+  private let color2500_3000 = UIColor(red: 1.0, green: 0.6, blue:0.2, alpha: 1).cgColor
+  private let color3000_ = UIColor(red: 0.8, green: 0.4, blue:0.2, alpha: 1).cgColor
   
   // ラベルの文字色
-  private let labelFontColor = UIColor.black
+  private let fontColor = UIColor.black
+  
+  // ラベルの色
+  var color: CGColor {
+    let height = source.height
+    switch height {
+    case 0 ..< 1000:
+      return color0000_1000
+    case 1000 ..< 1500:
+      return color1000_1500
+    case 1500 ..< 2000:
+      return color1500_2000
+    case 2000 ..< 2500:
+      return color2000_2500
+    case 2500 ..< 3000:
+      return color2500_3000
+    default:
+      return color3000_
+    }
+  }
 
+  // ラベルに表示する元データ
   let source: LabelSource
 
+  // ラベルに表示する文字列
   let text: String
   
+  // ラベルの画像
   var image: UIImage!
 
   // 対象地物の位置の画面への投影のx座標
@@ -56,7 +77,9 @@ class Label {
     return left + width
   }
   
-  // コンストラクタ
+  /// POIから生成するコンストラクタ
+  ///
+  /// - Parameter poi: 対象のPOI
   init(of poi: Poi) {
     self.source = poi
     text = poi.name
@@ -64,7 +87,9 @@ class Label {
     image = createImage()
   }
   
-  // コンストラクタ
+  /// POIグループから生成するコンストラクタ
+  ///
+  /// - Parameter group: 対象のPOIグループからグループ
   init(of group: PoiGroup) {
     self.source = group
     text = group.name + " ▶"
@@ -72,24 +97,28 @@ class Label {
     image = createImage()
   }
   
+  /// ラベルのイメージを作成する
+  ///
+  /// - Returns: 作成されたイメージ画像
   private func createImage() -> UIImage {
-    // 1x1のbitmapを作成
+    // ビットマップコンテキストを作成
     let rect = CGRect(x: 0, y: 0, width: width, height: Label.height)
     UIGraphicsBeginImageContext(rect.size)
     let context = UIGraphicsGetCurrentContext()!
     context.translateBy(x: 0.0, y: Label.height)
     context.scaleBy(x: 1.0, y: -1.0)
     
-    // bitmapを塗りつぶし
-    context.setFillColor(getColor())
+    // 塗りつぶし
+    context.setFillColor(color)
     context.fill(rect)
     
+    // 文字の記入
     UIGraphicsPushContext(context)
     let paragraphStyle = NSMutableParagraphStyle()
     paragraphStyle.alignment = .center
     let attrs = [NSFontAttributeName: Label.font,
                          NSParagraphStyleAttributeName: paragraphStyle,
-                         NSForegroundColorAttributeName: labelFontColor]
+                         NSForegroundColorAttributeName: fontColor]
     text.draw(with: CGRect(x: 0, y: Label.padding,
                                  width: width, height: Label.height),
                     options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
@@ -100,24 +129,24 @@ class Label {
     return image
   }
   
-  func getColor() -> CGColor {
-    let height = source.height
-    switch height {
-    case 0 ..< 1000:
-      return labelColor0_1000
-    case 1000 ..< 1500:
-      return labelColor1000_1500
-    case 1500 ..< 2000:
-      return labelColor1500_2000
-    case 2000 ..< 2500:
-      return labelColor2000_2500
-    case 2500 ..< 3000:
-      return labelColor2500_3000
-    default:
-      return labelColor3000_
-    }
-  }
-  
+//  func getColor() -> CGColor {
+//    let height = source.height
+//    switch height {
+//    case 0 ..< 1000:
+//      return color0000_1000
+//    case 1000 ..< 1500:
+//      return color1000_1500
+//    case 1500 ..< 2000:
+//      return color1500_2000
+//    case 2000 ..< 2500:
+//      return color2000_2500
+//    case 2500 ..< 3000:
+//      return color2500_3000
+//    default:
+//      return color3000_
+//    }
+//  }
+//  
 }
 
 /**
@@ -221,6 +250,7 @@ class LabelRow {
     let rightAvail = rightSpace + rightMargin
     let w_2 = label.width / 2.0
     
+    // 中心振り分けでおけるのであれば中心振り分け
     if leftAvail > w_2 && rightAvail > w_2 {
       if leftSpace < w_2 {
         leftShift = w_2 - leftSpace
@@ -229,6 +259,7 @@ class LabelRow {
         rightShift = w_2 - rightSpace
       }
       label.left = label.point - w_2
+    // そうでなければ、中心に近い側に寄せる
     } else if leftAvail < rightAvail {
       leftShift = leftMargin
       let rightW = label.width - leftAvail
@@ -244,57 +275,6 @@ class LabelRow {
       }
       label.left = label.point - leftW
     }
-    
-//    if leftAvail > 0 && rightAvail > 0 {
-//      if leftAvail > w_2 && rightAvail > w_2 {
-//        if leftSpace < w_2 {
-//          leftShift = w_2 - leftSpace
-//        }
-//        if rightSpace < w_2 {
-//          rightShift = w_2 - rightSpace
-//        }
-//      } else if leftAvail < rightAvail {
-//        leftShift = leftMargin
-//        let rightW = label.width - leftAvail
-//        if rightSpace < rightW {
-//          rightShift = rightW - rightSpace
-//        }
-//      } else {
-//        rightShift = rightMargin
-//        let leftW = label.width - rightAvail
-//        if leftSpace < leftW {
-//          leftShift = leftW - leftSpace
-//        }
-//      }
-//    } else if leftAvail < 0 {
-//      leftShift = leftMargin
-//      let rightW = label.width - leftAvail
-//      if rightSpace < rightW {
-//        rightShift = rightW - rightSpace
-//      }
-//    } else {
-//      rightShift = rightMargin
-//      let leftW = label.width - rightAvail
-//      if leftSpace < leftW {
-//        leftShift = leftW - leftSpace
-//      }
-//    }
-    
-//    let space = leftSpace + rightSpace
-//    let margin = leftMargin + rightMargin
-//    if space < label.width {
-//      // 現状のスペースでは不足の場合、足りない分の移動量を左右の確保可能量の比から算定
-//      let delta = label.width - space
-//      let leftdelta = delta * leftMargin / margin
-//      let rightdelta = delta - leftdelta
-//      leftShift += leftdelta
-//      rightShift += rightdelta
-//      label.left = label.point - (leftdelta + leftSpace)
-//    } else {
-//      // 現状のスペースで足りている場合、左右の割り振りをスペースの比から算定
-//      let delta = space - label.width
-//      label.left = label.point - leftSpace + delta / 2
-//    }
     
     // 実際に移動させる
     if leftShift > 0.1 {

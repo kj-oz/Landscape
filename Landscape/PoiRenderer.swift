@@ -40,20 +40,6 @@ class PoiRenderer {
   // 一番上の行の高さ
   private let rowTopHeight: CGFloat = Label.spacing
   
-  // ラベルの高さ
-  private let labelHeight: CGFloat
-  
-  // ラベルの色
-  private let labelColor0_1000 = UIColor(red: 0.0, green: 0.8, blue:1.0, alpha: 1).cgColor
-  private let labelColor1000_1500 = UIColor(red: 0.5, green: 1.0, blue:0.8, alpha: 1).cgColor
-  private let labelColor1500_2000 = UIColor(red: 0.7, green: 1.0, blue:0.1, alpha: 1).cgColor
-  private let labelColor2000_2500 = UIColor(red: 1.0, green: 0.9,blue:0.1, alpha: 1).cgColor
-  private let labelColor2500_3000 = UIColor(red: 1.0, green: 0.6, blue:0.2, alpha: 1).cgColor
-  private let labelColor3000_ = UIColor(red: 0.8, green: 0.4, blue:0.2, alpha: 1).cgColor
-  
-  // ラベルの文字色
-  private let labelFontColor = UIColor.black
-  
   // 引出し線の太さ
   private let leadLineWidth: CGFloat = 2.0
   
@@ -69,8 +55,6 @@ class PoiRenderer {
   
   init(poiManager: PoiManager) {
     self.poiManager = poiManager
-    labelHeight = "国".size(attributes:
-      [NSFontAttributeName: Label.font]).height + 2 * Label.padding
   }
   
   func setViewParameter(_ params: RenderingParams) {
@@ -111,10 +95,10 @@ class PoiRenderer {
   
   private func createLabels(pois: [Poi], params: RenderingParams) {
     var rows: [LabelRow] = []
-    let depth = leadLinePointHeight - (labelHeight + Label.spacing) * CGFloat(rowCountMax)
+    let depth = leadLinePointHeight - (Label.height + Label.spacing) * CGFloat(rowCountMax)
     for i in 0 ..< rowCountMax {
       rows.append(LabelRow(length: params.width,
-                           depth: depth + CGFloat(i) * (labelHeight + Label.spacing)))
+                           depth: depth + CGFloat(i) * (Label.height + Label.spacing)))
     }
     var groups = Set<PoiGroup>()
     var labels: [Label] = []
@@ -163,35 +147,37 @@ class PoiRenderer {
     let ctx = params.context!
     var lineSpacing = Label.spacing
     if rows.count < rowCountMax {
-      lineSpacing += (Label.spacing + labelHeight) / CGFloat(rows.count)
+      lineSpacing += (Label.spacing + Label.height) / CGFloat(rows.count)
     }
     
-//    var leftLabel: Label?
-//    var rightLabel: Label?
+    var leftLabel: Label?
+    var rightLabel: Label?
+    let debugFieldAngle = false
     
     for (index, row) in rows.enumerated() {
       if row.labels.count == 0 {
         continue
       }
       
-//      if let left = leftLabel, row.labels.first!.point > left.point {
-//      } else {
-//        leftLabel = row.labels.first!
-//      }
-//      
-//      if let right = rightLabel, row.labels.last!.point < right.point {
-//      } else {
-//        rightLabel = row.labels.last!
-//      }
+      if debugFieldAngle {
+        if let left = leftLabel, row.labels.first!.point > left.point {
+        } else {
+          leftLabel = row.labels.first!
+        }
+        
+        if let right = rightLabel, row.labels.last!.point < right.point {
+        } else {
+          rightLabel = row.labels.last!
+        }
+      }
 
       // print("ROW-\(index)")
-      let y = rowTopHeight + (labelHeight + lineSpacing) * CGFloat(index)
+      let y = rowTopHeight + (Label.height + lineSpacing) * CGFloat(index)
       for label in row.labels {
         ctx.draw(label.image.cgImage!, in:
-            CGRect(x: label.left, y: y, width: label.width, height: labelHeight))
+            CGRect(x: label.left, y: y, width: label.width, height: Label.height))
         
-        let color = label.getColor()
-        ctx.setStrokeColor(color)
+        ctx.setStrokeColor(label.color)
         let x: CGFloat
         if label.point > label.right {
           x = label.right - 1
@@ -201,30 +187,30 @@ class PoiRenderer {
           x = label.point
         }
         ctx.setLineWidth(leadLineWidth)
-        ctx.move(to: CGPoint(x: x, y: y + labelHeight))
+        ctx.move(to: CGPoint(x: x, y: y + Label.height))
         ctx.addLine(to: CGPoint(x: label.point, y: leadLinePointHeight))
         ctx.addLine(to: CGPoint(x: label.point, y: leadLinePointHeight + leadLinePointLength))
         ctx.strokePath()
       }
     }
     
-//    if let left = leftLabel, let right = rightLabel {
-//      print("> left :\(left.text) \(left.point) = \(left.source.azimuth)")
-//      print("> right:\(right.text) \(right.point) = \(right.source.azimuth)")
-//    }
+    if debugFieldAngle, let left = leftLabel, let right = rightLabel {
+      print("> left :\(left.text) \(left.point) = \(left.source.azimuth)")
+      print("> right:\(right.text) \(right.point) = \(right.source.azimuth)")
+    }
   }
   
   private func findLabel(at point: CGPoint) -> Label? {
     var lineSpacing = Label.spacing
     if rows.count < rowCountMax {
-      lineSpacing += (Label.spacing + labelHeight) / CGFloat(rows.count)
+      lineSpacing += (Label.spacing + Label.height) / CGFloat(rows.count)
     }
     let vMargin = lineSpacing / 2
     let hMargin = Label.spacing / 2
     
     for (index, row) in rows.enumerated() {
-      let y = rowTopHeight + (labelHeight + lineSpacing) * CGFloat(index)
-      if point.y < y - vMargin || point.y > y + labelHeight + vMargin {
+      let y = rowTopHeight + (Label.height + lineSpacing) * CGFloat(index)
+      if point.y < y - vMargin || point.y > y + Label.height + vMargin {
         continue
       }
       
