@@ -58,9 +58,10 @@ func toDegree(_ radian: Double) -> Double {
   return radian * 180 / M_PI
 }
 
+let EARTH_R = 6_378_137.0
+
 func calcDistanceAndAngle(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D)
     -> (Double, Double) {
-  let r = 6_378_137.0
   let dx = toRadian(to.longitude - from.longitude)
   let y1 = toRadian(from.latitude)
   let y2 = toRadian(to.latitude)
@@ -68,7 +69,7 @@ func calcDistanceAndAngle(from: CLLocationCoordinate2D, to: CLLocationCoordinate
   let cos_y1 = cos(y1)
   let cos_dx = cos(dx)
   
-  let distance = r * acos(sin_y1 * sin(y2) + cos_y1 * cos(y2) * cos_dx)
+  let distance = EARTH_R * acos(sin_y1 * sin(y2) + cos_y1 * cos(y2) * cos_dx)
   var angle = toDegree(atan2(sin(dx), cos_y1 * tan(y2) - sin_y1 * cos_dx))
   if angle < 0 {
     angle += 360

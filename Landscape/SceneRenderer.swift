@@ -220,9 +220,9 @@ class SceneRenderer: NSObject, CALayerDelegate {
   /// （角度次第で）描画対象となるPOIを選定する
   ///
   /// - Parameter location: 自分の位置
-  func updateLocation(location: CLLocationCoordinate2D) {
+  func updateLocation(location: CLLocation) {
     // 対象POIの再計算
-    poiManager.setCurrentPosition(position: location)
+    poiManager.currentPosition = location
     layer.setNeedsDisplay()
   }
   
@@ -244,7 +244,6 @@ class SceneRenderer: NSObject, CALayerDelegate {
   }
   
   // MARK: - CALayerDelegate
-  
   // 描画時に呼び出される
   func draw(_ layer: CALayer, in ctx: CGContext) {
     if params.heading == nil {

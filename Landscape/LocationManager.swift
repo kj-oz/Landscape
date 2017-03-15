@@ -99,7 +99,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
       let newLocation = location.coordinate
       let (distance, _) = calcDistanceAndAngle(from: newLocation, to: prevLocation)
       if distance > distanceFilter {
-        renderer.updateLocation(location: newLocation)
+        renderer.updateLocation(location: location)
       }
       prevLocation = newLocation
     }
