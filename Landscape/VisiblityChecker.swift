@@ -202,7 +202,7 @@ class VisiblityChecker {
   /// コンストラクタ
   /// 非同期でメッシュ標高を読み込む
   init() {
-    DispatchQueue.global(qos: .userInitiated).async {
+    DispatchQueue.global(qos: .userInitiated).async { [unowned self] in
       Mesh.loadMem()
       self.memLoaded = true
     }
@@ -314,5 +314,4 @@ class VisiblityChecker {
     print(String(format:"\(poi.name),%.0f,%.1f,G", poi.height, poi.distance / 1000.0))
     return true
   }
-  
 }

@@ -9,38 +9,38 @@
 import UIKit
 import AVFoundation
 
-/**
- * カメラ画像取得のセッションを管理するクラス
- */
+/// カメラ画像取得のセッションを管理するクラス
 class CameraManager: NSObject {
 
-  // ビデオ・セッションのセットアップの結果のENUM
+  /// ビデオ・セッションのセットアップの結果のENUM
   enum SessionSetupResult {
     case success
     case notAuthorized
     case configurationFailed
   }
   
-  // 対象のビュー
+  /// 対象のビュー
   private var cameraView: CameraView
   
+  /// 対象のカメラ
   private var camera: AVCaptureDevice?
 
-  // ビデオ・セッション
+  /// ビデオ・セッション
   private let session = AVCaptureSession()
   
-  // ビデオ・セッションが動作中かどうか
+  /// ビデオ・セッションが動作中かどうか
   private var isSessionRunning = false
   
-  // ビデオ・セッションに関する処理を実行する非同期キュー
+  /// ビデオ・セッションに関する処理を実行する非同期キュー
   private let sessionQueue = DispatchQueue(label: "session queue", attributes: [], target: nil)
   
-  // ビデオ・セッションのセットアップの結果
+  /// ビデオ・セッションのセットアップの結果
   var setupResult: SessionSetupResult = .success
   
-  // MARK: KVO and Notifications
+  /// ビデオ・セッションのKVOのコンテキスト
   private var sessionRunningObserveContext = 0
   
+  /// カメラの表示倍率
   var zoom: CGFloat = 1.0 {
     didSet {
       // camera.videoZoomFactorを設定しても、ちょうど指定した倍率にはならないため、Viewのtransformで調整
@@ -54,8 +54,10 @@ class CameraManager: NSObject {
     }
   }
   
+  /// アプリケーション的な最大ズーム
   private let appMaxZoom: CGFloat = 8
   
+  /// 最大ズーム
   var maxZoom: CGFloat {
     if let activeFormat = camera?.activeFormat {
       return CGFloat(min(activeFormat.videoMaxZoomFactor, appMaxZoom))
@@ -63,24 +65,21 @@ class CameraManager: NSObject {
     return appMaxZoom
   }
   
-  
-  /**
-   *
-   *
-   * - parameter cameraView:
-   */
+  /// コンストラクタ
+  ///
+  /// - Parameter cameraView: 対象のカメラビュー
   init(cameraView: CameraView) {
     self.cameraView = cameraView
     super.init()
     cameraView.session = session
     cameraView.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
-//    baseSize = cameraView.frame.size
     
     sessionQueue.async { [unowned self] in
       self.configureSession()
     }
   }
   
+  /// ビデオ・セッションを開始する
   func startSession() {
     sessionQueue.async { [unowned self] in
       self.addObservers()
@@ -89,6 +88,7 @@ class CameraManager: NSObject {
     }
   }
   
+  /// ビデオ・セッションを中段する
   func stopSession() {
     sessionQueue.async { [unowned self] in
       if self.setupResult == .success {
@@ -99,6 +99,9 @@ class CameraManager: NSObject {
     }
   }
   
+  /// 画面の回転（縦横の変更）時に呼び出される
+  ///
+  /// - Parameter size: 新たな画面サイズ
   func viewWillTransition(to size: CGSize) {
     if let videoPreviewLayerConnection = cameraView.previewLayer.connection {
       let deviceOrientation = UIDevice.current.orientation
@@ -107,13 +110,10 @@ class CameraManager: NSObject {
       }
       
       videoPreviewLayerConnection.videoOrientation = newVideoOrientation
-//      baseSize = size
     }
   }
   
-  /**
-   * ビデオ・セッションをセットアップする
-   */
+  /// ビデオ・セッションを準備する
   private func configureSession() {
     if setupResult != .success {
       return
@@ -157,9 +157,7 @@ class CameraManager: NSObject {
     session.commitConfiguration()
   }
   
-  /**
-   * 中断されたビデオ・セッションの再開を試みる
-   */
+  /// 中断されたビデオ・セッションの再開を試みる
   private func resumeInterruptedSession() {
     sessionQueue.async { [unowned self] in
       self.session.startRunning()
@@ -170,9 +168,7 @@ class CameraManager: NSObject {
     }
   }
   
-  /**
-   * ビデオ・セッションの状態の変化を監視する
-   */
+  /// ビデオ・セッションの状態の変化を監視する
   private func addObservers() {
     session.addObserver(self, forKeyPath: "running", options: .new, context: &sessionRunningObserveContext)
     
@@ -181,23 +177,16 @@ class CameraManager: NSObject {
     NotificationCenter.default.addObserver(self, selector: #selector(sessionInterruptionEnded), name: Notification.Name("AVCaptureSessionInterruptionEndedNotification"), object: session)
   }
   
-  /**
-   * ビデオ・セッションの状態の監視を解除する
-   */
+  /// ビデオ・セッションの状態の監視を解除する
   private func removeObservers() {
     NotificationCenter.default.removeObserver(self)
     
     session.removeObserver(self, forKeyPath: "running", context: &sessionRunningObserveContext)
   }
   
-  override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-  }
-
-  /**
-   * ビデオ・セッションにエラーが発生した際のハンドラ
-   *
-   * - parameter notification 通知
-   */
+  /// ビデオ・セッションにエラーが発生した際のハンドラ
+  ///
+  /// - Parameter notification: 通知
   func sessionRuntimeError(notification: NSNotification) {
     guard let errorValue = notification.userInfo?[AVCaptureSessionErrorKey] as? NSError else {
       return
@@ -209,11 +198,9 @@ class CameraManager: NSObject {
     resumeInterruptedSession()
   }
   
-  /**
-   * ビデオ・セッションが中断された際のハンドラ
-   *
-   * - parameter notification 通知
-   */
+  /// ビデオ・セッションが中断された際のハンドラ
+  ///
+  /// - Parameter notification: 通知
   func sessionWasInterrupted(notification: NSNotification) {
     if let userInfoValue = notification.userInfo?[AVCaptureSessionInterruptionReasonKey] as AnyObject?, let reasonIntegerValue = userInfoValue.integerValue, let reason = AVCaptureSessionInterruptionReason(rawValue: reasonIntegerValue) {
       print("Capture session was interrupted with reason \(reason)")
@@ -222,19 +209,15 @@ class CameraManager: NSObject {
     }
   }
   
-  /**
-   * ビデオ・セッションの中断が解除された際のハンドラ
-   *
-   * - parameter notification 通知
-   */
+  /// ビデオ・セッションの中断が解除された際のハンドラ
+  ///
+  /// - Parameter notification: 通知
   func sessionInterruptionEnded(notification: NSNotification) {
     print("Capture session interruption ended")
   }
   
-  func getMaxZoom() -> CGFloat? {
-    if let activeFormat = camera?.activeFormat {
-      return CGFloat(min(activeFormat.videoMaxZoomFactor, self.maxZoom))
-    }
-    return nil
+  // MARK: - NSObject
+  // KVOをサポートするために宣言が必要
+  override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
   }
 }

@@ -188,7 +188,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   // 各種ボタンの状態の更新
   private func updateButtonStatus() {
     if targetActionType == .imageZoom {
-      let maxZoom = Int(NSDecimalNumber(decimal: pow(2, Int(log2(cameraManager.getMaxZoom()!)))))
+      let maxZoom = Int(NSDecimalNumber(decimal: pow(2, Int(log2(cameraManager.maxZoom)))))
       zoomoutButton.isEnabled = zoom > 1
       zoominButton.isEnabled = zoom < maxZoom
       targetButton.setTitle("ズーム：\(zoom) 倍", for: .normal)
