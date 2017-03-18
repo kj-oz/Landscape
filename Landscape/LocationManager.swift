@@ -9,31 +9,41 @@
 import UIKit
 import CoreLocation
 
+/// 端末の存在する位置や向きを管理するクラス
 class LocationManager: NSObject, CLLocationManagerDelegate {
-  // 位置情報サービスの許可状態
+  
+  /// 位置情報サービスの許可状態
   var authorizationStatus = CLLocationManager.authorizationStatus()
   
-  // 位置情報サービスが動作可能かどうか
+  /// 位置情報サービスが動作可能かどうか
   let supportsLocation = CLLocationManager.headingAvailable() &&
     CLLocationManager.locationServicesEnabled()
   
-  // 位置情報サービス
+  /// 位置情報サービス
   private let lm = CLLocationManager()
   
+  /// 位置の更新を通知する距離(m)
   private let distanceFilter = 100.0
   
+  /// 方向の更新を通知する角度(°）
   private let headingFilter = 1.0
   
+  /// 測定値の測定時刻の許容値（60秒以上前の測定値は対象にしない）
   private let timeTolerance = 60.0
   
-  // 画面描画オブジェクト
+  /// 画面描画オブジェクト
   private var renderer: SceneRenderer
   
+  /// 方向の変更のアニメーションを管理するオブジェクト
   private let animator: HeadingAnimator
   
-  //
+  /// 前回の通知時の緯度経度
   var prevLocation = CLLocationCoordinate2D()
   
+  
+  /// コンストラクタ
+  ///
+  /// - Parameter renderer: 画面描画オブジェクト
   init(renderer: SceneRenderer) {
     self.renderer = renderer
     animator = HeadingAnimator(renderer: renderer)
@@ -52,9 +62,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
   }
   
-  /**
-   * アプリの状態が変化する際のイベントの待ち受けを登録する
-   */
+  /// アプリの状態が変化する際のイベントの待ち受けを登録する
   private func setupApplicationEvent() {
     let nc = NotificationCenter.default;
     nc.addObserver(self, selector: #selector(applicationWillEnterForeground),
@@ -63,22 +71,28 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
                    name: NSNotification.Name(rawValue: "applicationDidEnterBackground"), object: nil);
   }
   
-  /**
-   * アプリ・フォアグラウンド化時の処理
-   */
+  /// アプリ・フォアグラウンド化時の処理
   func applicationWillEnterForeground() {
     lm.startUpdatingLocation()
     lm.startUpdatingHeading()
   }
   
-  /**
-   * アプリ・バックグラウンド化時の処理
-   */
+  /// アプリ・バックグラウンド化時の処理
   func applicationDidEnterBackground() {
     lm.stopUpdatingLocation()
     lm.stopUpdatingHeading()
   }
   
+  /// 機器の縦横の変更時に呼び出される
+  ///
+  /// - Parameter size: 機器の画面の（機器の向きに準じた）サイズ
+  func changeOrientation(to size: CGSize) {
+    lm.headingOrientation = UIDevice.current.orientation.headingOrientation
+    renderer.changeOrientation(to: size)
+  }
+  
+  // MARK: - CLLocationManagerDelegate
+  // 使用許可状態が変更された場合に呼び出される
   func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
     authorizationStatus = status
     switch status {
@@ -91,6 +105,21 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
   }
   
+  /// 方位検知サービスを開始する
+  private func startHeadingService() {
+    lm.headingOrientation = UIDevice.current.orientation.headingOrientation
+    lm.headingFilter = headingFilter
+    lm.startUpdatingHeading()
+  }
+  
+  /// 位置検知サービスを開始する
+  private func startLocationService() {
+    lm.desiredAccuracy = kCLLocationAccuracyBest
+    lm.distanceFilter = distanceFilter
+    lm.startUpdatingLocation()
+  }
+
+  // 位置が変更された場合に呼び出される
   func locationManager(_ manager: CLLocationManager, didUpdateLocations locations:[CLLocation]) {
     let location = locations.last!
     if  Date().timeIntervalSince(location.timestamp) < timeTolerance {
@@ -103,55 +132,47 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
   }
   
-  
+  // 方位が変更された場合に呼び出される
   func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
     if Date().timeIntervalSince(newHeading.timestamp) < timeTolerance
-        && newHeading.trueHeading >= 0.0 {
+      && newHeading.trueHeading >= 0.0 {
       animator.animate(to: Double(newHeading.trueHeading))
     }
   }
-  
-  func viewWillTransition(to size: CGSize) {
-    lm.headingOrientation = UIDevice.current.orientation.headingOrientation
-    renderer.changeOrientation(to: size)
-  }
-  
-  /**
-   * 方位検知サービスを開始する
-   */
-  func startHeadingService() {
-    lm.headingOrientation = UIDevice.current.orientation.headingOrientation
-    lm.headingFilter = headingFilter
-    lm.startUpdatingHeading()
-  }
-  
-  /**
-   * 位置検知サービスを開始する
-   */
-  func startLocationService() {
-    lm.desiredAccuracy = kCLLocationAccuracyBest
-    lm.distanceFilter = distanceFilter
-    lm.startUpdatingLocation()
-  }
 }
 
+/// 方位変更のアニメーションを管理するクラス
 class HeadingAnimator {
-  // 描画オブジェクト
+  
+  /// 描画オブジェクト
   private let renderer: SceneRenderer
   
-  // 最終方位
+  /// 最終方位
   private var endValue = 0.0
 
-  // 直前の描画の時刻
+  /// 直前の描画の時刻
   private var prevUpdateTime: Date?
   
-  // 描画間隔（30fps)
+  /// 描画間隔（30fps)
   private let renderingPeriod = 1.0 / 30.0
-
+  
+  /// アニメーションを停止する終点からの誤差
+  private let stopTolerance = 0.1
+  
+  /// 1回のアニメーションで変更する率
+  private let animationStepRatio = 0.1
+  
+  
+  /// コンストラクタ
+  ///
+  /// - Parameter renderer: 画面描画オブジェクト
   init(renderer: SceneRenderer) {
     self.renderer = renderer
   }
   
+  /// 指定の方位まで、アニメーションを行う
+  ///
+  /// - Parameter to: 最終的な方位
   func animate(to: Double) {
     Logger.log(String(format:"▷ heading: %7.3f -> %7.3f", renderer.heading ?? 999.0, to))
     endValue = to
@@ -163,10 +184,13 @@ class HeadingAnimator {
     }
   }
   
+  /// アニメーションの一コマごとに呼び出される
+  ///
+  /// - Parameter link: ディスプレイ・リンク・オブジェクト
   @objc func updateHeading(link: AnyObject) {
     var currentValue = renderer.heading!
     let delta = angle(from: currentValue, to: endValue)
-    if abs(delta) < 0.1 {
+    if abs(delta) < stopTolerance {
       link.invalidate()
     } else {
       let now = Date()
@@ -176,7 +200,7 @@ class HeadingAnimator {
           return
         }
       }
-      currentValue = angleAdd(to: currentValue, delta: delta * 0.1)
+      currentValue = angleAdd(to: currentValue, delta: delta * animationStepRatio)
       prevUpdateTime = now
       renderer.heading = currentValue
     }

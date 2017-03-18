@@ -12,6 +12,7 @@ import Dispatch
 
 /// 3次メッシュの高さを管理する構造体
 struct Mesh {
+  
   /// メッシュのX方向（経度）幅
   static let xPitch = 1 / 80.0
   
@@ -47,6 +48,7 @@ struct Mesh {
   
   /// 各3次メッシュの標高（平均高さと最高高さの平均）
   private static var _heights: [Int16] = []
+  
   
   /// 与えられた点のメッシュ座標系における実数座標
   ///
@@ -151,6 +153,7 @@ struct Mesh {
 
 /// POIが地形上、見えるかどうかを判定する機能を提供する
 class VisiblityChecker {
+  
   /// 現在地の緯度
   private var y1 = 0.0
   
@@ -198,6 +201,7 @@ class VisiblityChecker {
                    coord.longitude, coord.latitude, currentLocation!.altitude))
     }
   }
+  
   
   /// コンストラクタ
   /// 非同期でメッシュ標高を読み込む

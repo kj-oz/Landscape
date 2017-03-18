@@ -11,6 +11,7 @@ import CoreLocation
 
 /// 画面上の地物の名称の表示
 class Label {
+  
   // ラベルに表示する文字サイズ
   static let font = UIFont.systemFont(ofSize: 12.0)
   
@@ -24,12 +25,22 @@ class Label {
   static let height = "国".size(attributes:
     [NSFontAttributeName: Label.font]).height + 2 * Label.padding
   
-  // ラベルの色の選択肢
+  // ラベルの色（山：高さ1000m以下）
   private let color0000_1000 = UIColor(red: 0.0, green: 0.8, blue:1.0, alpha: 1).cgColor
+  
+  // ラベルの色（山：高さ1000〜1500m）
   private let color1000_1500 = UIColor(red: 0.5, green: 1.0, blue:0.8, alpha: 1).cgColor
+  
+  // ラベルの色（山：高さ1500〜2000m）
   private let color1500_2000 = UIColor(red: 0.7, green: 1.0, blue:0.1, alpha: 1).cgColor
+  
+  // ラベルの色（山：高さ2000〜2500m）
   private let color2000_2500 = UIColor(red: 1.0, green: 0.9, blue:0.1, alpha: 1).cgColor
+  
+  // ラベルの色（山：高さ2500〜3000m）
   private let color2500_3000 = UIColor(red: 1.0, green: 0.6, blue:0.2, alpha: 1).cgColor
+  
+  // ラベルの色（山：高さ3000m以上）
   private let color3000_ = UIColor(red: 0.8, green: 0.4, blue:0.2, alpha: 1).cgColor
   
   // ラベルの文字色
@@ -76,6 +87,7 @@ class Label {
   var right: CGFloat {
     return left + width
   }
+  
   
   /// POIから生成するコンストラクタ
   ///
@@ -128,57 +140,38 @@ class Label {
     UIGraphicsEndImageContext()
     return image
   }
-  
-//  func getColor() -> CGColor {
-//    let height = source.height
-//    switch height {
-//    case 0 ..< 1000:
-//      return color0000_1000
-//    case 1000 ..< 1500:
-//      return color1000_1500
-//    case 1500 ..< 2000:
-//      return color1500_2000
-//    case 2000 ..< 2500:
-//      return color2000_2500
-//    case 2500 ..< 3000:
-//      return color2500_3000
-//    default:
-//      return color3000_
-//    }
-//  }
-//  
 }
 
-/**
- * 画面に表示する1行のラベル群
- */
+/// 画面に表示する1行のラベル群
 class LabelRow {
+  
   // 画面の幅
   let length: CGFloat
   
+  /// 自分の下端から引出線の折れ曲がり点までの高さ
   let depth: CGFloat
   
+  /// 許容傾き（高さに対する水平方向の最大離れの比）
   let coef: CGFloat = 1.5
 
   // ラベルそのもの
   var labels: [Label] = []
   
-  /**
-   * コンストラクタ
-   *
-   * - parameter length 画面横のピクセル数
-   */
+
+  /// コンストラクタ
+  ///
+  /// - Parameters:
+  ///   - length: 画面横のピクセル数
+  ///   - depth: 行下端から引出線の折れ曲がり点までの高さ
   init(length: CGFloat, depth: CGFloat) {
     self.length = length
     self.depth = depth
   }
   
-  /**
-   * 指定のラベルを行の中に吸収する
-   *
-   * - parameter label: 吸収対応のラベル文字列
-   * - returns 吸収することが出来たらばtrue、何らかの理由で出来なければfalse
-   */
+  /// 指定のラベルを行の中に挿入する
+  ///
+  /// - Parameter label: 対象のラベル
+  /// - Returns: 挿入できた場合にtrue、挿入する余地が無かった場合にfalse
   func insert(label: Label) -> Bool {
     // 挿入位置の確定
     var index = 0
@@ -287,12 +280,10 @@ class LabelRow {
     return true
   }
   
-  /**
-   * 指定のラベルが左にずれることの可能な最大の長さを求める
-   *
-   * - parameter index: 対象のラベルのインデックス
-   * - return 対象のラベルが現在の位置から左にずれることのできる最大値を求める
-   */
+  /// 指定のラベルが左にずれることの可能な最大の長さを求める
+  ///
+  /// - Parameter index: 対象のラベルの行内インデックス
+  /// - Returns: 対象のラベルが現在の位置から左にずれることのできる最大値
   private func estimateLeftShift(index: Int) -> CGFloat {
     let label = labels[index]
     let maxSift: CGFloat = depth * coef + label.width - (label.point - label.left)
@@ -304,12 +295,10 @@ class LabelRow {
     }
   }
   
-  /**
-   * 指定のラベルが右にずれることの可能な最大の長さを求める
-   *
-   * - parameter index: 対象のラベルのインデックス
-   * - return 対象のラベルが現在の位置から右にずれることのできる最大値を求める
-   */
+  /// 指定のラベルが右にずれることの可能な最大の長さを求める
+  ///
+  /// - Parameter index: 対象のラベルの行内インデックス
+  /// - Returns: 対象のラベルが現在の位置から右にずれることのできる最大値
   private func estimateRightShift(index: Int) -> CGFloat {
     let label = labels[index]
     let maxSift: CGFloat = (label.point - label.left) + depth * coef
@@ -321,12 +310,11 @@ class LabelRow {
     }
   }
   
-  /**
-   * 指定のラベルを指定の距離分左にずらす
-   *
-   * - parameter index: 対象のラベルのインデックス
-   * - parameter distance: 対象のラベル左にずらす長さ
-   */
+  /// 指定のラベルを指定の距離分左にずらす
+  ///
+  /// - Parameters:
+  ///   - index: 対象のラベルの行内インデックス
+  ///   - distance: 左にずらす距離
   private func shiftLeft(index: Int, distance: CGFloat) {
     labels[index].left -= distance
     if index > 0 {
@@ -337,12 +325,11 @@ class LabelRow {
     }
   }
   
-  /**
-   * 指定のラベルを指定の距離分右にずらす
-   *
-   * - parameter index: 対象のラベルのインデックス
-   * - parameter distance: 対象のラベル右にずらす長さ
-   */
+  /// 指定のラベルを指定の距離分右にずらす
+  ///
+  /// - Parameters:
+  ///   - index: 対象のラベルの行内インデックス
+  ///   - distance: 右にずらす距離
   private func shiftRight(index: Int, distance: CGFloat) {
     labels[index].left += distance
     if index < labels.count - 1 {

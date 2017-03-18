@@ -65,6 +65,7 @@ class CameraManager: NSObject {
     return appMaxZoom
   }
   
+  
   /// コンストラクタ
   ///
   /// - Parameter cameraView: 対象のカメラビュー
@@ -102,7 +103,7 @@ class CameraManager: NSObject {
   /// 画面の回転（縦横の変更）時に呼び出される
   ///
   /// - Parameter size: 新たな画面サイズ
-  func viewWillTransition(to size: CGSize) {
+  func changeOrientation(to size: CGSize) {
     if let videoPreviewLayerConnection = cameraView.previewLayer.connection {
       let deviceOrientation = UIDevice.current.orientation
       guard let newVideoOrientation = deviceOrientation.videoOrientation, deviceOrientation.isPortrait || deviceOrientation.isLandscape else {

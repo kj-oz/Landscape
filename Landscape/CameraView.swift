@@ -9,12 +9,15 @@
 import UIKit
 import AVFoundation
 
+/// カメラのプレビューを表示するビュー
 class CameraView: UIView {
 
+  /// プレビューを表示するレイヤ
   var previewLayer: AVCaptureVideoPreviewLayer {
     return layer as! AVCaptureVideoPreviewLayer
   }
   
+  /// ビデオ・セッション
   var session: AVCaptureSession? {
     get {
       return previewLayer.session
@@ -24,7 +27,8 @@ class CameraView: UIView {
     }
   }
   
-  // MARK: UIView
+  
+  // レイヤで使用するクラスを返す
   override class var layerClass: AnyClass {
     return AVCaptureVideoPreviewLayer.self
   }

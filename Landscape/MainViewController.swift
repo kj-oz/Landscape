@@ -8,10 +8,9 @@
 
 import UIKit
 
-/**
- * メイン画面のコントローラ
- */
+/// メイン画面のコントローラ
 class MainViewController: UIViewController, UIGestureRecognizerDelegate {
+  
   // カメラの映像を表示するビュー
   @IBOutlet weak var cameraView: CameraView!
   
@@ -23,21 +22,22 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   @IBOutlet weak var zoomoutButton: UIButton!
   @IBOutlet weak var targetButton: UIButton!
   
-  /**
-   * ズームボタン押下時の処理
-   */
+  /// ズームボタン押下時の処理
+  ///
+  /// - imageZoom           画面のズーム
+  /// - fieldAngleAdjust    画角の調整
   enum TargetActionType {
-    case imageZoom          // ズーム
-    case fieldAngleAdjust   // 画角の調整
+    case imageZoom
+    case fieldAngleAdjust
   }
   
-  // ズームボタン押下時の処理
+  /// ズームボタン押下時の処理
   private var targetActionType: TargetActionType = .imageZoom
   
-  // 画角調整時にボタン1タップで変更する画角
+  /// 画角調整時にボタン1タップで変更する画角
   private let fieldAngleDelta = 1.0
   
-  // ズーム値
+  /// ズーム値
   private var zoom: Int {
     get {
       return Int(renderer.zoom)
@@ -48,7 +48,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     }
   }
   
-  // 画角
+  /// 画角
   private var fieldAngle: Double {
     get {
       return renderer.fieldAngle
@@ -58,17 +58,18 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     }
   }
   
-  // アプリ名称
+  /// アプリ名称
   private let appName = "風景ガイド"
   
-  // カメラのセッションを管理するオブジェクト
+  /// カメラのセッションを管理するオブジェクト
   private var cameraManager: CameraManager!
   
-  // 風景のラベルを描画するオブジェクト
+  /// 風景のラベルを描画するオブジェクト
   private var renderer: SceneRenderer!
   
-  // 位置情報を管理するオブジェクト
+  /// 位置情報を管理するオブジェクト
   private var locationManager: LocationManager!
+  
   
   // ビューのロード時に呼び出される
   override func viewDidLoad() {
@@ -142,13 +143,13 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     viewWillTransition(to: size)
   }
   
-  /**
-   * 画面回転時に、各オブジェクトにそれを通知する
-   */
+  /// 画面の縦横の回転を各オブジェクトに通知する
+  ///
+  /// - Parameter size: 新しい画面サイズ
   private func viewWillTransition(to size: CGSize) {
     print("transit to: \(size)")
-    cameraManager.viewWillTransition(to: size)
-    locationManager.viewWillTransition(to: size)
+    cameraManager.changeOrientation(to: size)
+    locationManager.changeOrientation(to: size)
   }
   
   // ステータスバーは表示しない
@@ -204,12 +205,11 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     renderer.tapped(at: sender.location(in: self.view))
   }
   
-  /**
-   * 警告ダイアログを表示する
-   *
-   * - parameter message: 表示するメッセージ
-   * - parameter requireAuthrization: 設定画面の表示ボタンを表示するかどうか
-   */
+  /// 警告ダイアログを表示する
+  ///
+  /// - Parameters:
+  ///   - message: 表示するメッセージ
+  ///   - requireAuthorization: 設定画面の表示ボタンを表示するかどうか
   private func showWarning(message: String, requireAuthorization: Bool = false) {
     let alertController = UIAlertController(title: self.appName, message: message, preferredStyle: .alert)
     alertController.addAction(UIAlertAction(title: "了解", style: .cancel, handler: nil))
@@ -221,13 +221,10 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     self.present(alertController, animated: true, completion: nil)
   }
   
-  /**
-   * カメラの状態をチェックする
-   *
-   * - returns true: 正常に終了、false: 何らか失敗している
-   */
+  /// カメラの状態をチェックする
+  ///
+  /// - Returns: true: 正常に終了、false: 何らか失敗している
   private func checkCameraService() -> Bool {
-    // カメラセッションの状態を確認
     switch cameraManager.setupResult {
     case .success:
       return true
@@ -242,9 +239,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     return false
   }
   
-  /**
-   * 位置情報サービスの状態をチェックする
-   */
+  /// 位置情報サービスの状態をチェックする
   private func checkLocationService() {
     // 位置情報関係の状態を確認
     if !locationManager.supportsLocation {

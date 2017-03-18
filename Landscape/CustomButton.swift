@@ -8,9 +8,7 @@
 
 import UIKit
 
-/**
- * Disable時の背景色や枠、角丸を指定できるカスタムボタン
- */
+/// Disable時の背景色や枠、角丸を指定できるカスタムボタン
 @IBDesignable class CustomButton: UIButton {
 
   // 角丸の半径(0で四角形)
@@ -25,6 +23,7 @@ import UIKit
   
   // Disable時の背景色
   @IBInspectable var disabledBackgroundColor: UIColor?
+  
   
   // 描画時に呼び出される
   // この中で背景色を変えてもうまくいかないので、プロパティの変更を監視して設定

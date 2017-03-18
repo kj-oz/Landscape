@@ -8,53 +8,59 @@
 
 import UIKit
 
+/// 方位の描画を司るクラス
 class DirectionRenderer {
   
-  // 方位文字列
+  /// 方位文字列
   private let directions = ["北", "北北東", "北東", "東北東",
                             "東", "東南東", "南東", "南南東",
                             "南", "南南西", "南西", "西南西",
                             "西", "西北西", "北西", "北北西"]
   
+  /// 方位文字列の描画済み画像（高速化のため）
   private var dirImages: [UIImage] = []
   
-  // 方位文字列のフォント
+  /// 方位文字列のフォント（大）
   private let dirFont1 = UIFont.systemFont(ofSize: 16)
+  
+  /// 方位文字列のフォント（中）
   private let dirFont2 = UIFont.systemFont(ofSize: 14)
+  
+  /// 方位文字列のフォント（小）
   private let dirFont3 = UIFont.systemFont(ofSize: 12)
   
-  // 方位目盛りの間隔（度）
+  /// 方位目盛りの間隔（度）
   private let tickPitch = 1.5
   
-  // 方位表示部の高さ
+  /// 方位表示部の高さ
   private let bandHeight: CGFloat = 30.0
   
-  // 方位表示部の色
+  /// 方位表示部の色
   private let bandColor = UIColor.white.cgColor
   
-  // 方位文字のある場所の目盛りの長さ
+  /// 方位文字のある場所の目盛りの長さ
   private let longTickLength: CGFloat = 12.0
   
-  // 方位目盛りの長さ
+  /// 方位目盛りの長さ
   private let shortTickLength: CGFloat = 6.0
   
-  // 目盛りの総数
+  /// 目盛りの総数
   private let tickCount: Int
   
-  // 一方位当たりの目盛り数
+  /// 一方位当たりの目盛り数
   private var tickPerDir: Int
   
-  // 方位文字列の幅
+  /// 方位文字列の幅
   private let dirWidth: CGFloat = 60.0
   
-  // 方位文字列の高さ
+  /// 方位文字列の高さ
   private let dirHeight: CGFloat
   
+  /// 方位文字の余白
   private let dirSpacing: CGFloat = 2.0
   
-  /**
-   * コンストラクタ
-   */
+  
+  /// コンストラクタ
   init() {
     tickCount = Int(360.0 / tickPitch)
     tickPerDir = tickCount / directions.count
@@ -63,6 +69,7 @@ class DirectionRenderer {
     createImages()
   }
   
+  /// 高速化のために予め方位文字列の画像を作成しておく
   private func createImages() {
     let paragraphStyle = NSMutableParagraphStyle()
     paragraphStyle.alignment = .center
@@ -103,11 +110,9 @@ class DirectionRenderer {
     }
   }
   
-  /**
-   * 方位目盛りを描画する
-   *
-   * - parameter params 描画用パラメータ
-   */
+  /// 方位目盛りバンドを描画する
+  ///
+  /// - Parameter params: 描画用パラメータ
   func draw(params: RenderingParams) {
     let ctx = params.context!
     
@@ -133,12 +138,11 @@ class DirectionRenderer {
     
   }
   
-  /**
-   * 一つの方位目盛りを描画する
-   *
-   * - parameter tickIndex 目盛りの番号（北＝0°が0、最大239）
-   * - parameter params 描画用パラメータ
-   */
+  /// 一つの方位目盛りを描画する
+  ///
+  /// - Parameters:
+  ///   - tickIndex: 目盛りの番号（北＝0°が0、最大239）
+  ///   - params: 描画用パラメータ
   private func drawTick(tickIndex: Int, params: RenderingParams) {
     let azimuth = Double(tickIndex) * tickPitch
     let x = params.calcX(of: azimuth)

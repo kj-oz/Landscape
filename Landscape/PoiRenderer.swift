@@ -8,60 +8,70 @@
 
 import UIKit
 
-/**
- * POIの描画を担当するクラス
- */
+/// POIの描画を担当するクラス
 class PoiRenderer {
   
-  // 対象POI選定時の画面端部の余裕角度
+  /// 対象POI選定時の画面端部の余裕角度
   private let angleMargin = 3.0
   
-  // POIの管理を担当するオブジェクト
+  /// POIの管理を担当するオブジェクト
   private var poiManager: PoiManager
   
-  // その時点で選択されているグループ名
+  /// その時点で選択されているグループ名
   private var selectedGroup: PoiGroup?
   
-  // その時点で選択されているPOI
+  /// その時点で選択されているPOI
   private var selectedPoi: Poi?
   
-  // ラベルの最大行数
+  /// 現在地の情報を表示するかどうか
+  private var displayCurrentLocation = false
+  
+  /// ラベルの最大行数
   private var rowCountMax = 0
   
-  // ラベルの縦向き時の最大行数
+  /// ラベルの縦向き時の最大行数
   private let rowCountV = 7
   
-  // ラベルの横向き時の最大行数
+  /// ラベルの横向き時の最大行数
   private let rowCountH = 5
   
-  // ラベルの行
+  /// ラベルの行
   private var rows: [LabelRow] = []
   
-  // 一番上の行の高さ
+  /// 一番上の行の高さ
   private let rowTopHeight: CGFloat = Label.spacing
   
-  // 引出し線の太さ
-  private let leadLineWidth: CGFloat = 2.0
+  /// 引出し線の太さ
+  private let leadLineWidth: CGFloat = 1.5
   
-  // 引出し線のPOI部の折れ曲り点の高さ
+  /// 引出し線のPOI部の折れ曲り点の高さ
   private var leadLinePointHeight: CGFloat = 0.0
   
-  // 引出し線のPOI部鉛直線の長さ
+  /// 引出し線のPOI部鉛直線の長さ
   private let leadLinePointLength: CGFloat = 10.0
   
-  
+  /// 情報ボックスの描画を担当するオブジェクト
   private let infoBoxRenderer = InfoBoxRenderer()
-
   
+
+  /// コンストラクタ
+  ///
+  /// - Parameter poiManager: POIの管理を担当するオブジェクト
   init(poiManager: PoiManager) {
     self.poiManager = poiManager
   }
   
+  /// 画面の向き（縦横）に応じて描画用の変数の値を更新する
+  ///
+  /// - Parameter params: 描画用パラメータ
   func setViewParameter(_ params: RenderingParams) {
     rowCountMax = params.isPortrait ? rowCountV : rowCountH
     leadLinePointHeight = params.height * 0.45
   }
   
+  /// 画面がタップされた際に呼び出される
+  ///
+  /// - Parameter point: タップ座標
   func tapped(at point: CGPoint) {
     if let label = findLabel(at: point) {
       if let group = label.source as? PoiGroup {
@@ -79,6 +89,9 @@ class PoiRenderer {
     }
   }
 
+  /// 画面描画時に呼び出される
+  ///
+  /// - Parameter params: 描画用パラメータ
   func draw(params: RenderingParams) {
     let startAzimuth = angleAdd(to: params.startAngle, delta: angleMargin)
     let endAzimuth = angleAdd(to: params.endAngle, delta: -angleMargin)
@@ -87,12 +100,16 @@ class PoiRenderer {
     createLabels(pois: pois, params: params)
     drawLabels(params: params)
     
-    // デバッグ出力
     if let poi = selectedPoi {
       infoBoxRenderer.drawInfoBox(of: poi, params: params)
     }
   }
   
+  /// POIのラベルを、現在の画面の向きに応じて準備する
+  ///
+  /// - Parameters:
+  ///   - pois: 距離的に見える可能性のある全てのPOI
+  ///   - params: 描画パラメータ
   private func createLabels(pois: [Poi], params: RenderingParams) {
     var rows: [LabelRow] = []
     let depth = leadLinePointHeight - (Label.height + Label.spacing) * CGFloat(rowCountMax)
@@ -143,6 +160,9 @@ class PoiRenderer {
     self.rows = rows
   }
   
+  /// POIのラベルを描画する
+  ///
+  /// - Parameter params: 描画用パラメータ
   private func drawLabels(params: RenderingParams) {
     let ctx = params.context!
     var lineSpacing = Label.spacing
@@ -200,6 +220,10 @@ class PoiRenderer {
     }
   }
   
+  /// 指定の位置にPOIのラベルが存在するかどうか調べる
+  ///
+  /// - Parameter point: 座標
+  /// - Returns: POIのラベル、そんざいしなければnil
   private func findLabel(at point: CGPoint) -> Label? {
     var lineSpacing = Label.spacing
     if rows.count < rowCountMax {

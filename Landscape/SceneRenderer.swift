@@ -94,6 +94,7 @@ struct RenderingParams {
   private var defaultFieldAngle: Double {
     return 62.0
   }
+  
 
   /// コンストラクタ
   ///
@@ -194,6 +195,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
       layer.setNeedsDisplay()
     }
   }
+  
   
   /// コンストラクタ
   ///

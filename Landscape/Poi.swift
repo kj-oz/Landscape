@@ -9,9 +9,13 @@
 import Foundation
 import CoreLocation
 
-/**
- * POIの種類
- */
+/// POIの種類
+///
+/// - mountain: 山岳
+/// - island: 島
+/// - building: 建物
+/// - city: 町
+/// - userDefined: ユーザー定義
 enum PoiType {
   case mountain
   case island
@@ -20,68 +24,124 @@ enum PoiType {
   case userDefined
 }
 
+/// ラベル表示対象
 protocol LabelSource {
+  
+  /// 名称
   var name: String { get }
+  
+  /// POIの種類
   var type: PoiType { get }
+  
+  /// 高さ
   var height: Double { get }
+  
+  /// 現在地から見た方位
   var azimuth: Double { get }
+  
+  /// 現在地からの距離（m)
   var distance: Double { get }
 }
 
+/// POIのグループ
 class PoiGroup: Hashable, LabelSource {
+  
+  // Hashableを満たすための==演算子
   static func == (lhs: PoiGroup, rhs: PoiGroup) -> Bool {
     return lhs.name == rhs.name
   }
   
-  let name: String
-  var poi: Poi!
-  var height = 0.0
-  lazy var label: Label = Label(of: self)
-  
+  // Hashable
   var hashValue: Int {
     return name.hashValue
   }
   
+  /// グループ名
+  let name: String
+  
+  /// 代表POI（見える範囲で一番高さの高いPOI）
+  var poi: Poi!
+  
+  /// 代表POIの高さ
+  var height = 0.0
+  
+  /// ラベル（必要になったタイミングで作成）
+  lazy var label: Label = Label(of: self)
+  
+  /// 代表POIのタイプ
   var type: PoiType {
     return poi.type
   }
   
+  /// 代表POIの方位
   var azimuth: Double {
     return poi.azimuth
   }
   
+  /// 代表POIまでの距離
   var distance: Double {
     return poi.distance
   }
   
+  
+  /// コンストラクタ
+  ///
+  /// - Parameter name: グループ名
   init(name: String) {
     self.name = name
   }
 }
 
-/**
- * POI
- */
+/// POI
 class Poi: LabelSource {
   
+  /// 名称
   let name: String
+  
+  /// 詳細情報
   let detail: String?
+  
+  /// 所属するグループ
   let group: PoiGroup?
+  
+  /// 高さ
   let height: Double
+  
+  /// 座標
   let location: CLLocationCoordinate2D
+  
+  /// 種別
   let type: PoiType
+  
+  /// 有名な地点かどうか
   let famous: Bool
+  
+  /// 現在地からの方位
   var azimuth = 0.0
+  
+  /// 現在地からの距離
   var distance = 0.0
+  
+  /// ラベル（必要になったタイミングで作成）
   lazy var label: Label = Label(of: self)
 
-  
+  /// デバッグ用文字列
   var debugString: String {
     let nameStr = group != nil ? "\(name)(\(group!))" : "\(name)"
     let locStr = "\(location.longitude)/\(location.latitude)"
     return "\(nameStr), \(locStr), \(height), \(distance), \(azimuth)"
   }
   
+  /// コンストラクタ
+  ///
+  /// - Parameters:
+  ///   - name: 名称
+  ///   - detail: 詳細情報
+  ///   - group: グループ名
+  ///   - height: 高さ
+  ///   - location: 座標
+  ///   - type: 種別
+  ///   - famous: 有名かどうか
   init(name: String, detail: String?, group: PoiGroup?, height: Double,
        location: CLLocationCoordinate2D, type: PoiType, famous: Bool) {
     self.name = name
@@ -93,6 +153,12 @@ class Poi: LabelSource {
     self.famous = famous
   }
   
+  /// POIが与えられた方位の範囲に含まれるかどうかを判定する
+  ///
+  /// - Parameters:
+  ///   - fromAzimuth: 画面向かって左端の方位
+  ///   - toAzimuth: 画面向かって右端の方位
+  /// - Returns: 画面の範囲に含まれているかどうか
   func isInside(fromAzimuth: Double, toAzimuth: Double) -> Bool {
     var result = false
     if fromAzimuth < toAzimuth {
@@ -109,17 +175,19 @@ class Poi: LabelSource {
   }
 }
 
-/**
- * POIを管理するオブジェクト
- */
+/// POIを管理するオブジェクト
 class PoiManager {
-  let minElevation = 0.01
-  let maxDistance = 50_000.0
+  
+  /// 全てのPOI
   var pois: [Poi] = []
+  
+  /// 現在地から見える可能性のあるPOI
   var candidates: [Poi] = []
+  
+  /// POIグループのマップ
   var groups: [String : PoiGroup] = [:]
   
-  
+  /// 現在地の緯度経度、高度
   var currentPosition: CLLocation? {
     didSet {
       let position = currentPosition!
@@ -142,31 +210,34 @@ class PoiManager {
     }
   }
   
+  /// POIが現在地から見えるかどうかを判定するオブジェクト
   private var checker: VisiblityChecker
   
+  /// 地形データが未ロードかどうか（未ロード=true、ロード済み=false）
   private var notLoaded = false
   
+  
+  /// コンストラクタ
   init() {
     checker = VisiblityChecker()
     loadPois()
   }
   
-  /**
-   *
-   *
-   * - parameter startAzimuth:
-   * - parameter endAzimuth:
-   * - returns 指定の角度の間に入っていて、仰角が0.01以上あるいはユーザーが登録したPOIが仰角の大きな順にならんだ配列
-   */
+  /// POIの中から現在地から見える可能性のあるものだけを抜き出す
+  ///
+  /// - Parameters:
+  ///   - startAzimuth: 画面左端の方位
+  ///   - endAzimuth: 画面右端の方位
+  /// - Returns: 現在地から見える可能性のあるPOIの中で指定の角度の間に入っているPOIの配列
   func getVisiblePois(startAzimuth: Double, endAzimuth: Double) -> [Poi] {
     if notLoaded {
       currentPosition = checker.currentLocation!
     }
     let filtered = candidates.filter({ $0.isInside(fromAzimuth: startAzimuth, toAzimuth: endAzimuth) })
-    //print("angle filtered: \(filtered.count) (\(startAzimuth) - \(endAzimuth))")
     return filtered
   }
     
+  /// 外部ファイルからPOIの情報を読み込む
   func loadPois() {
     pois = []
     
@@ -206,9 +277,7 @@ class PoiManager {
         let poi = Poi(name: parts[1], detail: detail, group: group, height: height,
                       location: coord, type: .mountain, famous: famous)
         pois.append(poi)
-        
       }
-      
     }
   }
 }
