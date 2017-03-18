@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		31223BE11E3CD4EF009874ED /* Label.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31223BE01E3CD4EF009874ED /* Label.swift */; };
+		3153DE951E72E0E700CF8060 /* VisiblityChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3153DE941E72E0E700CF8060 /* VisiblityChecker.swift */; };
 		31ACCB021E2522A900AFDC09 /* Poi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31ACCB011E2522A900AFDC09 /* Poi.swift */; };
 		31B423A61E607F90002D2582 /* CustomButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B423A51E607F90002D2582 /* CustomButton.swift */; };
 		31C9C1811E1D2DD100DD5842 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31C9C1801E1D2DD100DD5842 /* AppDelegate.swift */; };
@@ -27,6 +28,7 @@
 
 /* Begin PBXFileReference section */
 		31223BE01E3CD4EF009874ED /* Label.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Label.swift; sourceTree = "<group>"; };
+		3153DE941E72E0E700CF8060 /* VisiblityChecker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VisiblityChecker.swift; sourceTree = "<group>"; };
 		31ACCB011E2522A900AFDC09 /* Poi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Poi.swift; sourceTree = "<group>"; };
 		31B423A51E607F90002D2582 /* CustomButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomButton.swift; sourceTree = "<group>"; };
 		31C9C17D1E1D2DD100DD5842 /* Landscape.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Landscape.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -90,6 +92,7 @@
 				31ACCB011E2522A900AFDC09 /* Poi.swift */,
 				31E3252F1E38EDBD000203EC /* LocationManager.swift */,
 				31E325311E3A3AC1000203EC /* Util.swift */,
+				3153DE941E72E0E700CF8060 /* VisiblityChecker.swift */,
 				31223BE01E3CD4EF009874ED /* Label.swift */,
 				31D29EA41E45AC2000835A4B /* FileUtil.swift */,
 				31B423A51E607F90002D2582 /* CustomButton.swift */,
@@ -177,6 +180,7 @@
 				31E325321E3A3AC1000203EC /* Util.swift in Sources */,
 				31D29EA71E5343D600835A4B /* DirectionRenderer.swift in Sources */,
 				31D29EA91E534A2C00835A4B /* PoiRenderer.swift in Sources */,
+				3153DE951E72E0E700CF8060 /* VisiblityChecker.swift in Sources */,
 				31E325301E38EDBD000203EC /* LocationManager.swift in Sources */,
 				31223BE11E3CD4EF009874ED /* Label.swift in Sources */,
 				31C9C1951E1D392800DD5842 /* SceneRenderer.swift in Sources */,

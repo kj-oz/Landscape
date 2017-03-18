@@ -14,7 +14,9 @@ import CoreLocation
  */
 enum PoiType {
   case mountain
+  case island
   case building
+  case city
   case userDefined
 }
 

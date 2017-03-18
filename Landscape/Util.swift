@@ -97,3 +97,14 @@ func angleAdd(to: Double, delta: Double) -> Double {
   return add
 }
 
+class Logger {
+  private static var formatter: DateFormatter = {
+    var obj = DateFormatter()
+    obj.dateFormat = "HH:mm:ss.SSS"
+    return obj
+  } ()
+  
+  static func log(_ message: String, now: Date = Date()) {
+    print(formatter.string(from: now) + " " + message)
+  }
+}

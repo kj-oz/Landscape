@@ -12,20 +12,6 @@ import UIKit
  * メイン画面のコントローラ
  */
 class MainViewController: UIViewController, UIGestureRecognizerDelegate {
-  /**
-   * ズームボタン押下時の処理
-   */
-  enum TargetActionType {
-    case imageZoom          // ズーム
-    case fieldAngleAdjust   // 画角の調整
-  }
-
-  // ズームボタン押下時の処理
-  private var targetActionType: TargetActionType = .imageZoom
-  
-  // 画角調整時にボタン1タップで変更する画角
-  private let fieldAngleDelta = 1.0
-  
   // カメラの映像を表示するビュー
   @IBOutlet weak var cameraView: CameraView!
   
@@ -36,6 +22,20 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   @IBOutlet weak var zoominButton: UIButton!
   @IBOutlet weak var zoomoutButton: UIButton!
   @IBOutlet weak var targetButton: UIButton!
+  
+  /**
+   * ズームボタン押下時の処理
+   */
+  enum TargetActionType {
+    case imageZoom          // ズーム
+    case fieldAngleAdjust   // 画角の調整
+  }
+  
+  // ズームボタン押下時の処理
+  private var targetActionType: TargetActionType = .imageZoom
+  
+  // 画角調整時にボタン1タップで変更する画角
+  private let fieldAngleDelta = 1.0
   
   // ズーム値
   private var zoom: Int {

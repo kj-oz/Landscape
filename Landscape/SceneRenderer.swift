@@ -130,8 +130,7 @@ struct RenderingParams {
     if let heading = heading {
       _startAngle = angleAdd(to: heading, delta: -fieldAngle_2)
       _endAngle = angleAdd(to: heading, delta: fieldAngle_2)
-      print(String(format:"▶ heading:%.3f (%.3f 〜 %.3f) %@",
-                   heading, _startAngle, _endAngle, isPortrait ? "P" : "L"))
+      Logger.log(String(format:"▶ heading: %7.3f", heading))
     }
   }
   
@@ -196,9 +195,6 @@ class SceneRenderer: NSObject, CALayerDelegate {
     }
   }
   
-  /// 描画開始時刻
-  private var startTime: Date
-  
   /// コンストラクタ
   ///
   /// - Parameter layer: 描画対象レイヤ
@@ -208,7 +204,6 @@ class SceneRenderer: NSObject, CALayerDelegate {
     directionRenderer = DirectionRenderer()
     poiRenderer = PoiRenderer(poiManager: poiManager)
     self.layer = layer
-    startTime = Date()
     super.init()
     
     layer.delegate = self
@@ -261,7 +256,8 @@ class SceneRenderer: NSObject, CALayerDelegate {
     // POIの描画
     poiRenderer.draw(params: params)
     
-    print(">>render \(start.timeIntervalSince(startTime))  - \(Date().timeIntervalSince(start))")
+    let now = Date()
+    Logger.log("> render : \(now.timeIntervalSince(start))s", now: now)
     UIGraphicsPopContext()
     ctx.restoreGState()
   }
