@@ -78,24 +78,24 @@
 		31C9C17F1E1D2DD100DD5842 /* Landscape */ = {
 			isa = PBXGroup;
 			children = (
-				31C9C1801E1D2DD100DD5842 /* AppDelegate.swift */,
-				31C9C1821E1D2DD100DD5842 /* MainViewController.swift */,
 				31C9C1841E1D2DD100DD5842 /* Main.storyboard */,
 				31C9C1871E1D2DD100DD5842 /* Assets.xcassets */,
 				31C9C1891E1D2DD100DD5842 /* LaunchScreen.storyboard */,
 				31C9C18C1E1D2DD100DD5842 /* Info.plist */,
+				31C9C1801E1D2DD100DD5842 /* AppDelegate.swift */,
+				31C9C1821E1D2DD100DD5842 /* MainViewController.swift */,
+				31B423A51E607F90002D2582 /* CustomButton.swift */,
 				31C9C1921E1D302900DD5842 /* CameraView.swift */,
+				31C9C1981E1FDA4900DD5842 /* CameraManager.swift */,
+				31E3252F1E38EDBD000203EC /* LocationManager.swift */,
+				3153DE941E72E0E700CF8060 /* VisiblityChecker.swift */,
 				31C9C1941E1D392800DD5842 /* SceneRenderer.swift */,
 				31D29EA61E5343D500835A4B /* DirectionRenderer.swift */,
 				31D29EA81E534A2C00835A4B /* PoiRenderer.swift */,
-				31C9C1981E1FDA4900DD5842 /* CameraManager.swift */,
 				31ACCB011E2522A900AFDC09 /* Poi.swift */,
-				31E3252F1E38EDBD000203EC /* LocationManager.swift */,
-				31E325311E3A3AC1000203EC /* Util.swift */,
-				3153DE941E72E0E700CF8060 /* VisiblityChecker.swift */,
 				31223BE01E3CD4EF009874ED /* Label.swift */,
+				31E325311E3A3AC1000203EC /* Util.swift */,
 				31D29EA41E45AC2000835A4B /* FileUtil.swift */,
-				31B423A51E607F90002D2582 /* CustomButton.swift */,
 			);
 			path = Landscape;
 			sourceTree = "<group>";
