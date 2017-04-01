@@ -172,14 +172,20 @@ class VisiblityChecker {
   /// 現在地の標高
   private var cz = 0.0
   
+  /// 気差(0.135とする）を考慮した地球のみなし半径
+  private let earthR = EARTH_R / (1.0 - 0.135)
+  
   /// 距離と可視高さの2次式の係数A
-  private let a = 1.0 / (2.0 * EARTH_R)
+  private var a = 0.0
   
   /// 距離と可視高さの2次式の係数B（現在地の標高により定まる）
   private var b = 0.0
   
   /// 判定対象として扱う最大距離
   private let maxDistance = 400_000.0
+  
+  /// 中間の高さをチェックする範囲（POIまでの距離に対する割合）
+  private let checkRange = 0.02 ... 0.98
   
   /// メッシュ標高の読み込みが済んでいるか
   var memLoaded = false
@@ -194,7 +200,7 @@ class VisiblityChecker {
 
       (cx, cy) = Mesh.coordinate(of: coord)
       cz = currentLocation!.altitude
-      b = -sqrt(2.0 * EARTH_R * cz) / EARTH_R
+      b = -sqrt(2.0 * cz / earthR)
       
       print(String(format:"現在地: %@(%.3f/%.3f) H=%.0f",
                    Mesh.code(x: Int(round(cx)), y: Int(round(cy))),
@@ -210,6 +216,7 @@ class VisiblityChecker {
       Mesh.loadMem()
       self.memLoaded = true
     }
+    a = 1.0 / (2.0 * earthR)
   }
   
   /// 指定のPOIの方位と距離を、現在地からの値に更新する
@@ -259,16 +266,19 @@ class VisiblityChecker {
       // 現在地とPOIの間のメッシュX座標
       var mxs: [Int]
       if vx > 0.0 {
-        let sx = Int(ceil(cx + 1.0))
-        let ex = Int(floor(px - 1.0))
+        let sx = Int(ceil(cx))
+        let ex = Int(floor(px))
         mxs = Array(sx ... ex)
       } else {
-        let sx = Int(floor(cx - 1.0))
-        let ex = Int(ceil(px + 1.0))
+        let sx = Int(floor(cx))
+        let ex = Int(ceil(px))
         mxs = (ex ... sx).reversed()
       }
       for mx in mxs {
         let ra = (Double(mx) - cx) / vx
+        if !checkRange.contains(ra) {
+          continue;
+        }
         let my = Int(round(ra * vy + cy))
         // 各座標のメッシュ高さ
         let mz = Mesh.height(x: mx, y: my)
@@ -289,16 +299,19 @@ class VisiblityChecker {
       // 現在地とPOIの間のメッシュY座標
       var mys: [Int]
       if vy > 0.0 {
-        let sy = Int(ceil(cy + 1.0))
-        let ey = Int(floor(py - 1.0))
+        let sy = Int(ceil(cy))
+        let ey = Int(floor(py))
         mys = Array(sy ... ey)
       } else {
-        let sy = Int(floor(cy - 1.0))
-        let ey = Int(ceil(py + 1.0))
+        let sy = Int(floor(cy))
+        let ey = Int(ceil(py))
         mys = (ey ... sy).reversed()
       }
       for my in mys {
         let ra = (Double(my) - cy) / vy
+        if !checkRange.contains(ra) {
+          continue;
+        }
         let mx = Int(round(ra * vx + cx))
         // 各座標のメッシュ高さ
         let mz = Mesh.height(x: mx, y: my)

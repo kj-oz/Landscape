@@ -191,10 +191,9 @@ class PoiManager {
   var currentPosition: CLLocation? {
     didSet {
       let position = currentPosition!
-      print(String(format:"現在地: %.3f / %.3f / %.0f",
-                   position.coordinate.longitude, position.coordinate.latitude, position.altitude))
       checker.currentLocation = position
       if checker.memLoaded {
+        let start = Date()
         candidates = pois.filter({
           checker.calcVector(of: $0)
           if $0.type == .userDefined {
@@ -202,7 +201,7 @@ class PoiManager {
           }
           return checker.checkVisibility(of: $0)
         })
-        print("elevation filter: \(candidates.count)")
+        print("checkVisibility:\(Date().timeIntervalSince(start))")
         notLoaded = false
       } else {
         notLoaded = true
