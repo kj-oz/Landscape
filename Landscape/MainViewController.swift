@@ -161,7 +161,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   @IBAction func targetTapped(_ sender: Any) {
     targetActionType = targetActionType == .imageZoom ? .fieldAngleAdjust : .imageZoom
     updateButtonStatus()
-    print("○ Target Button tapped: \(targetButton.title(for: .normal))")
+    print("○ Target Button tapped: \(String(describing: targetButton.title(for: .normal)))")
   }
   
   // プラスボタンタップ時

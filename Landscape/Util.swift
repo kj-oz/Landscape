@@ -57,7 +57,7 @@ extension UIInterfaceOrientation {
 /// - Parameter degree: 角度（°）
 /// - Returns: ラジアン
 func toRadian(_ degree: Double) -> Double {
-  return degree / 180 * M_PI
+  return degree / 180 * Double.pi
 }
 
 /// ラジアンを角度（°）に変換する
@@ -65,7 +65,7 @@ func toRadian(_ degree: Double) -> Double {
 /// - Parameter radian: ラジアン
 /// - Returns: 角度（°）
 func toDegree(_ radian: Double) -> Double {
-  return radian * 180 / M_PI
+  return radian * 180 / Double.pi
 }
 
 /// 地球の長径

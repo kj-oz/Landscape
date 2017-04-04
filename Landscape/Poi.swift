@@ -192,29 +192,20 @@ class PoiManager {
     didSet {
       let position = currentPosition!
       checker.currentLocation = position
-      if checker.memLoaded {
-        let start = Date()
-        candidates = pois.filter({
-          checker.calcVector(of: $0)
-          if $0.type == .userDefined {
-            return true
-          }
-          return checker.checkVisibility(of: $0)
-        })
-        print("checkVisibility:\(Date().timeIntervalSince(start))")
-        notLoaded = false
-      } else {
-        notLoaded = true
-      }
+      let start = Date()
+      candidates = pois.filter({
+        checker.calcVector(of: $0)
+        if $0.type == .userDefined {
+          return true
+        }
+        return checker.checkVisibility(of: $0)
+      })
+      print("checkVisibility:\(Date().timeIntervalSince(start))")
     }
   }
   
   /// POIが現在地から見えるかどうかを判定するオブジェクト
   private var checker: VisiblityChecker
-  
-  /// 地形データが未ロードかどうか（未ロード=true、ロード済み=false）
-  private var notLoaded = false
-  
   
   /// コンストラクタ
   init() {
@@ -229,9 +220,6 @@ class PoiManager {
   ///   - endAzimuth: 画面右端の方位
   /// - Returns: 現在地から見える可能性のあるPOIの中で指定の角度の間に入っているPOIの配列
   func getVisiblePois(startAzimuth: Double, endAzimuth: Double) -> [Poi] {
-    if notLoaded {
-      currentPosition = checker.currentLocation!
-    }
     let filtered = candidates.filter({ $0.isInside(fromAzimuth: startAzimuth, toAzimuth: endAzimuth) })
     return filtered
   }

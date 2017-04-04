@@ -10,20 +10,26 @@ import Foundation
 import CoreLocation
 import Dispatch
 
-/// 3次メッシュの高さを管理する構造体
+/// 100mメッシュの高さを管理する構造体
 struct Mesh {
   
+  /// 1次メッシュX方向のメッシュ数
+  private static let numM1X = 900
+  
+  /// 1次メッシュY方向のメッシュ数
+  private static let numM1Y = 600
+  
   /// メッシュのX方向（経度）幅
-  static let xPitch = 1 / 80.0
+  static let xPitch = 1 / Double(numM1X)
   
   /// メッシュのY方向（緯度）幅
-  static let yPitch = 1 / 120.0
+  static let yPitch = 1 / 1.5 / Double(numM1Y)
   
   /// メッシュ座標系の原点の1次メッシュコード（4629）のX成分
-  static let originX = 29
+  static let originM1X = 29
   
   /// メッシュ座標系の原点の1次メッシュコード（4629）のY成分
-  static let originY = 46
+  static let originM1Y = 46
   
   /// 原点の経度
   static let originLng = 129.0 + xPitch * 0.5
@@ -32,22 +38,19 @@ struct Mesh {
   static let originLat = 46.0 * 2.0 / 3.0 + yPitch * 0.5
   
   /// 右上メッシュの1次メッシュコード（6845）のX成分
-  private static let maxX = 45
+  private static let maxM1X = 45
   
   /// 右上メッシュの1次メッシュコード（6845）のY成分
-  private static let maxY = 68
-  
-  /// 1次メッシュ各辺の3次メッシュ数
-  private static let num3 = 80
+  private static let maxM1Y = 68
   
   /// メッシュのX方向の数
-  private static let numX = (maxX - originX + 1) * num3
+  private static let numX = (maxM1X - originM1X + 1) * numM1X
   
   /// メッシュのY方向の数
-  static let numY = (maxY - originY + 1) * num3
+  static let numY = (maxM1Y - originM1Y + 1) * numM1Y
   
-  /// 各3次メッシュの標高（平均高さと最高高さの平均）
-  private static var _heights: [Int16] = []
+  /// 各メッシュの標高（最高高さ）、1次メッシュごとの配列に保持
+  private static var _heights: [String:[Int16]] = [:]
   
   
   /// 与えられた点のメッシュ座標系における実数座標
@@ -67,87 +70,38 @@ struct Mesh {
   ///   - y: 座標のY方向成分
   /// - Returns: 標高
   static func height(x: Int, y: Int) -> Double {
-    return Double(_heights[y * numX + x])
-  }
-  
-  /// メッシュ標高データを読み込む
-  /// 各メッシュの標高は、最高高さと平均高さの平均値とする
-  static func loadMem() {
-    let start = Date()
-    let docDir = FileUtil.documentDir
-    let csvPath = docDir.appending("/mem.csv")
-    let binPath = docDir.appending("/mem.bin")
-    let binLength = MemoryLayout<Int16>.size * numX * numY
-    
-    _heights = Array(repeating: Int16(0), count: numX * numY)
-
-    let fm = FileManager.default
-    if fm.fileExists(atPath: csvPath) {
-      let lines = FileUtil.readLines(path: csvPath)
-      for line in lines {
-        let parts = line.components(separatedBy: ",")
-        let (mx, my) = index(of: parts[0])
-        
-        // 高さは、最高高さと平均高さの平均
-        let h = (Double(parts[1])! + Double(parts[2])!) / 2.0
-        _heights[my * numX + mx] = Int16(h)
-      }
-      print("loadMem(csv):\(Date().timeIntervalSince(start))")
-      
-      let data = NSMutableData(bytes: &_heights, length: binLength)
-      data.write(toFile: binPath, atomically: true)
-      try? fm.removeItem(atPath: csvPath)
-    } else {
-      let data = NSData(contentsOfFile: binPath)
-      if let data = data {
-        data.getBytes(&_heights, length: binLength)
-      }
-      print("loadMem(bin):\(Date().timeIntervalSince(start))")
+    if x < 0 || y < 0 || x >= numX || y >= numY {
+      return 0.0
     }
+    let mx = x / numM1X
+    let my = y / numM1Y
+    let code = String((my + originM1Y) * 100 + (mx + originM1X))
+    var mesh1 = _heights[code]
+    if mesh1 == nil {
+      mesh1 = loadMesh1(code: code)
+      _heights[code] = mesh1
+    }
+    
+    let dx = x - mx * numM1X
+    let dy = y - my * numM1Y
+    return Double(mesh1![dy * numM1X + dx]) / 10.0
   }
   
-  /// 与えられたメッシュコードに対するメッシュ座標（整数）を得る
+  /// 指定の1次メッシュの標高データを読み込む
   ///
-  /// - Parameter code: メッシュコード
-  /// - Returns: 整数座標
-  private static func index(of code: String) -> (Int, Int) {
-    var startIndex = code.startIndex
-    var endIndex = code.index(startIndex, offsetBy: 2)
-    let y1 = Int(code.substring(with: startIndex ..< endIndex))!
-    startIndex = endIndex
-    endIndex = code.index(startIndex, offsetBy: 2)
-    let x1 = Int(code.substring(with: startIndex ..< endIndex))!
-    startIndex = endIndex
-    endIndex = code.index(startIndex, offsetBy: 1)
-    let y2 = Int(code.substring(with: startIndex ..< endIndex))!
-    startIndex = endIndex
-    endIndex = code.index(startIndex, offsetBy: 1)
-    let x2 = Int(code.substring(with: startIndex ..< endIndex))!
-    startIndex = endIndex
-    endIndex = code.index(startIndex, offsetBy: 1)
-    let y3 = Int(code.substring(with: startIndex ..< endIndex))!
-    startIndex = endIndex
-    endIndex = code.index(startIndex, offsetBy: 1)
-    let x3 = Int(code.substring(with: startIndex ..< endIndex))!
-    let x = (x1 - originX) * 80 + x2 * 10 + x3
-    let y = (y1 - originY) * 80 + y2 * 10 + y3
-    return (x, y)
-  }
-  
-  /// 与えられた整数座標に対するメッシュコードを得る
-  ///
-  /// - Parameters:
-  ///   - x: 座標のX方向成分
-  ///   - y: 座標のY方向成分
-  /// - Returns: メッシュコード
-  static func code(x: Int, y: Int) -> String {
-    let x3 = x % 10
-    let x2 = x / 10 % 8
-    let x1 = x / 80 + originX
-    let y3 = y % 10
-    let y2 = y / 10 % 8
-    let y1 = y / 80 + originY
-    return String(format: "%d%d%d%d%d%d", y1, x1, y2, x2, y3, x3)
+  /// - Parameter code: 1次メッシュコード
+  /// - Returns: 標高データ配列
+  static func loadMesh1(code: String) -> [Int16] {
+    let docDir = FileUtil.documentDir
+    let binPath = docDir.appending("/\(code)_MAX_10.bin")
+    var result = Array(repeating: Int16(0), count: numM1X * numM1Y)
+    
+    let data = NSData(contentsOfFile: binPath)
+    if let data = data {
+      let binLength = MemoryLayout<Int16>.size * numM1X * numM1Y
+      data.getBytes(&result, length: binLength)
+    }
+    return result
   }
 }
 
@@ -187,9 +141,6 @@ class VisiblityChecker {
   /// 中間の高さをチェックする範囲（POIまでの距離に対する割合）
   private let checkRange = 0.02 ... 0.98
   
-  /// メッシュ標高の読み込みが済んでいるか
-  var memLoaded = false
-  
   /// 現在地
   var currentLocation: CLLocation? {
     didSet {
@@ -199,23 +150,17 @@ class VisiblityChecker {
       cos_y1 = cos(y1)
 
       (cx, cy) = Mesh.coordinate(of: coord)
-      cz = currentLocation!.altitude
+      cz = max(currentLocation!.altitude, 0.0)
       b = -sqrt(2.0 * cz / earthR)
       
-      print(String(format:"現在地: %@(%.3f/%.3f) H=%.0f",
-                   Mesh.code(x: Int(round(cx)), y: Int(round(cy))),
+      print(String(format:"現在地: %.3f/%.3f H=%.0f",
                    coord.longitude, coord.latitude, currentLocation!.altitude))
     }
   }
   
   
   /// コンストラクタ
-  /// 非同期でメッシュ標高を読み込む
   init() {
-    DispatchQueue.global(qos: .userInitiated).async { [unowned self] in
-      Mesh.loadMem()
-      self.memLoaded = true
-    }
     a = 1.0 / (2.0 * earthR)
   }
   
@@ -258,6 +203,8 @@ class VisiblityChecker {
     let (px, py) = Mesh.coordinate(of: poi.location)
     let vx = px - cx
     let vy = py - cy
+    let ph = Mesh.height(x: Int(round(px)), y: Int(round(py)))
+    print(String(format:"Mesh:%.0f, Poi:%.0f", ph, poi.height))
     
     let bb = (poi.height - minH) / d + b
     let hor = (45.0 ... 135.0).contains(poi.azimuth) || (225.0 ... 315.0).contains(poi.azimuth)
@@ -287,9 +234,9 @@ class VisiblityChecker {
           // POIが見えるためのその座標位置における最大高さ（メッシュ高さがそれ以下なら邪魔をしない）
           let hc = a * md * md + bb * md + cz
           if mz > hc {
-            print(String(format:"\(poi.name),%.0f,%.1f,M,%.3f,%.3f,%@,%.2f,%.0f,%.0f",
+            print(String(format:"\(poi.name),%.0f,%.1f,M,%.3f,%.3f,%.2f,%.0f,%.0f",
               poi.height, poi.distance / 1000.0, poi.location.longitude, poi.location.latitude,
-              Mesh.code(x: mx, y: my), ra, hc, mz))
+              ra, hc, mz))
             return false
           }
         }
@@ -320,9 +267,9 @@ class VisiblityChecker {
           // POIが見えるためのその座標位置における最大高さ（メッシュ高さがそれ以下なら邪魔をしない）
           let hc = a * md * md + bb * md + cz
           if mz > hc {
-            print(String(format:"\(poi.name),%.0f,%.1f,M,%.3f,%.3f,%@,%.2f,%.0f,%.0f",
+            print(String(format:"\(poi.name),%.0f,%.1f,M,%.3f,%.3f,%.2f,%.0f,%.0f",
               poi.height, poi.distance / 1000.0, poi.location.longitude, poi.location.latitude,
-              Mesh.code(x: mx, y: my), ra, hc, mz))
+              ra, hc, mz))
             return false
           }
         }
