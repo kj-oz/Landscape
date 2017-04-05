@@ -26,42 +26,60 @@ class Label {
     [NSFontAttributeName: Label.font]).height + 2 * Label.padding
   
   // ラベルの色（山：高さ1000m以下）
-  private let color0000_1000 = UIColor(red: 0.0, green: 0.8, blue:1.0, alpha: 1).cgColor
+  private let color0000_1000 = UIColor(red: 0.0, green: 0.8, blue: 1.0, alpha: 1).cgColor
   
   // ラベルの色（山：高さ1000〜1500m）
-  private let color1000_1500 = UIColor(red: 0.5, green: 1.0, blue:0.8, alpha: 1).cgColor
+  private let color1000_1500 = UIColor(red: 0.5, green: 1.0, blue: 0.8, alpha: 1).cgColor
   
   // ラベルの色（山：高さ1500〜2000m）
-  private let color1500_2000 = UIColor(red: 0.7, green: 1.0, blue:0.1, alpha: 1).cgColor
+  private let color1500_2000 = UIColor(red: 0.7, green: 1.0, blue: 0.1, alpha: 1).cgColor
   
   // ラベルの色（山：高さ2000〜2500m）
-  private let color2000_2500 = UIColor(red: 1.0, green: 0.9, blue:0.1, alpha: 1).cgColor
+  private let color2000_2500 = UIColor(red: 1.0, green: 0.9, blue: 0.1, alpha: 1).cgColor
   
   // ラベルの色（山：高さ2500〜3000m）
-  private let color2500_3000 = UIColor(red: 1.0, green: 0.6, blue:0.2, alpha: 1).cgColor
+  private let color2500_3000 = UIColor(red: 1.0, green: 0.6, blue: 0.2, alpha: 1).cgColor
   
   // ラベルの色（山：高さ3000m以上）
-  private let color3000_ = UIColor(red: 0.8, green: 0.4, blue:0.2, alpha: 1).cgColor
+  private let color3000_ = UIColor(red: 0.8, green: 0.4, blue: 0.2, alpha: 1).cgColor
+  
+  // ラベルの色（建造物）
+  private let colorBuilding = UIColor(red: 0.8, green: 0.8, blue: 0.8, alpha: 1).cgColor
+  
+  // ラベルの色（都市）
+  private let colorCity = UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1).cgColor
+  
+  // ラベルの色（ユーザー定義）
+  private let colorSpecial = UIColor(red: 1.0, green: 0.0, blue: 1.0, alpha: 1).cgColor
   
   // ラベルの文字色
   private let fontColor = UIColor.black
   
   // ラベルの色
   var color: CGColor {
-    let height = source.height
-    switch height {
-    case 0 ..< 1000:
-      return color0000_1000
-    case 1000 ..< 1500:
-      return color1000_1500
-    case 1500 ..< 2000:
-      return color1500_2000
-    case 2000 ..< 2500:
-      return color2000_2500
-    case 2500 ..< 3000:
-      return color2500_3000
+    switch source.type {
+    case .mountain, .island:
+      let height = source.height
+      switch height {
+      case 0 ..< 1000:
+        return color0000_1000
+      case 1000 ..< 1500:
+        return color1000_1500
+      case 1500 ..< 2000:
+        return color1500_2000
+      case 2000 ..< 2500:
+        return color2000_2500
+      case 2500 ..< 3000:
+        return color2500_3000
+      default:
+        return color3000_
+      }
+    case .building:
+      return colorBuilding
+    case .city:
+      return colorCity
     default:
-      return color3000_
+      return colorSpecial
     }
   }
 

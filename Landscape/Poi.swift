@@ -113,9 +113,6 @@ class Poi: LabelSource {
   /// 種別
   let type: PoiType
   
-  /// 有名な地点かどうか
-  let famous: Bool
-  
   /// 現在地からの方位
   var azimuth = 0.0
   
@@ -141,16 +138,14 @@ class Poi: LabelSource {
   ///   - height: 高さ
   ///   - location: 座標
   ///   - type: 種別
-  ///   - famous: 有名かどうか
   init(name: String, detail: String?, group: PoiGroup?, height: Double,
-       location: CLLocationCoordinate2D, type: PoiType, famous: Bool) {
+       location: CLLocationCoordinate2D, type: PoiType) {
     self.name = name
     self.detail = detail
     self.group = group
     self.height = height
     self.location = location
     self.type = type
-    self.famous = famous
   }
   
   /// POIが与えられた方位の範囲に含まれるかどうかを判定する
@@ -207,6 +202,9 @@ class PoiManager {
   /// POIが現在地から見えるかどうかを判定するオブジェクト
   private var checker: VisiblityChecker
   
+  /// 都市の場合のみなし高さ
+  private let cityH = 100.0
+  
   /// コンストラクタ
   init() {
     checker = VisiblityChecker()
@@ -229,7 +227,7 @@ class PoiManager {
     pois = []
     
     let docDir = FileUtil.documentDir
-    let path = docDir.appending("/mountain.csv")
+    let path = docDir.appending("/POI.csv")
     let lines = FileUtil.readLines(path: path)
     
     var first = true
@@ -238,12 +236,26 @@ class PoiManager {
         first = false
       } else {
         let parts = line.components(separatedBy: ",")
-        if parts[11] == "☓" {
+        if parts[12] == "☓" {
           continue
         }
-        let groupName = parts[5].isEmpty ? nil : parts[5]
-        let height = Double(parts[6])!
         
+        var type: PoiType
+        switch parts[1] {
+        case "山岳":
+          type = .mountain
+        case "島":
+          type = .island
+        case "建造物":
+          type = .building
+        case "都市":
+          type = .city
+        default:
+          type = .userDefined
+        }
+        
+        let groupName = parts[6].isEmpty ? nil : parts[6]
+        let height = (type == .city || type == .userDefined) ? cityH : Double(parts[7])!
         var group: PoiGroup?
         if let groupName = groupName {
           if let g = groups[groupName] {
@@ -256,13 +268,12 @@ class PoiManager {
           }
         }
 
-        let coord = CLLocationCoordinate2D(latitude: CLLocationDegrees(parts[7])!,
-                                           longitude: CLLocationDegrees(parts[8])!)
-        let famous = !parts[11].isEmpty
-        let detail = parts[2] + "," + parts[3] + "," + parts[4] + "," +
-            parts[9] + "," + parts[10] + "," + parts[11]
-        let poi = Poi(name: parts[1], detail: detail, group: group, height: height,
-                      location: coord, type: .mountain, famous: famous)
+        let coord = CLLocationCoordinate2D(latitude: CLLocationDegrees(parts[8])!,
+                                           longitude: CLLocationDegrees(parts[9])!)
+        let detail = parts[3] + "," + parts[4] + "," + parts[5] + "," +
+          parts[10] + "," + parts[11] + "," + parts[12]   // よみ,別名,別名よみ,都道府県,地域,備考
+        let poi = Poi(name: parts[2], detail: detail, group: group, height: height,
+                      location: coord, type: type)
         pois.append(poi)
       }
     }

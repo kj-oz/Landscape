@@ -15,7 +15,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   // ウィンドウ
   var window: UIWindow?
 
-  
   // バックグラウンドへまわるタイミングで呼び出される
   func applicationDidEnterBackground(_ application: UIApplication) {
     let n = Notification(name: Notification.Name(rawValue: "applicationDidEnterBackground"),
