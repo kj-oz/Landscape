@@ -92,12 +92,10 @@ struct Mesh {
   /// - Parameter code: 1次メッシュコード
   /// - Returns: 標高データ配列
   static func loadMesh1(code: String) -> [Int16] {
-    let docDir = FileUtil.documentDir
-    let binPath = docDir.appending("/\(code)_MAX_10.bin")
+    let binPath = Bundle.main.path(forResource: "/\(code)_MAX_10", ofType: "bin", inDirectory: "Data")
     var result = Array(repeating: Int16(0), count: numM1X * numM1Y)
     
-    let data = NSData(contentsOfFile: binPath)
-    if let data = data {
+    if let path = binPath, let data = NSData(contentsOfFile: path) {
       let binLength = MemoryLayout<Int16>.size * numM1X * numM1Y
       data.getBytes(&result, length: binLength)
     }

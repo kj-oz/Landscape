@@ -22,6 +22,7 @@
 		31D29EA51E45AC2000835A4B /* FileUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D29EA41E45AC2000835A4B /* FileUtil.swift */; };
 		31D29EA71E5343D600835A4B /* DirectionRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D29EA61E5343D500835A4B /* DirectionRenderer.swift */; };
 		31D29EA91E534A2C00835A4B /* PoiRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D29EA81E534A2C00835A4B /* PoiRenderer.swift */; };
+		31E23E741E97C8D20035DCC2 /* Data in Resources */ = {isa = PBXBuildFile; fileRef = 31E23E731E97C8D20035DCC2 /* Data */; };
 		31E325301E38EDBD000203EC /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31E3252F1E38EDBD000203EC /* LocationManager.swift */; };
 		31E325321E3A3AC1000203EC /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31E325311E3A3AC1000203EC /* Util.swift */; };
 /* End PBXBuildFile section */
@@ -44,6 +45,7 @@
 		31D29EA41E45AC2000835A4B /* FileUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileUtil.swift; sourceTree = "<group>"; };
 		31D29EA61E5343D500835A4B /* DirectionRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DirectionRenderer.swift; sourceTree = "<group>"; };
 		31D29EA81E534A2C00835A4B /* PoiRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PoiRenderer.swift; sourceTree = "<group>"; };
+		31E23E731E97C8D20035DCC2 /* Data */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Data; sourceTree = "<group>"; };
 		31E3252F1E38EDBD000203EC /* LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		31E325311E3A3AC1000203EC /* Util.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -62,6 +64,7 @@
 		31C9C1741E1D2DD100DD5842 = {
 			isa = PBXGroup;
 			children = (
+				31E23E731E97C8D20035DCC2 /* Data */,
 				31C9C17F1E1D2DD100DD5842 /* Landscape */,
 				31C9C17E1E1D2DD100DD5842 /* Products */,
 			);
@@ -162,6 +165,7 @@
 			files = (
 				31C9C18B1E1D2DD100DD5842 /* LaunchScreen.storyboard in Resources */,
 				31C9C1881E1D2DD100DD5842 /* Assets.xcassets in Resources */,
+				31E23E741E97C8D20035DCC2 /* Data in Resources */,
 				31C9C1861E1D2DD100DD5842 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

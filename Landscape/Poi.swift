@@ -203,7 +203,7 @@ class PoiManager {
   private var checker: VisiblityChecker
   
   /// 都市の場合のみなし高さ
-  private let cityH = 100.0
+  private let cityH = 1000.0
   
   /// コンストラクタ
   init() {
@@ -226,9 +226,8 @@ class PoiManager {
   func loadPois() {
     pois = []
     
-    let docDir = FileUtil.documentDir
-    let path = docDir.appending("/POI.csv")
-    let lines = FileUtil.readLines(path: path)
+    let path = Bundle.main.path(forResource: "POI", ofType: "csv", inDirectory: "Data")
+    let lines = FileUtil.readLines(path: path!)
     
     var first = true
     for line in lines {
