@@ -1,0 +1,59 @@
+id,fa,name
+"iPod1,1",-1,iPod Touch 1th
+"iPod2,1",-1,iPod Touch 2th
+"iPod3,1",-1,iPod Touch 3th
+"iPod4,1",54.5,iPod Touch 4th
+"iPod5,1",57,iPod Touch 5th
+"iPod7,1",57,iPod Touch 6th
+"iPhone1,1",54.5,iPhone 2G
+"iPhone1,2",54.5,iPhone 3G
+"iPhone2,1",54.5,iPhone 3GS
+"iPhone3,1",54.5,iPhone 4
+"iPhone3,2",54.5,iPhone 4
+"iPhone3,3",54.5,iPhone 4
+"iPhone4,1",54.5,iPhone 4S
+"iPhone5,1",57,iPhone 5
+"iPhone5,2",57,iPhone 5
+"iPhone5,3",57,iPhone 5c
+"iPhone5,4",57,iPhone 5c
+"iPhone6,1",62,iPhone 5s
+"iPhone6,2",62,iPhone 5s
+"iPhone7,1",62,iPhone 6 Plus
+"iPhone7,2",62,iPhone 6
+"iPhone8,1",62,iPhone 6S
+"iPhone8,2",62,iPhone 6S Plus
+"iPhone8,4",62,"iPhone SE"""
+"iPhone9,1",62,iPhone 7
+"iPhone9,3",62,iPhone 7
+"iPhone9,2",63,iPhone 7 Plus
+"iPhone9,4",63,iPhone 7 Plus
+"iPad1,1",54.5,iPad 1 
+"iPad2,1",54.5,iPad 2 WiFi
+"iPad2,2",54.5,iPad 2 Cell
+"iPad2,3",54.5,iPad 2 Cell
+"iPad2,4",54.5,iPad 2 WiFi
+"iPad2,5",54.5,iPad Mini WiFi
+"iPad2,6",54.5,iPad Mini Cell
+"iPad2,7",54.5,iPad Mini Cell
+"iPad3,1",54.5,iPad 3 WiFi
+"iPad3,2",54.5,iPad 3 Cell
+"iPad3,3",54.5,iPad 3 Cell
+"iPad3,4",54.5,iPad 4 WiFi
+"iPad3,5",54.5,iPad 4 Cell
+"iPad3,6",54.5,iPad 4 Cell
+"iPad4,1",57,iPad Air WiFi
+"iPad4,2",57,iPad Air Cell
+"iPad4,4",57,iPad Mini 2 WiFi
+"iPad4,5",57,iPad Mini 2 Cell
+"iPad4,6",57,iPad Mini 2 China
+"iPad4,7",62,iPad Mini 3 WiFi
+"iPad4,8",62,iPad Mini 3 Cell
+"iPad4,9",62,iPad Mini 3 China
+"iPad5,1",62,iPad Mini 4 WiFi
+"iPad5,2",62,iPad Mini 4 Cell
+"iPad5,3",62,iPad Air 2 WiFi
+"iPad5,4",62,iPad Air 2 Cell
+"iPad6,3",63,iPad Pro 9.7inch WiFi
+"iPad6,4",63,iPad Pro 9.7inch Cell
+"iPad6,7",63,iPad Pro 12.9inch WiFi
+"iPad6,8",63,iPad Pro 12.9inch Cell

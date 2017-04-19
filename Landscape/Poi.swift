@@ -235,7 +235,7 @@ class PoiManager {
         first = false
       } else {
         let parts = line.components(separatedBy: ",")
-        if parts[12] == "☓" {
+        if parts[12] == "X" {
           continue
         }
         
