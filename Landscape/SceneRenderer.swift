@@ -196,6 +196,16 @@ class SceneRenderer: NSObject, CALayerDelegate {
     }
   }
   
+  /// 最低見上げ角
+  var minimumElevation: Double {
+    get {
+      return poiManager.minimumElevation
+    }
+    set {
+      poiManager.minimumElevation = newValue
+      layer.setNeedsDisplay()
+    }
+  }
   
   /// コンストラクタ
   ///

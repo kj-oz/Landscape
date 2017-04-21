@@ -187,18 +187,21 @@ class PoiManager {
     didSet {
       let position = currentPosition!
       checker.currentLocation = position
-      let start = Date()
-      candidates = pois.filter({
-        checker.calcVector(of: $0)
-        if $0.type == .userDefined {
-          return true
-        }
-        return checker.checkVisibility(of: $0)
-      })
-      print("checkVisibility:\(Date().timeIntervalSince(start))")
+      resetCandidates()
     }
   }
   
+  /// 最低見上げ角
+  var minimumElevation: Double {
+    get {
+      return checker.minimumElevation
+    }
+    set {
+      checker.minimumElevation = newValue
+      resetCandidates()
+    }
+  }
+
   /// POIが現在地から見えるかどうかを判定するオブジェクト
   private var checker: VisiblityChecker
   
@@ -209,6 +212,19 @@ class PoiManager {
   init() {
     checker = VisiblityChecker()
     loadPois()
+  }
+  
+  /// 何らかの値の変化に応じて、距離・障害物的に見えるPOIの一覧を更新する
+  func resetCandidates() {
+    let start = Date()
+    candidates = pois.filter({
+      checker.calcVector(of: $0)
+      if $0.type == .userDefined {
+        return true
+      }
+      return checker.checkVisibility(of: $0)
+    })
+    print("checkVisibility:\(Date().timeIntervalSince(start))")
   }
   
   /// POIの中から現在地から見える可能性のあるものだけを抜き出す

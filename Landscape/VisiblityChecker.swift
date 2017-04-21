@@ -157,7 +157,7 @@ class VisiblityChecker {
   }
   
   /// 最小限の（可視部分の）見上げ角
-  var minElevation = 0.001
+  var minimumElevation = 0.001
   
   
   /// コンストラクタ
@@ -194,7 +194,7 @@ class VisiblityChecker {
     }
     
     // 間に障害物がない場合の最低可視高さ
-    let minH = a * d * d + (b + minElevation) * d + cz
+    let minH = a * d * d + (b + minimumElevation) * d + cz
     if poi.height < minH {
       print(String(format:"\(poi.name),%.0f,%.1f,H,%.0f", poi.height, poi.distance / 1000.0, minH))
       return false
@@ -233,7 +233,7 @@ class VisiblityChecker {
         if mz > 0.0 {
           let md = poi.distance * ra
           // POIが見えるためのその座標位置における最大高さ（メッシュ高さがそれ以下なら邪魔をしない）
-          let hc = a * md * md + (bb - minElevation) * md + cz
+          let hc = a * md * md + (bb - minimumElevation) * md + cz
           if mz > hc {
             print(String(format:"\(poi.name),%.0f,%.1f,M,%.3f,%.3f,%.2f,%.0f,%.0f",
               poi.height, poi.distance / 1000.0, poi.location.longitude, poi.location.latitude,
@@ -266,7 +266,7 @@ class VisiblityChecker {
         if mz > 0.0 {
           let md = poi.distance * ra
           // POIが見えるためのその座標位置における最大高さ（メッシュ高さがそれ以下なら邪魔をしない）
-          let hc = a * md * md + (bb - minElevation) * md + cz
+          let hc = a * md * md + (bb - minimumElevation) * md + cz
           if mz > hc {
             print(String(format:"\(poi.name),%.0f,%.1f,M,%.3f,%.3f,%.2f,%.0f,%.0f",
               poi.height, poi.distance / 1000.0, poi.location.longitude, poi.location.latitude,

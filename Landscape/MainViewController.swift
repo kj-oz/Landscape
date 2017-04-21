@@ -27,15 +27,19 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   /// - imageZoom           画面のズーム
   /// - fieldAngleAdjust    画角の調整
   enum TargetActionType {
-    case imageZoom
-    case fieldAngleAdjust
+    case zoom
+    case fieldAngle
+    case minimumElevation
   }
   
   /// ズームボタン押下時の処理
-  private var targetActionType: TargetActionType = .imageZoom
+  private var targetActionType: TargetActionType = .zoom
   
   /// 画角調整時にボタン1タップで変更する画角
   private let fieldAngleDelta = 1.0
+  
+  /// 最低見上げ角調整時にボタン1タップで変更する角度（tangent）
+  private let elevationDelta = 0.0001
   
   /// ズーム値
   private var zoom: Int {
@@ -55,6 +59,16 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     }
     set {
       renderer.fieldAngle = newValue
+    }
+  }
+  
+  /// 最低見上げ角
+  var minimumElevation: Double {
+    get {
+      return renderer.minimumElevation
+    }
+    set {
+      renderer.minimumElevation = newValue
     }
   }
   
@@ -159,17 +173,27 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   
   // 処理切り替えボタンタップ時
   @IBAction func targetTapped(_ sender: Any) {
-    targetActionType = targetActionType == .imageZoom ? .fieldAngleAdjust : .imageZoom
+    switch targetActionType {
+    case .zoom:
+      targetActionType = .fieldAngle
+    case .fieldAngle:
+      targetActionType = .minimumElevation
+    case .minimumElevation:
+      targetActionType = .zoom
+    }
     updateButtonStatus()
     print("○ Target Button tapped: \(String(describing: targetButton.title(for: .normal)))")
   }
   
   // プラスボタンタップ時
   @IBAction func zoominTapped(_ sender: Any) {
-    if targetActionType == .imageZoom {
+    switch targetActionType {
+    case .zoom:
       UIView.animate(withDuration: 0.5, animations: { self.zoom *= 2 })
-    } else {
+    case .fieldAngle:
       fieldAngle += fieldAngleDelta
+    case .minimumElevation:
+      minimumElevation += elevationDelta
     }
     updateButtonStatus()
     print("○ Zoomin Button tapped")
@@ -177,10 +201,13 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
 
   // マイナスボタンタップ時
   @IBAction func zoomoutTapped(_ sender: Any) {
-    if targetActionType == .imageZoom {
+    switch targetActionType {
+    case .zoom:
       UIView.animate(withDuration: 0.5, animations: { self.zoom /= 2 })
-    } else {
+    case .fieldAngle:
       fieldAngle -= fieldAngleDelta
+    case .minimumElevation:
+      minimumElevation -= elevationDelta
     }
     updateButtonStatus()
     print("○ Zoomout Button tapped")
@@ -188,15 +215,20 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   
   // 各種ボタンの状態の更新
   private func updateButtonStatus() {
-    if targetActionType == .imageZoom {
+    switch targetActionType {
+    case .zoom:
       let maxZoom = Int(NSDecimalNumber(decimal: pow(2, Int(log2(cameraManager.maxZoom)))))
       zoomoutButton.isEnabled = zoom > 1
       zoominButton.isEnabled = zoom < maxZoom
       targetButton.setTitle("ズーム：\(zoom) 倍", for: .normal)
-    } else {
+    case .fieldAngle:
       zoomoutButton.isEnabled = true
       zoominButton.isEnabled = true
       targetButton.setTitle(String(format: "水平画角：%.1f°", fieldAngle), for: .normal)
+    case .minimumElevation:
+      zoomoutButton.isEnabled = true
+      zoominButton.isEnabled = true
+      targetButton.setTitle(String(format: "最低仰角：%.2f%%", minimumElevation * 100.0), for: .normal)
     }
   }
   
