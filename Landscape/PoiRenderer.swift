@@ -31,10 +31,10 @@ class PoiRenderer {
   private var rowCountMax = 0
   
   /// ラベルの縦向き時の最大行数
-  private let rowCountV = 7
+  private let rowCountV = 6
   
   /// ラベルの横向き時の最大行数
-  private let rowCountH = 5
+  private let rowCountH = 4
   
   /// ラベルの行
   private var rows: [LabelRow] = []
@@ -67,7 +67,7 @@ class PoiRenderer {
   /// - Parameter params: 描画用パラメータ
   func setViewParameter(_ params: RenderingParams) {
     rowCountMax = params.isPortrait ? rowCountV : rowCountH
-    leadLinePointHeight = params.height * 0.45
+    leadLinePointHeight = params.height * 0.40
   }
   
   /// 画面がタップされた際に呼び出される
