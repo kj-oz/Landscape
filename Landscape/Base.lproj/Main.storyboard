@@ -108,6 +108,29 @@
                                     <action selector="zoomoutTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="gXw-f1-6yK"/>
                                 </connections>
                             </button>
+                            <button contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qJ3-Xv-B6o" customClass="CustomButton" customModule="Landscape" customModuleProvider="target">
+                                <rect key="frame" x="11" y="593" width="33" height="33"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="33" id="q1K-xw-tFN"/>
+                                    <constraint firstAttribute="width" constant="33" id="x9K-Ah-o0g"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="HelveticaNeue-Bold" family="Helvetica Neue" pointSize="22"/>
+                                <state key="normal" title="i">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
+                                        <real key="value" value="17"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="color" keyPath="borderColor">
+                                        <color key="value" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="borderWidth">
+                                        <real key="value" value="2"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="0.5" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
@@ -116,10 +139,12 @@
                             <constraint firstAttribute="trailing" secondItem="1cN-A0-bnU" secondAttribute="trailing" constant="11" id="EcR-9n-7W8"/>
                             <constraint firstItem="TKp-rf-c0o" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="Ice-AI-SBG"/>
                             <constraint firstAttribute="trailing" secondItem="5bh-nF-7FU" secondAttribute="trailing" constant="77" id="YV7-C3-WOq"/>
+                            <constraint firstAttribute="bottom" secondItem="qJ3-Xv-B6o" secondAttribute="bottom" constant="41" id="feT-3r-vfr"/>
                             <constraint firstAttribute="trailing" secondItem="hOl-df-sJS" secondAttribute="trailing" constant="11" id="iDE-2Q-ge8"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="5bh-nF-7FU" secondAttribute="bottom" constant="41" id="jBL-d1-8c8"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="xAG-EH-e1F" secondAttribute="bottom" id="jkt-hX-sVl"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="hOl-df-sJS" secondAttribute="bottom" constant="41" id="jzL-qk-aqQ"/>
+                            <constraint firstItem="qJ3-Xv-B6o" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="11" id="lhk-Fx-0EL"/>
                             <constraint firstItem="xAG-EH-e1F" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="mvE-yd-pLY"/>
                             <constraint firstAttribute="trailing" secondItem="TKp-rf-c0o" secondAttribute="trailing" id="nbS-Xb-yRt"/>
                             <constraint firstAttribute="bottom" secondItem="TKp-rf-c0o" secondAttribute="bottom" id="rgM-Ss-eyN"/>

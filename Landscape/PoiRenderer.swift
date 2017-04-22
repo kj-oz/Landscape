@@ -265,13 +265,13 @@ class PoiRenderer {
     private let sentenceFont = UIFont.systemFont(ofSize: 14)
     
     /// POIの情報ボックスの高さ（縦向き時）
-    private let poiHeightP: CGFloat = 155
+    private let poiHeightP: CGFloat = 135
     
     /// 現在地の情報ボックスの高さ（縦向き時）
-    private let locationHeightP: CGFloat = 90
+    private let locationHeightP: CGFloat = 70
     
     /// 情報ボックスの底部の画面下端からの距離（縦向き時）
-    private let boxBottomP: CGFloat = 160
+    private let boxBottomP: CGFloat = 151
     
     /// POIの情報ボックスの高さ（横向き時）
     private let poiHeightL: CGFloat = 120
@@ -280,13 +280,16 @@ class PoiRenderer {
     private let locationHeightL: CGFloat = 70
 
     /// 情報ボックスの底部の画面下端からの距離（横向き時）
-    private let boxBottomL: CGFloat = 50
+    private let boxBottomL: CGFloat = 41
     
     /// 情報ボックスと画面左右端との距離
-    private let boxMargin: CGFloat = 20
+    private let boxMargin: CGFloat = 11
     
     /// 情報ボックスの右端から画面右端までの距離（横向き時）
-    private let boxRightMarginL: CGFloat = 218
+    private let boxRightMarginL: CGFloat = 143
+    
+    /// 情報ボックスの左端から画面左端までの距離（横向き時）
+    private let boxLefttMarginL: CGFloat = 55
     
     /// ボックスと中のフォントとの距離
     private let boxSpacing: CGFloat = 5
@@ -319,9 +322,9 @@ class PoiRenderer {
         itemSeparator = "\n　　　　　"
       } else {
         y = params.height - (boxBottomL + poiHeightL)
-        x = boxMargin
+        x = boxLefttMarginL
         height = poiHeightL
-        width = params.width - (boxMargin + boxRightMarginL)
+        width = params.width - (x + boxRightMarginL)
         itemSeparator = "　"
       }
       
@@ -346,17 +349,17 @@ class PoiRenderer {
       switch poi.type {
       case .building:
         string += "高さ　　：\(String(format: "%.0f", poi.height)) m\n"
-        string += "緯度経度：北緯 \(String(format: "%.5f", poi.location.latitude)) 度" + itemSeparator
-        string += "東経 \(String(format: "%.5f", poi.location.longitude)) 度\n"
+        string += "緯度経度：N \(String(format: "%.5f", poi.location.latitude))° "
+        string += "E \(String(format: "%.5f", poi.location.longitude))°\n"
         string += "所在地　　：\(details[3])\(details[4])\n"
       case .city:
-        string += "緯度経度：北緯 \(String(format: "%.5f", poi.location.latitude)) 度" + itemSeparator
-        string += "東経 \(String(format: "%.5f", poi.location.longitude)) 度\n"
+        string += "緯度経度：N \(String(format: "%.5f", poi.location.latitude))° "
+        string += "E \(String(format: "%.5f", poi.location.longitude))°\n"
         string += "都道府県　　：\(details[3])）\n"
       default:
         string += "標高　　：\(String(format: "%.0f", poi.height)) m\n"
-        string += "緯度経度：北緯 \(String(format: "%.5f", poi.location.latitude)) 度" + itemSeparator
-        string += "東経 \(String(format: "%.5f", poi.location.longitude)) 度\n"
+        string += "緯度経度：N \(String(format: "%.5f", poi.location.latitude))° "
+        string += "E \(String(format: "%.5f", poi.location.longitude))°\n"
         string += "山域　　：\(details[4])" + itemSeparator
         string += "（\(details[3])）\n"
       }
@@ -386,20 +389,17 @@ class PoiRenderer {
       let x: CGFloat
       let height: CGFloat
       let width: CGFloat
-      let itemSeparator: String
       
       if params.isPortrait {
         y = params.height - (boxBottomP + locationHeightP)
         x = boxMargin
         height = locationHeightP
         width = params.width - boxMargin * 2
-        itemSeparator = "\n　　　　　"
       } else {
         y = params.height - (boxBottomL + locationHeightL)
-        x = boxMargin
+        x = boxLefttMarginL
         height = locationHeightL
-        width = params.width - (boxMargin + boxRightMarginL)
-        itemSeparator = "　"
+        width = params.width - (x + boxRightMarginL)
       }
       
       let rect = CGRect(x: x, y: y, width: width, height: height)
@@ -416,8 +416,8 @@ class PoiRenderer {
       attrs[NSFontAttributeName] = sentenceFont
       string = ""
       string += "標高　　：\(String(format: "%.0f", Double(location!.altitude))) m\n"
-      string += "緯度経度：北緯 \(String(format: "%.5f", location!.coordinate.latitude)) 度" + itemSeparator
-      string += "東経 \(String(format: "%.5f", location!.coordinate.longitude)) 度\n"
+      string += "緯度経度：N \(String(format: "%.5f", location!.coordinate.latitude))° "
+      string += "E \(String(format: "%.5f", location!.coordinate.longitude))°\n"
       string.draw(with: CGRect(x: x + boxSpacing + sentenceIndent,
                                y: y + titleHeight + boxSpacing * 2,
                                width: width - boxSpacing * 2 - sentenceIndent,
