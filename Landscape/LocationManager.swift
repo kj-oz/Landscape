@@ -59,6 +59,11 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
       
       startLocationService()
       startHeadingService()
+    } else {
+      let ll = CLLocationCoordinate2D(latitude: 35.9577729, longitude: 139.5993176)
+      let loc = CLLocation(coordinate: ll, altitude: 2900.0, horizontalAccuracy: 1.0, verticalAccuracy: 1.0, timestamp: Date())
+      renderer.updateLocation(location: loc)
+      renderer.heading = 290.0
     }
   }
   

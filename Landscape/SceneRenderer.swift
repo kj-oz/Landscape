@@ -67,6 +67,7 @@ struct RenderingParams {
   /// 画面のサイズ
   var size:CGSize {
     didSet {
+      print("new size:\(size)")
       w_2 = size.width / 2
       updateFieldAngleBase()
     }
@@ -101,6 +102,7 @@ struct RenderingParams {
   /// - Parameter size: 画面のサイズ（向きはどちらでも良い）
   init(size: CGSize) {
     self.size = size
+
     let h = Double(max(size.width, size.height))
     let v = Double(min(size.width, size.height))
     aspectRatio = v / h
@@ -210,8 +212,8 @@ class SceneRenderer: NSObject, CALayerDelegate {
   /// コンストラクタ
   ///
   /// - Parameter layer: 描画対象レイヤ
-  init(layer: CALayer) {
-    params = RenderingParams(size: layer.frame.size)
+  init(layer: CALayer, size: CGSize) {
+    params = RenderingParams(size: size)
     poiManager = PoiManager()
     directionRenderer = DirectionRenderer()
     poiRenderer = PoiRenderer(poiManager: poiManager)
@@ -219,7 +221,7 @@ class SceneRenderer: NSObject, CALayerDelegate {
     super.init()
     
     layer.delegate = self
-    params.size = layer.frame.size
+    params.size = size
     poiRenderer.setViewParameter(params)
   }
   

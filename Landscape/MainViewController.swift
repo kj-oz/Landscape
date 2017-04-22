@@ -98,7 +98,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     
     // 各種オブジェクトの初期化
     cameraManager = CameraManager(cameraView: cameraView)
-    renderer = SceneRenderer(layer: annotationView.layer)
+    renderer = SceneRenderer(layer: annotationView.layer, size: view.bounds.size)
     locationManager = LocationManager(renderer: renderer)
     
     fieldAngle = renderer.fieldAngle
@@ -116,14 +116,6 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     
-    // カメラセッションの状態を確認
-    if checkCameraService() {
-      cameraManager.startSession()
-    }
-    
-    // 位置情報関係の状態を確認
-    checkLocationService()
-    
     print("frame: \(view.frame.size), bounds: \(view.bounds.size)")
     if UIDevice.current.orientation == UIDeviceOrientation.portrait {
       // 他の向きの場合はTransitイベントが発生するが、Portraitの場合は発生しない
@@ -131,6 +123,20 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     }
 
     updateButtonStatus()
+  }
+  
+  // ビューが画面に表示された直後に呼び出される
+  // アラートはこちらでないと出せない
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    
+    // カメラセッションの状態を確認
+    if checkCameraService() {
+      cameraManager.startSession()
+    }
+    
+    // 位置情報関係の状態を確認
+    checkLocationService()
   }
   
   // ビューが画面から隠される直前に呼び出される
@@ -173,6 +179,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   
   // 処理切り替えボタンタップ時
   @IBAction func targetTapped(_ sender: Any) {
+    Logger.log("MainViewController.targetTapped \(view.bounds.size)")
     switch targetActionType {
     case .zoom:
       targetActionType = .fieldAngle
