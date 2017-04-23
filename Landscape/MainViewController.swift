@@ -73,7 +73,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   }
   
   /// アプリ名称
-  private let appName = "風景ガイド"
+  private let appName = "風景ナビ"
   
   /// カメラのセッションを管理するオブジェクト
   private var cameraManager: CameraManager!
@@ -84,6 +84,8 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   /// 位置情報を管理するオブジェクト
   private var locationManager: LocationManager!
   
+  /// 各種のチェックを実行済みかどうか
+  private var checked = false;
   
   // ビューのロード時に呼び出される
   override func viewDidLoad() {
@@ -137,6 +139,8 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     
     // 位置情報関係の状態を確認
     checkLocationService()
+    
+    checked = true
   }
   
   // ビューが画面から隠される直前に呼び出される
@@ -269,11 +273,15 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
       return true
       
     case .notAuthorized:
-      let message = "\(self.appName)はカメラを使用する許可を与えられていません。\n" + "設定＞プライバシーで許可を与えてください。"
-      showWarning(message: message, requireAuthorization: true)
+      if !checked {
+        let message = "\(self.appName)はカメラを使用する許可を与えられていません。\n" + "設定＞プライバシーで許可を与えてください。"
+        showWarning(message: message, requireAuthorization: true)
+      }
       
     case .configurationFailed:
-      showWarning(message: "カメラ画像を取得できません。")
+      if !checked {
+        showWarning(message: "カメラ画像を取得できません。")
+      }
     }
     return false
   }
@@ -282,11 +290,19 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   private func checkLocationService() {
     // 位置情報関係の状態を確認
     if !locationManager.supportsLocation {
-      showWarning(message: "この端末では位置情報を利用できません。")
+      if !checked {
+        showWarning(message: "この端末では位置情報を利用できません。")
+      }
     } else if !(locationManager.authorizationStatus == .authorizedWhenInUse ||
-      locationManager.authorizationStatus == .authorizedAlways) {
-      let message = "\(self.appName)は位置情報を使用する許可を与えられていません。\n" + "設定＞プライバシーで許可を与えてください。"
-      showWarning(message: message, requireAuthorization: true)
+        locationManager.authorizationStatus == .authorizedAlways) {
+      if !checked {
+        let message = "\(self.appName)は位置情報を使用する許可を与えられていません。\n" + "設定＞プライバシーで許可を与えてください。"
+        showWarning(message: message, requireAuthorization: true)
+      }
     }
+  }
+  
+  @IBAction func exitFromHelp(_ segue: UIStoryboardSegue) {
+    // 何もしない
   }
 }

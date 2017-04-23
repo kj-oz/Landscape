@@ -130,6 +130,9 @@
                                         <real key="value" value="2"/>
                                     </userDefinedRuntimeAttribute>
                                 </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <segue destination="8AG-R4-Hv3" kind="presentation" modalTransitionStyle="flipHorizontal" id="vfK-a5-OOo"/>
+                                </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="0.5" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
@@ -163,6 +166,66 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="117.59999999999999" y="122.78860569715144"/>
+        </scene>
+        <!--風景ナビの使い方-->
+        <scene sceneID="FOT-lB-gFB">
+            <objects>
+                <viewController title="風景ナビの使い方" id="3Un-fI-Y3H" customClass="HelpViewController" customModule="Landscape" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Y1J-2O-zPc"/>
+                        <viewControllerLayoutGuide type="bottom" id="YpW-nT-6BH"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="u5O-Uh-vTc">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <webView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sGd-4I-C2O">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                                <color key="backgroundColor" red="0.36078431370000003" green="0.38823529410000002" blue="0.4039215686" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <dataDetectorType key="dataDetectorTypes"/>
+                            </webView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="sGd-4I-C2O" firstAttribute="top" secondItem="u5O-Uh-vTc" secondAttribute="top" id="LrQ-eo-O53"/>
+                            <constraint firstAttribute="trailing" secondItem="sGd-4I-C2O" secondAttribute="trailing" id="Mg6-M0-3mQ"/>
+                            <constraint firstItem="YpW-nT-6BH" firstAttribute="top" secondItem="sGd-4I-C2O" secondAttribute="bottom" id="bQX-hs-bwY"/>
+                            <constraint firstItem="sGd-4I-C2O" firstAttribute="leading" secondItem="u5O-Uh-vTc" secondAttribute="leading" id="wST-zg-Geo"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="風景ナビの使い方" id="wO5-ej-bd2">
+                        <barButtonItem key="leftBarButtonItem" title="戻る" id="R0i-r0-boB">
+                            <connections>
+                                <segue destination="9CA-s0-0Wu" kind="unwind" unwindAction="exitFromHelp:" id="SFz-xB-4uh"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="webView" destination="sGd-4I-C2O" id="qM4-xU-ftC"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="elt-Vc-zjv" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <exit id="9CA-s0-0Wu" userLabel="Exit" sceneMemberID="exit"/>
+            </objects>
+            <point key="canvasLocation" x="1997.5999999999999" y="122.78860569715144"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="UP0-w1-ooY">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="8AG-R4-Hv3" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="pG3-QJ-fwS">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="3Un-fI-Y3H" kind="relationship" relationship="rootViewController" id="y8b-km-dXm"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="oAb-HL-4FX" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1058.4000000000001" y="122.78860569715144"/>
         </scene>
     </scenes>
 </document>
