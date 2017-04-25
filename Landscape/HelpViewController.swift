@@ -14,7 +14,8 @@ class HelpViewController: UIViewController,UIWebViewDelegate {
   override func viewDidLoad() {
     super.viewDidLoad()
     
-    let request = URLRequest(url: URL(string: "https://mapwalk-help.blogspot.jp/?m=1")!)
+    let url = URL(string: "https://landscape-help.blogspot.jp")
+    let request = URLRequest(url: url!)
     webView.loadRequest(request)
   }
 }

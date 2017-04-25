@@ -87,6 +87,9 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   /// 各種のチェックを実行済みかどうか
   private var checked = false;
   
+  /// ビューが非表示になる直前のサイズ
+  private var prevViewSize: CGSize?
+  
   // ビューのロード時に呼び出される
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -119,7 +122,11 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     super.viewWillAppear(animated)
     
     print("frame: \(view.frame.size), bounds: \(view.bounds.size)")
-    if UIDevice.current.orientation == UIDeviceOrientation.portrait {
+    if let prevSize = prevViewSize {
+      if prevSize != view.bounds.size {
+        viewWillTransition(to: view.bounds.size)
+      }
+    } else if UIDevice.current.orientation == UIDeviceOrientation.portrait {
       // 他の向きの場合はTransitイベントが発生するが、Portraitの場合は発生しない
       viewWillTransition(to: view.bounds.size)
     }
