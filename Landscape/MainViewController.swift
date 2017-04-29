@@ -281,7 +281,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
       
     case .notAuthorized:
       if !checked {
-        let message = "\(self.appName)はカメラを使用する許可を与えられていません。\n" + "設定＞プライバシーで許可を与えてください。"
+        let message = "\(self.appName)はカメラを使用する許可を与えられていません。\n" + "設定＞風景ナビで許可を与えてください。"
         showWarning(message: message, requireAuthorization: true)
       }
       
@@ -301,9 +301,10 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
         showWarning(message: "この端末では位置情報を利用できません。")
       }
     } else if !(locationManager.authorizationStatus == .authorizedWhenInUse ||
-        locationManager.authorizationStatus == .authorizedAlways) {
+          locationManager.authorizationStatus == .authorizedAlways ||
+          locationManager.authorizationStatus == .notDetermined) {
       if !checked {
-        let message = "\(self.appName)は位置情報を使用する許可を与えられていません。\n" + "設定＞プライバシーで許可を与えてください。"
+        let message = "\(self.appName)は位置情報を使用する許可を与えられていません。\n" + "設定＞風景ナビで許可を与えてください。"
         showWarning(message: message, requireAuthorization: true)
       }
     }

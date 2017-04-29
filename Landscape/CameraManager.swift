@@ -152,7 +152,10 @@ class CameraManager: NSObject {
     }
     catch {
       print("Could not create video device input: \(error)")
-      setupResult = .configurationFailed
+      let nserr = error as NSError
+      let reason = nserr.userInfo["NSLocalizedFailureReason"] as! String
+      setupResult = reason.range(of: "authorize",
+                      options: .caseInsensitive) != nil ? .notAuthorized : .configurationFailed
     }
     
     session.commitConfiguration()
