@@ -18,8 +18,8 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   @IBOutlet weak var annotationView: UIView!
   
   // 各種ボタン
-  @IBOutlet weak var zoominButton: UIButton!
-  @IBOutlet weak var zoomoutButton: UIButton!
+  @IBOutlet weak var plusButton: UIButton!
+  @IBOutlet weak var minusButton: UIButton!
   @IBOutlet weak var targetButton: UIButton!
   
   /// ズームボタン押下時の処理
@@ -204,7 +204,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   }
   
   // プラスボタンタップ時
-  @IBAction func zoominTapped(_ sender: Any) {
+  @IBAction func plusTapped(_ sender: Any) {
     switch targetActionType {
     case .zoom:
       UIView.animate(withDuration: 0.5, animations: { self.zoom *= 2 })
@@ -218,7 +218,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   }
 
   // マイナスボタンタップ時
-  @IBAction func zoomoutTapped(_ sender: Any) {
+  @IBAction func minusTapped(_ sender: Any) {
     switch targetActionType {
     case .zoom:
       UIView.animate(withDuration: 0.5, animations: { self.zoom /= 2 })
@@ -236,16 +236,16 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     switch targetActionType {
     case .zoom:
       let maxZoom = Int(NSDecimalNumber(decimal: pow(2, Int(log2(cameraManager.maxZoom)))))
-      zoomoutButton.isEnabled = zoom > 1
-      zoominButton.isEnabled = zoom < maxZoom
+      minusButton.isEnabled = zoom > 1
+      plusButton.isEnabled = zoom < maxZoom
       targetButton.setTitle("ズーム：\(zoom) 倍", for: .normal)
     case .fieldAngle:
-      zoomoutButton.isEnabled = true
-      zoominButton.isEnabled = true
+      minusButton.isEnabled = true
+      plusButton.isEnabled = true
       targetButton.setTitle(String(format: "水平画角：%.1f°", fieldAngle), for: .normal)
     case .minimumElevation:
-      zoomoutButton.isEnabled = true
-      zoominButton.isEnabled = true
+      minusButton.isEnabled = true
+      plusButton.isEnabled = true
       targetButton.setTitle(String(format: "最低仰角：%.2f%%", minimumElevation * 100.0), for: .normal)
     }
   }
