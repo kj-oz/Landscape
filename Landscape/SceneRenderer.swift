@@ -29,6 +29,7 @@ struct RenderingParams {
     didSet {
       fieldAngleV = toDegree(atan(aspectRatio * tan(toRadian(fieldAngleH / 2.0)))) * 2.0
       updateFieldAngleBase()
+      UserDefaults.standard.set(fieldAngleH, forKey:"fieldAngleH")
     }
   }
   
@@ -93,7 +94,36 @@ struct RenderingParams {
   
   /// カメラの（横長画像時の）画角
   private var defaultFieldAngle: Double {
-    return 62.0
+    var systemInfo = utsname()
+    uname(&systemInfo)
+    
+    let mirror = Mirror(reflecting: systemInfo.machine)
+    let identifier = mirror.children.reduce("") { identifier, element in
+      guard let value = element.value as? Int8, value != 0 else { return identifier }
+      return identifier + String(UnicodeScalar(UInt8(value)))
+    }
+    
+    let path = Bundle.main.path(forResource: "device", ofType: "csv", inDirectory: "Data")
+    let lines = FileUtil.readLines(path: path!)
+    var first = true
+    for line in lines {
+      if first {
+        first = false
+      } else {
+        var parts = line.components(separatedBy: ",")
+        parts[0].remove(at: parts[0].startIndex)
+        parts[1].remove(at: parts[1].index(before: parts[1].endIndex))
+        let id =  parts[0] + "," + parts[1]
+        if id == identifier {
+          return Double(parts[2])!
+        }
+      }
+    }
+    if identifier.range(of: "iphone") != nil || identifier.range(of: "ipad") != nil {
+      return 63.0
+    } else {
+      return 57.0
+    }
   }
   
 
@@ -106,7 +136,11 @@ struct RenderingParams {
     let h = Double(max(size.width, size.height))
     let v = Double(min(size.width, size.height))
     aspectRatio = v / h
-    fieldAngleH = defaultFieldAngle
+    if let angle = UserDefaults.standard.object(forKey: "fieldAngleH") {
+      fieldAngleH = angle as! Double
+    } else {
+      fieldAngleH = defaultFieldAngle
+    }
     
     // initの中の設定ではdidSetは呼び出sれない
     fieldAngleV = toDegree(atan(aspectRatio * tan(toRadian(fieldAngleH / 2.0)))) * 2.0

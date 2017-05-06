@@ -157,12 +157,19 @@ class VisiblityChecker {
   }
   
   /// 最小限の（可視部分の）見上げ角
-  var minimumElevation = 0.001
+  var minimumElevation = 0.001 {
+    didSet {
+      UserDefaults.standard.set(minimumElevation, forKey:"minimumElevation")
+    }
+  }
   
   
   /// コンストラクタ
   init() {
     a = 1.0 / (2.0 * earthR)
+    if let elevation = UserDefaults.standard.object(forKey: "minimumElevation") {
+      minimumElevation = elevation as! Double
+    }
   }
   
   /// 指定のPOIの方位と距離を、現在地からの値に更新する
