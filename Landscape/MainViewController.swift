@@ -24,8 +24,9 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   
   /// ズームボタン押下時の処理
   ///
-  /// - imageZoom           画面のズーム
-  /// - fieldAngleAdjust    画角の調整
+  /// - zoom: 画面のズーム
+  /// - fieldAngle: 画角の調整
+  /// - minimumElevation: 最低仰角の調整
   enum TargetActionType {
     case zoom
     case fieldAngle
@@ -214,7 +215,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
       minimumElevation += elevationDelta
     }
     updateButtonStatus()
-    print("○ Zoomin Button tapped")
+    print("○ Plus Button tapped")
   }
 
   // マイナスボタンタップ時
@@ -228,7 +229,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
       minimumElevation -= elevationDelta
     }
     updateButtonStatus()
-    print("○ Zoomout Button tapped")
+    print("○ Minus Button tapped")
   }
   
   // 各種ボタンの状態の更新

@@ -1,5 +1,5 @@
 //
-//  swift
+//  VisibilityChecker.swift
 //  Landscape
 //
 //  Created by KO on 2017/03/10.

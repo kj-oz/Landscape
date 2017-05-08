@@ -1,5 +1,5 @@
 //
-//  SceneManager.swift
+//  SceneRenderer.swift
 //  Landscape
 //
 //  Created by KO on 2017/01/04.

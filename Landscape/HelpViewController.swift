@@ -8,9 +8,12 @@
 
 import UIKit
 
+/// ヘルプ画面のコントローラ
 class HelpViewController: UIViewController,UIWebViewDelegate {
-  
+  // ヘルプHTMLを表示するWEBビュー
   @IBOutlet weak var webView: UIWebView!
+  
+  // ビューのロード時に呼び出される
   override func viewDidLoad() {
     super.viewDidLoad()
     

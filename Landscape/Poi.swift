@@ -164,10 +164,6 @@ class Poi: LabelSource {
     // print("isInside: \(fromAzimuth) - \(toAzimuth)  \(azimuth) \(result)")
     return result
   }
-  
-  func angle(from: Poi) -> Double {
-    return Landscape.angle(from: from.azimuth, to: azimuth)
-  }
 }
 
 /// POIを管理するオブジェクト
