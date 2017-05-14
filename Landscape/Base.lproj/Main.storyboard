@@ -109,19 +109,19 @@
                                 </connections>
                             </button>
                             <button contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qJ3-Xv-B6o" customClass="CustomButton" customModule="Landscape" customModuleProvider="target">
-                                <rect key="frame" x="11" y="593" width="33" height="33"/>
+                                <rect key="frame" x="11" y="582" width="44" height="44"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="33" id="q1K-xw-tFN"/>
-                                    <constraint firstAttribute="width" constant="33" id="x9K-Ah-o0g"/>
+                                    <constraint firstAttribute="height" constant="44" id="q1K-xw-tFN"/>
+                                    <constraint firstAttribute="width" constant="44" id="x9K-Ah-o0g"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" name="HelveticaNeue-Bold" family="Helvetica Neue" pointSize="22"/>
+                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="26"/>
                                 <state key="normal" title="i">
                                     <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
-                                        <real key="value" value="17"/>
+                                        <real key="value" value="22"/>
                                     </userDefinedRuntimeAttribute>
                                     <userDefinedRuntimeAttribute type="color" keyPath="borderColor">
                                         <color key="value" white="1" alpha="1" colorSpace="calibratedWhite"/>

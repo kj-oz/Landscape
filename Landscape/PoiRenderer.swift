@@ -273,7 +273,7 @@ class PoiRenderer {
     private let boxRightMarginL: CGFloat = 143
     
     /// 情報ボックスの左端から画面左端までの距離（横向き時）
-    private let boxLefttMarginL: CGFloat = 55
+    private let boxLefttMarginL: CGFloat = 66
     
     /// ボックスと中のフォントとの距離
     private let boxSpacing: CGFloat = 5

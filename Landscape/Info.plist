@@ -22,6 +22,11 @@
 	<string>0.9.0</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<true/>
+	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>画面に風景を表示するため</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
