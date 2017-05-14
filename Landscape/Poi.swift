@@ -202,7 +202,7 @@ class PoiManager {
   private var checker: VisiblityChecker
   
   /// 都市の場合のみなし高さ
-  private let cityH = 1000.0
+  private let cityH = 0.0
   
   /// コンストラクタ
   init() {

@@ -136,6 +136,9 @@ class VisiblityChecker {
   /// 判定対象として扱う最大距離
   private let maxDistance = 400_000.0
   
+  /// 都市の場合の判定対象として扱う最大距離
+  private let cityMaxDistance = 100_1000.0
+  
   /// 中間の高さをチェックする範囲（POIまでの距離に対する割合）
   private let checkRange = 0.02 ... 0.98
   
@@ -195,6 +198,9 @@ class VisiblityChecker {
   /// - Returns: 見えるかどうか
   func checkVisibility(of poi: Poi) -> Bool {
     let d = poi.distance
+    if poi.type == .city {
+      return d <= cityMaxDistance
+    }
     if d > maxDistance {
       print(String(format:"\(poi.name),%.0f,%.1f,D", poi.height, poi.distance / 1000.0))
       return false

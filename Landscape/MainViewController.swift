@@ -37,7 +37,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   private var targetActionType: TargetActionType = .zoom
   
   /// 画角調整時にボタン1タップで変更する画角
-  private let fieldAngleDelta = 1.0
+  private let fieldAngleDelta = 0.1
   
   /// 最低見上げ角調整時にボタン1タップで変更する角度（tangent）
   private let elevationDelta = 0.0001
@@ -247,7 +247,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     case .minimumElevation:
       minusButton.isEnabled = true
       plusButton.isEnabled = true
-      targetButton.setTitle(String(format: "最低仰角：%.2f%%", minimumElevation * 100.0), for: .normal)
+      targetButton.setTitle(String(format: "最小仰角：%.2f%%", minimumElevation * 100.0), for: .normal)
     }
   }
   
