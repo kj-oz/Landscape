@@ -137,7 +137,7 @@ class VisiblityChecker {
   private let maxDistance = 400_000.0
   
   /// 都市の場合の判定対象として扱う最大距離
-  private let cityMaxDistance = 100_1000.0
+  private let cityMaxDistance = 100_000.0
   
   /// 中間の高さをチェックする範囲（POIまでの距離に対する割合）
   private let checkRange = 0.02 ... 0.98
