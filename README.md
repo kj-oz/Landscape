@@ -1,12 +1,12 @@
 Landscape (工事中)
 ======================
-Landscapeは、現在地から見える山や建物の名称、情報をカメラのプレビュー画像上に表示することが出来るiOS端末用のアプリケーションです。
+Landscapeは、その位置から見えている著名な山や高層建物、100km以内にある都道府県庁所在地の名称や情報を、端末のカメラ画像上に表示するiOS用のアプリケーションです。
 
 このソースからビルドされるアプリケーションは、Apple社のAppStoreで **風景ナビ** という名称で無料で配信　予定　です。  
 　[https://itunes.apple.com/jp/app/XXX][AppStore]
 
 画面イメージや使い方は、以下のページをご覧下さい。  
-　[http://XXX.blogspot.jp][Blogger]
+　[http://landscape-navi.blogspot.jp][Blogger]
 
 ### アプリケーションの特徴
 
@@ -41,5 +41,5 @@ iOS 10.0以上
 Copyright &copy; 2017 Kj Oz  
 
 [AppStore]: https://itunes.apple.com/jp/app/XXX
-[Blogger]: http://XXX.blogspot.jp
+[Blogger]: http://landscape-navi.blogspot.jp
 [MIT]: http://www.opensource.org/licenses/mit-license.php

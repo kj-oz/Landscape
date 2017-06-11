@@ -40,6 +40,17 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
   /// 前回の通知時の緯度経度
   var prevLocation = CLLocationCoordinate2D()
   
+  // シミュレータ時の緯度経度高度
+  // 八ヶ岳 阿弥陀が岳
+//  let sampleLat = 35.973213
+//  let sampleLng = 138.357356
+//  let sampleAtt = 2780.0
+//  let sampleHeadding = 285.0
+  // 六本木ヒルズ
+  let sampleLat = 35.6605
+  let sampleLng = 139.729056
+  let sampleAtt = 238.1
+  let sampleHeadding = 70.0
   
   /// コンストラクタ
   ///
@@ -60,10 +71,10 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
       startLocationService()
       startHeadingService()
     } else {
-      let ll = CLLocationCoordinate2D(latitude: 35.9577729, longitude: 139.5993176)
-      let loc = CLLocation(coordinate: ll, altitude: 2900.0, horizontalAccuracy: 1.0, verticalAccuracy: 1.0, timestamp: Date())
+      let ll = CLLocationCoordinate2D(latitude: sampleLat, longitude: sampleLng)
+      let loc = CLLocation(coordinate: ll, altitude: sampleAtt, horizontalAccuracy: 1.0, verticalAccuracy: 1.0, timestamp: Date())
       renderer.updateLocation(location: loc)
-      renderer.heading = 290.0
+      renderer.heading = sampleHeadding
     }
   }
   

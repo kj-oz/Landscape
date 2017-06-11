@@ -136,6 +136,9 @@ class VisiblityChecker {
   /// 判定対象として扱う最大距離
   private let maxDistance = 400_000.0
   
+  /// 判定対象として扱う最小距離
+  private let minDistance = 100.0
+  
   /// 都市の場合の判定対象として扱う最大距離
   private let cityMaxDistance = 100_000.0
   
@@ -201,7 +204,7 @@ class VisiblityChecker {
     if poi.type == .city {
       return d <= cityMaxDistance
     }
-    if d > maxDistance {
+    if d > maxDistance || d < minDistance {
       print(String(format:"\(poi.name),%.0f,%.1f,D", poi.height, poi.distance / 1000.0))
       return false
     }
