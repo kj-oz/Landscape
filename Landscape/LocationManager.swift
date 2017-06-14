@@ -42,15 +42,15 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
   
   // シミュレータ時の緯度経度高度
   // 八ヶ岳 阿弥陀が岳
-//  let sampleLat = 35.973213
-//  let sampleLng = 138.357356
-//  let sampleAtt = 2780.0
-//  let sampleHeadding = 285.0
+  let simuLat = 35.973213
+  let simuLng = 138.357356
+  let simuAtt = 2780.0
+  let simuHeadding = 285.0
   // 六本木ヒルズ
-  let sampleLat = 35.6605
-  let sampleLng = 139.729056
-  let sampleAtt = 238.1
-  let sampleHeadding = 70.0
+//  let simuLat = 35.6605
+//  let simuLng = 139.729056
+//  let simuAtt = 238.1
+//  let simuHeadding = 85.0
   
   /// コンストラクタ
   ///
@@ -71,10 +71,11 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
       startLocationService()
       startHeadingService()
     } else {
-      let ll = CLLocationCoordinate2D(latitude: sampleLat, longitude: sampleLng)
-      let loc = CLLocation(coordinate: ll, altitude: sampleAtt, horizontalAccuracy: 1.0, verticalAccuracy: 1.0, timestamp: Date())
+      let ll = CLLocationCoordinate2D(latitude: simuLat, longitude: simuLng)
+      let loc = CLLocation(coordinate: ll, altitude: simuAtt, horizontalAccuracy: 1.0, verticalAccuracy: 1.0, timestamp: Date())
       renderer.updateLocation(location: loc)
-      renderer.heading = sampleHeadding
+      renderer.heading = simuHeadding
+      renderer.isSimulator = true
     }
   }
   

@@ -196,6 +196,29 @@ class SceneRenderer: NSObject, CALayerDelegate {
   /// 描画全般で使用するパラメータ
   private var params: RenderingParams
   
+  /// シミュレータ上かどうか
+  var isSimulator = false {
+    didSet {
+      if isSimulator {
+        let docDir = FileUtil.documentDir
+        let imageH = UIImage(contentsOfFile: docDir.appending("/simu_h.png"))
+        if let image = imageH {
+          simuImageH = image.cgImage
+        }
+        let imageV = UIImage(contentsOfFile: docDir.appending("/simu_v.png"))
+        if let image = imageV {
+          simuImageV = image.cgImage
+        }
+      }
+    }
+  }
+  
+  /// シミュレータ用の背景画像（横）
+  var simuImageH: CGImage! = nil
+  
+  /// シミュレータ用の背景画像（縦）
+  var simuImageV: CGImage! = nil
+  
   /// 描画対象のレイヤ
   var layer: CALayer
   
@@ -297,6 +320,18 @@ class SceneRenderer: NSObject, CALayerDelegate {
     UIGraphicsPushContext(ctx)
     params.context = ctx
     let start = Date()
+    
+    // シミュレータ上の場合、docフォルダーに所定の名称の画像があればそれを背景に表示する
+    if isSimulator {
+      let image = params.isPortrait ? simuImageV : simuImageH
+      if let image = image {
+        ctx.translateBy(x: 0.0, y: params.height)
+        ctx.scaleBy(x: 1.0, y: -1.0)
+        ctx.draw(image, in: CGRect(x:0, y:0, width: params.width, height: params.height))
+        ctx.translateBy(x: 0.0, y: params.height)
+        ctx.scaleBy(x: 1.0, y: -1.0)
+      }
+    }
     
     // 方位の描画
     directionRenderer.draw(params: params)

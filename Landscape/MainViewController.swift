@@ -95,8 +95,10 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   override func viewDidLoad() {
     super.viewDidLoad()
     
+    let documentDir = FileUtil.documentDir
+    print(documentDir)
+
     //ログをファイルに出力したい場合にコメントアウト
-    //let documentDir = FileUtil.documentDir
     //let formatter = DateFormatter()
     //formatter.dateFormat = "yyyyMMddHHmmss"
     //let log = String(format: "%@/%@.log", documentDir, formatter.string(from: Date()))

@@ -133,6 +133,9 @@ class VisiblityChecker {
   /// 距離と可視高さの2次式の係数B（現在地の標高により定まる）
   private var b = 0.0
   
+  /// 水平線までの距離
+  private var hd = 0.0
+  
   /// 判定対象として扱う最大距離
   private let maxDistance = 400_000.0
   
@@ -155,7 +158,8 @@ class VisiblityChecker {
 
       (cx, cy) = Mesh.coordinate(of: coord)
       cz = max(currentLocation!.altitude, 0.0)
-      b = -sqrt(2.0 * cz / earthR)
+      hd = sqrt(2.0 * cz * earthR)
+      b = -hd / earthR
       
       print(String(format:"現在地: %.3f/%.3f H=%.0f",
                    coord.longitude, coord.latitude, currentLocation!.altitude))
@@ -211,7 +215,7 @@ class VisiblityChecker {
     
     // 間に障害物がない場合の最低可視高さ
     let minH = a * d * d + (b + minimumElevation) * d + cz
-    if poi.height < minH {
+    if d > hd && poi.height < minH {
       print(String(format:"\(poi.name),%.0f,%.1f,H,%.0f", poi.height, poi.distance / 1000.0, minH))
       return false
     }
@@ -249,7 +253,7 @@ class VisiblityChecker {
         if mz > 0.0 {
           let md = poi.distance * ra
           // POIが見えるためのその座標位置における最大高さ（メッシュ高さがそれ以下なら邪魔をしない）
-          let hc = a * md * md + (bb - minimumElevation) * md + cz
+          let hc = a * md * md + bb * md + cz
           if mz > hc {
             print(String(format:"\(poi.name),%.0f,%.1f,M,%.3f,%.3f,%.2f,%.0f,%.0f",
               poi.height, poi.distance / 1000.0, poi.location.longitude, poi.location.latitude,
@@ -282,7 +286,7 @@ class VisiblityChecker {
         if mz > 0.0 {
           let md = poi.distance * ra
           // POIが見えるためのその座標位置における最大高さ（メッシュ高さがそれ以下なら邪魔をしない）
-          let hc = a * md * md + (bb - minimumElevation) * md + cz
+          let hc = a * md * md + bb * md + cz
           if mz > hc {
             print(String(format:"\(poi.name),%.0f,%.1f,M,%.3f,%.3f,%.2f,%.0f,%.0f",
               poi.height, poi.distance / 1000.0, poi.location.longitude, poi.location.latitude,
