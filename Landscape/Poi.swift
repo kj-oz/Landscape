@@ -93,7 +93,17 @@ class PoiGroup: Hashable, LabelSource {
 }
 
 /// POI
-class Poi: LabelSource {
+class Poi: Hashable, LabelSource {
+  
+  // Hashableを満たすための==演算子
+  static func == (lhs: Poi, rhs: Poi) -> Bool {
+    return lhs.name == rhs.name
+  }
+  
+  // Hashable
+  var hashValue: Int {
+    return name.hashValue
+  }
   
   /// 名称
   let name: String
@@ -220,6 +230,8 @@ class PoiManager {
       }
       return checker.checkVisibility(of: $0)
     })
+    candidates.sort(by: { $0.height > $1.height})
+    
     print("checkVisibility:\(Date().timeIntervalSince(start))")
   }
   

@@ -77,7 +77,6 @@ class PoiRenderer {
     if let label = findLabel(at: point) {
       if let group = label.source as? PoiGroup {
         selectedGroup = group
-        selectedPoi = nil
       } else {
         selectedPoi = label.source as? Poi
       }
@@ -127,19 +126,18 @@ class PoiRenderer {
     var labels: [Label] = []
     for poi in pois {
       let label: Label
-      if let selectedGroup = selectedGroup {
-        if let group = poi.group, group === selectedGroup {
+      
+      if let group = poi.group {
+        if let selectedGroup = selectedGroup, group === selectedGroup {
           label = poi.label
         } else {
-          continue
+          if groups.contains(group) {
+            continue
+          }
+          group.poi = poi
+          groups.insert(group)
+          label = group.label
         }
-      } else if let group = poi.group {
-        if groups.contains(group) {
-          continue
-        }
-        group.poi = poi
-        groups.insert(group)
-        label = group.label
       } else {
         label = poi.label
       }
@@ -176,6 +174,7 @@ class PoiRenderer {
       lineSpacing += (Label.spacing + Label.height) / CGFloat(rows.count)
     }
     
+    var pois = Set<Poi>()
     for (index, row) in rows.enumerated() {
       if row.labels.count == 0 {
         continue
@@ -201,6 +200,15 @@ class PoiRenderer {
         ctx.addLine(to: CGPoint(x: label.point, y: leadLinePointHeight))
         ctx.addLine(to: CGPoint(x: label.point, y: leadLinePointHeight + leadLinePointLength))
         ctx.strokePath()
+        
+        if let poi = label.source as? Poi {
+          pois.insert(poi)
+        }
+      }
+    }
+    if let selected = selectedPoi {
+      if !pois.contains(selected) {
+        selectedPoi = nil
       }
     }
   }
@@ -335,11 +343,11 @@ class PoiRenderer {
         string += "高さ　　：\(String(format: "%.0f", poi.height)) m\n"
         string += "緯度経度：N \(String(format: "%.5f", poi.location.latitude))° "
         string += "E \(String(format: "%.5f", poi.location.longitude))°\n"
-        string += "所在地　　：\(details[3])\(details[4])\n"
+        string += "所在地　：\(details[3])\(details[4])\n"
       case .city:
         string += "緯度経度：N \(String(format: "%.5f", poi.location.latitude))° "
         string += "E \(String(format: "%.5f", poi.location.longitude))°\n"
-        string += "都道府県　　：\(details[3])）\n"
+        string += "都道府県：\(details[3])）\n"
       default:
         string += "標高　　：\(String(format: "%.0f", poi.height)) m\n"
         string += "緯度経度：N \(String(format: "%.5f", poi.location.latitude))° "
