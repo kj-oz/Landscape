@@ -1,9 +1,9 @@
-Landscape (工事中)
+Landscape 
 ======================
-Landscapeは、その位置から見えている著名な山や高層建物、100km以内にある都道府県庁所在地の名称や情報を、端末のカメラ画像上に表示するiOS用のアプリケーションです。
+Landscapeは、その位置から見えている有名な山や高層建物、100km以内にある都道府県庁所在地の名称や情報を、端末のカメラ画像上に表示するiOS用のアプリケーションです。
 
-このソースからビルドされるアプリケーションは、Apple社のAppStoreで **風景ナビ** という名称で無料で配信　予定　です。  
-　[https://itunes.apple.com/jp/app/XXX][AppStore]
+このソースからビルドされるアプリケーションは、Apple社のAppStoreで **風景ナビ** という名称で無料で配信中です。  
+　[https://itunes.apple.com/jp/app/風景ナビ/id1249615235?mt=8][AppStore]
 
 画面イメージや使い方は、以下のページをご覧下さい。  
 　[http://landscape-navi.blogspot.jp][Blogger]
@@ -23,7 +23,7 @@ Landscapeは、その位置から見えている著名な山や高層建物、10
 
 ### 開発環境
 
-* 2017/05/07現在、Mac 0S X 10.12.4、Xcode 8.3.2
+* 2017/06/18 現在、Mac 0S X 10.12.5、Xcode 8.3.3
 
 ### 使用ライブラリ
 
@@ -40,6 +40,6 @@ iOS 10.0以上
 -----
 Copyright &copy; 2017 Kj Oz  
 
-[AppStore]: https://itunes.apple.com/jp/app/XXX
+[AppStore]: https://itunes.apple.com/jp/app/風景ナビ/id1249615235?mt=8
 [Blogger]: http://landscape-navi.blogspot.jp
 [MIT]: http://www.opensource.org/licenses/mit-license.php
