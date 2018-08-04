@@ -10,7 +10,7 @@ import UIKit
 import AVFoundation
 
 /// カメラ画像取得のセッションを管理するクラス
-class CameraManager: NSObject {
+class CameraManager: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
 
   /// ビデオ・セッションのセットアップの結果のENUM
   enum SessionSetupResult {
@@ -28,6 +28,18 @@ class CameraManager: NSObject {
   /// ビデオ・セッション
   private let session = AVCaptureSession()
   
+  /// スナップショット用出力
+  private let snapshotOutput = AVCaptureVideoDataOutput()
+  
+  /// スナップショット撮影時の処理
+  var snapshotHandler: ((CGImage) -> ())?
+  
+  /// スナップショット画像処理用コンテキスト
+  private let context = CIContext()
+  
+  /// スナップショットを取得するかどうか
+  private var takesSnapshot = false
+
   /// ビデオ・セッションが動作中かどうか
   private var isSessionRunning = false
   
@@ -73,7 +85,7 @@ class CameraManager: NSObject {
     self.cameraView = cameraView
     super.init()
     cameraView.session = session
-    cameraView.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
+    cameraView.previewLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
     
     sessionQueue.async { [unowned self] in
       self.configureSession()
@@ -121,16 +133,19 @@ class CameraManager: NSObject {
     }
     
     session.beginConfiguration()
-    session.sessionPreset = AVCaptureSessionPresetPhoto
+    session.sessionPreset = AVCaptureSession.Preset.photo
     
     do {
-      if let dualCameraDevice = AVCaptureDevice.defaultDevice(withDeviceType: .builtInDuoCamera, mediaType: AVMediaTypeVideo, position: .back) {
+      if let dualCameraDevice = AVCaptureDevice.default(AVCaptureDevice.DeviceType.builtInDuoCamera, for: AVMediaType.video, position: .back) {
         camera = dualCameraDevice
-      } else if let backCameraDevice = AVCaptureDevice.defaultDevice(withDeviceType: .builtInWideAngleCamera, mediaType: AVMediaTypeVideo, position: .back) {
+      } else if let backCameraDevice = AVCaptureDevice.default(AVCaptureDevice.DeviceType.builtInWideAngleCamera, for: AVMediaType.video, position: .back) {
         camera = backCameraDevice
       }
+      if camera == nil {
+        throw NSError(domain: "Not on device", code: 0, userInfo: nil)
+      }
       
-      let videoDeviceInput = try AVCaptureDeviceInput(device: camera)
+      let videoDeviceInput = try AVCaptureDeviceInput(device: camera!)
       
       if session.canAddInput(videoDeviceInput) {
         session.addInput(videoDeviceInput)
@@ -143,11 +158,17 @@ class CameraManager: NSObject {
             }
           }
           
-          self.cameraView.previewLayer.connection.videoOrientation = initialVideoOrientation
+          self.cameraView.previewLayer.connection?.videoOrientation = initialVideoOrientation
         }
       } else {
         print("Could not add video device input to the session")
         setupResult = .configurationFailed
+      }
+      
+      if session.canAddOutput(snapshotOutput) {
+        let cameraQueue = DispatchQueue(__label:"cameraQueue", attr: nil)
+        snapshotOutput.setSampleBufferDelegate(self, queue: cameraQueue)
+        session.addOutput(snapshotOutput)
       }
     }
     catch {
@@ -164,6 +185,11 @@ class CameraManager: NSObject {
     session.commitConfiguration()
   }
   
+  /// スナップショットを取る（次のキャプチャ時にsnapshotHandlerを呼び出す）
+  func takeSnapshot() {
+     takesSnapshot = true
+  }
+
   /// 中断されたビデオ・セッションの再開を試みる
   private func resumeInterruptedSession() {
     sessionQueue.async { [unowned self] in
@@ -194,7 +220,7 @@ class CameraManager: NSObject {
   /// ビデオ・セッションにエラーが発生した際のハンドラ
   ///
   /// - Parameter notification: 通知
-  func sessionRuntimeError(notification: NSNotification) {
+  @objc func sessionRuntimeError(notification: NSNotification) {
     guard let errorValue = notification.userInfo?[AVCaptureSessionErrorKey] as? NSError else {
       return
     }
@@ -208,8 +234,8 @@ class CameraManager: NSObject {
   /// ビデオ・セッションが中断された際のハンドラ
   ///
   /// - Parameter notification: 通知
-  func sessionWasInterrupted(notification: NSNotification) {
-    if let userInfoValue = notification.userInfo?[AVCaptureSessionInterruptionReasonKey] as AnyObject?, let reasonIntegerValue = userInfoValue.integerValue, let reason = AVCaptureSessionInterruptionReason(rawValue: reasonIntegerValue) {
+  @objc func sessionWasInterrupted(notification: NSNotification) {
+    if let userInfoValue = notification.userInfo?[AVCaptureSessionInterruptionReasonKey] as AnyObject?, let reasonIntegerValue = userInfoValue.integerValue, let reason = AVCaptureSession.InterruptionReason(rawValue: reasonIntegerValue) {
       print("Capture session was interrupted with reason \(reason)")
       
       resumeInterruptedSession()
@@ -219,12 +245,49 @@ class CameraManager: NSObject {
   /// ビデオ・セッションの中断が解除された際のハンドラ
   ///
   /// - Parameter notification: 通知
-  func sessionInterruptionEnded(notification: NSNotification) {
+  @objc func sessionInterruptionEnded(notification: NSNotification) {
     print("Capture session interruption ended")
   }
   
   // MARK: - NSObject
   // KVOをサポートするために宣言が必要
   override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+  }
+  
+  // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
+  // ビデオ画像取得デリゲート
+  func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+    if takesSnapshot {
+      if snapshotHandler != nil {
+        if let image = imageFromSampleBuffer(sampleBuffer:
+          sampleBuffer) {
+          snapshotHandler!(image)
+        }
+      }
+      takesSnapshot = false
+    }
+  }
+  
+  /// ビデオのサンプルから画像を得る
+  ///
+  /// - Parameter sampleBuffer: ビデオのサンプル
+  /// - Returns: CGImage画像
+  private func imageFromSampleBuffer(sampleBuffer: CMSampleBuffer) -> CGImage? {
+    guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return nil }
+    var ciImage = CIImage(cvPixelBuffer: imageBuffer)
+    // 以下のtransformは実験により算出
+    var transform = CGAffineTransform(scaleX: -1, y: 1)
+    switch UIDevice.current.orientation {
+    case .portrait:
+      transform = transform.rotated(by: CGFloat(.pi * 0.5))
+    case .portraitUpsideDown:
+      transform = transform.rotated(by: CGFloat(.pi * -0.5))
+    case .landscapeLeft:
+      transform = transform.rotated(by: CGFloat(Double.pi))
+    default:
+      break
+    }
+    ciImage = ciImage.transformed(by: transform)
+    return context.createCGImage(ciImage, from: ciImage.extent)
   }
 }

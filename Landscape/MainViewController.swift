@@ -106,11 +106,13 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     
     // 各種オブジェクトの初期化
     cameraManager = CameraManager(cameraView: cameraView)
+    cameraManager.snapshotHandler = self.handleSnapshot
+    
     renderer = SceneRenderer(layer: annotationView.layer, size: view.bounds.size)
     locationManager = LocationManager(renderer: renderer)
     
     fieldAngle = renderer.fieldAngle
-
+    
     // 画面タップ
     let tapGesture = UITapGestureRecognizer(target: self,
                                             action: #selector(MainViewController.tapped(sender:)))
@@ -238,7 +240,7 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
   private func updateButtonStatus() {
     switch targetActionType {
     case .zoom:
-      let maxZoom = Int(NSDecimalNumber(decimal: pow(2, Int(log2(cameraManager.maxZoom)))))
+      let maxZoom = Int(truncating: NSDecimalNumber(decimal: pow(2, Int(log2(cameraManager.maxZoom)))))
       minusButton.isEnabled = zoom > 1
       plusButton.isEnabled = zoom < maxZoom
       targetButton.setTitle("ズーム：\(zoom) 倍", for: .normal)
@@ -253,8 +255,75 @@ class MainViewController: UIViewController, UIGestureRecognizerDelegate {
     }
   }
   
+  // カメラボタンタップ時
+  @IBAction func cameraTapped(_ sender: Any) {
+    cameraManager.takeSnapshot()
+  }
+  
+  /// スナップショット取得時の処理
+  ///
+  /// - Parameter image: カメラ画像
+  private func handleSnapshot(image: CGImage) {
+    let rect = self.view.bounds
+    let cropped = self.croppedImage(from: image, rect: rect)
+    
+    // 疑似スクリーンショットの保存
+    UIGraphicsBeginImageContextWithOptions(rect.size, false, 0.0)
+    let context = UIGraphicsGetCurrentContext()
+    context?.draw(cropped, in: rect)
+    self.renderer.drawScene(with: context!)
+    if let capturedImage = UIGraphicsGetImageFromCurrentImageContext() {
+      UIImageWriteToSavedPhotosAlbum(capturedImage, nil, nil, nil)
+      print("save image")
+    }
+    UIGraphicsEndImageContext()
+  }
+  
+  /// カメラ画像を与えられたrectに収まるように切り出す
+  ///
+  /// - Parameters:
+  ///   - image: カメラ画像
+  ///   - rect: 長方形
+  /// - Returns: 切り出された画像
+  private func croppedImage(from image: CGImage, rect: CGRect) -> CGImage {
+    let iw = Double(image.width)
+    let ih = Double(image.height)
+    let vw = Double(rect.size.width)
+    let vh = Double(rect.size.height)
+    
+    let sw = iw / vw
+    let sh = ih / vh
+    
+    var ox = 0.0
+    var oy = 0.0
+    var w = iw
+    var h = ih
+    var s = 1.0
+    if sw  > sh {
+      s = sh
+      w = vw * s
+      ox = (iw - w) * 0.5
+    } else {
+      s = sw
+      h = vh * s
+      oy = (ih - h) * 0.5
+    }
+    
+    if renderer.zoom > 1 {
+      let factor = 1 / Double(zoom)
+      ox += 0.5 * w * (1 - factor)
+      w *= factor
+      oy += 0.5 * h * (1 - factor)
+      h *= factor
+    }
+    
+    let cropRect = CGRect(x:ox, y:oy, width:w, height:h)
+    let croppedImage = image.cropping(to: cropRect)
+    return croppedImage!
+  }
+  
   // 画面タップ時
-  func tapped(sender: UITapGestureRecognizer) {
+  @objc func tapped(sender: UITapGestureRecognizer) {
     renderer.tapped(at: sender.location(in: self.view))
   }
   

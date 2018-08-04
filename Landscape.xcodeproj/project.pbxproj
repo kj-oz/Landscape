@@ -10,6 +10,7 @@
 		310E003C1EC519FE003F6BDD /* www in Resources */ = {isa = PBXBuildFile; fileRef = 310E003B1EC519FE003F6BDD /* www */; };
 		311A22401EAC629200E4029C /* HelpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 311A223F1EAC629200E4029C /* HelpViewController.swift */; };
 		31223BE11E3CD4EF009874ED /* Label.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31223BE01E3CD4EF009874ED /* Label.swift */; };
+		314F450720D4A689006A0404 /* camera@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 314F450620D4A688006A0404 /* camera@2x.png */; };
 		3153DE951E72E0E700CF8060 /* VisiblityChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3153DE941E72E0E700CF8060 /* VisiblityChecker.swift */; };
 		31ACCB021E2522A900AFDC09 /* Poi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31ACCB011E2522A900AFDC09 /* Poi.swift */; };
 		31B423A61E607F90002D2582 /* CustomButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B423A51E607F90002D2582 /* CustomButton.swift */; };
@@ -33,6 +34,7 @@
 		310E003B1EC519FE003F6BDD /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; path = www; sourceTree = "<group>"; };
 		311A223F1EAC629200E4029C /* HelpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HelpViewController.swift; sourceTree = "<group>"; };
 		31223BE01E3CD4EF009874ED /* Label.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Label.swift; sourceTree = "<group>"; };
+		314F450620D4A688006A0404 /* camera@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "camera@2x.png"; sourceTree = "<group>"; };
 		3153DE941E72E0E700CF8060 /* VisiblityChecker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VisiblityChecker.swift; sourceTree = "<group>"; };
 		31ACCB011E2522A900AFDC09 /* Poi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Poi.swift; sourceTree = "<group>"; };
 		31B423A51E607F90002D2582 /* CustomButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomButton.swift; sourceTree = "<group>"; };
@@ -86,6 +88,7 @@
 		31C9C17F1E1D2DD100DD5842 /* Landscape */ = {
 			isa = PBXGroup;
 			children = (
+				314F450620D4A688006A0404 /* camera@2x.png */,
 				31C9C1841E1D2DD100DD5842 /* Main.storyboard */,
 				31C9C1871E1D2DD100DD5842 /* Assets.xcassets */,
 				31C9C1891E1D2DD100DD5842 /* LaunchScreen.storyboard */,
@@ -142,6 +145,7 @@
 					31C9C17C1E1D2DD100DD5842 = {
 						CreatedOnToolsVersion = 8.1;
 						DevelopmentTeam = A8EEF732K9;
+						LastSwiftMigration = 0940;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -174,6 +178,7 @@
 				31E23E741E97C8D20035DCC2 /* Data in Resources */,
 				310E003C1EC519FE003F6BDD /* www in Resources */,
 				31C9C1861E1D2DD100DD5842 /* Main.storyboard in Resources */,
+				314F450720D4A689006A0404 /* camera@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -327,7 +332,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = kj.okzk.Landscape;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -341,7 +347,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = kj.okzk.Landscape;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};

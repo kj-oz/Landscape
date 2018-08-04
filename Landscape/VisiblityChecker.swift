@@ -92,7 +92,7 @@ struct Mesh {
   /// - Parameter code: 1次メッシュコード
   /// - Returns: 標高データ配列
   static func loadMesh1(code: String) -> [Int16] {
-    let binPath = Bundle.main.path(forResource: "/\(code)_MAX_10", ofType: "bin", inDirectory: "Data")
+    let binPath = Bundle.main.path(forResource: "/\(code)_MIN_10", ofType: "bin", inDirectory: "Data")
     var result = Array(repeating: Int16(0), count: numM1X * numM1Y)
     
     if let path = binPath, let data = NSData(contentsOfFile: path) {
@@ -114,6 +114,15 @@ class VisiblityChecker {
   
   /// 現在地の緯度のcos
   private var cos_y1 = 0.0
+  
+  /// 現在地の経度
+  private var x1 = 0.0
+  
+  /// 現在地の経度のsin
+  private var sin_x1 = 0.0
+  
+  /// 現在地の経度のcos
+  private var cos_x1 = 0.0
   
   /// 現在地のメッシュ座標X（実数）
   private var cx = 0.0
@@ -148,16 +157,21 @@ class VisiblityChecker {
   /// 中間の高さをチェックする範囲（POIまでの距離に対する割合）
   private let checkRange = 0.02 ... 0.98
   
+  private let minIgnore = 10
+  
   /// 現在地
   var currentLocation: CLLocation? {
     didSet {
       let coord = currentLocation!.coordinate
-      y1 = toRadian(coord.latitude)
+      y1 = toRadian(coord.latitude)                     // 現在地緯度（rad）
       sin_y1 = sin(y1)
       cos_y1 = cos(y1)
+      x1 = toRadian(coord.longitude)                    // 現在地経度（rad）
+      sin_x1 = sin(x1)
+      cos_x1 = cos(x1)
 
-      (cx, cy) = Mesh.coordinate(of: coord)
-      cz = max(currentLocation!.altitude, 0.0)
+      (cx, cy) = Mesh.coordinate(of: coord)             // 現在地のメッシュ座標
+      cz = max(currentLocation!.altitude, 0.0)          // 現在地の標高（m）
       hd = sqrt(2.0 * cz * earthR)
       b = -hd / earthR
       
@@ -182,120 +196,105 @@ class VisiblityChecker {
     }
   }
   
-  /// 指定のPOIの方位と距離を、現在地からの値に更新する
-  ///
-  /// - Parameter poi: 対象のPOI
-  func calcVector(of poi: Poi) {
-    let to = poi.location
-    let dx = toRadian(to.longitude - currentLocation!.coordinate.longitude)
-    let y2 = toRadian(to.latitude)
-    let cos_dx = cos(dx)
-    
-    poi.distance = EARTH_R * acos(sin_y1 * sin(y2) + cos_y1 * cos(y2) * cos_dx)
-    var angle = toDegree(atan2(sin(dx), cos_y1 * tan(y2) - sin_y1 * cos_dx))
-    if angle < 0 {
-      angle += 360
-    }
-    poi.azimuth = angle
-  }
-  
-  /// 指定のPOIが距離及び地形的に見えるかどうかを判定する
+  /// 指定のPOIが現在地から距離及び地形的に見えるかどうかを判定する
+  /// 同時に、POIの方位と距離を、現在地からの値に更新する
   ///
   /// - Parameter poi: 対象のPOI
   /// - Returns: 見えるかどうか
   func checkVisibility(of poi: Poi) -> Bool {
-    let d = poi.distance
-    if poi.type == .city {
-      return d <= cityMaxDistance
+    let to = poi.location
+    let y2 = toRadian(to.latitude)                      // POIの緯度（rad）
+    let sin_y2 = sin(y2)
+    let cos_y2 = cos(y2)
+    let x2 = toRadian(to.longitude)                     // POIの経度（rad）
+    let sin_x2 = sin(x2)
+    let cos_x2 = cos(x2)
+
+    let dx = x2 - x1                                    // 経度差
+    let sin_dx = sin(dx)
+    let cos_dx = cos(dx)
+    
+    // 大圏距離と方位
+    poi.distance = EARTH_R * acos(sin_y1 * sin_y2 + cos_y1 * cos_y2 * cos_dx)
+    var angle = toDegree(atan2(sin_dx, cos_y1 * sin_y2 / cos_y2 - sin_y1 * cos_dx))
+    if angle < 0 {
+      angle += 360
     }
-    if d > maxDistance || d < minDistance {
+    poi.azimuth = angle
+
+    // 距離だけで判定
+    if poi.type == .userDefined {
+      return true
+    }
+    if poi.type == .city {
+      return poi.distance <= cityMaxDistance
+    }
+    if poi.distance > maxDistance || poi.distance < minDistance {
       print(String(format:"\(poi.name),%.0f,%.1f,D", poi.height, poi.distance / 1000.0))
       return false
     }
     
     // 間に障害物がない場合の最低可視高さ
-    let minH = a * d * d + (b + minimumElevation) * d + cz
-    if d > hd && poi.height < minH {
+    let minH = a * poi.distance * poi.distance + (b + minimumElevation) * poi.distance + cz
+    if poi.distance > hd && poi.height < minH {
       print(String(format:"\(poi.name),%.0f,%.1f,H,%.0f", poi.height, poi.distance / 1000.0, minH))
       return false
     }
     
     // 間の地形で見えなくなっていないかの検討
-    let (px, py) = Mesh.coordinate(of: poi.location)
-    let vx = px - cx
+    let bb = (poi.height - minH) / poi.distance + b
+    let (px, py) = Mesh.coordinate(of: poi.location)  // POIのメッシュ座標
+    let vx = px - cx                                  // 現在地からPOIのまでのメッシュ座標上のベクトル
     let vy = py - cy
+    let d = sqrt(vx * vx + vy * vy)                   // 現在地からPOIのまでのメッシュ座標上の長さ
     let ph = Mesh.height(x: Int(round(px)), y: Int(round(py)))
     print(String(format:"Mesh:%.0f, Poi:%.0f", ph, poi.height))
     
-    let bb = (poi.height - minH) / d + b
-    let hor = (45.0 ... 135.0).contains(poi.azimuth) || (225.0 ... 315.0).contains(poi.azimuth)
+    // 1) 大圏コース中点の緯度経度
+    let a_gm = cos_y1 * sin_x1 + cos_y2 * sin_x2
+    let b_gm = cos_y1 * cos_x1 + cos_y2 * cos_x2
+    var x_gm = toDegree(atan(a_gm / b_gm))
+    if x_gm < 0 {
+      x_gm += 180
+    }
+    let y_gm = toDegree(atan((sin_y1 + sin_y2) / sqrt(a_gm * a_gm + b_gm * b_gm)))
+    let (mx_gm, my_gm) = Mesh.coordinate(of: CLLocationCoordinate2D(latitude: y_gm, longitude: x_gm))
     
-    if hor {
-      // 現在地とPOIの間のメッシュX座標
-      var mxs: [Int]
-      if vx > 0.0 {
-        let sx = Int(ceil(cx))
-        let ex = Int(floor(px))
-        mxs = Array(sx ... ex)
-      } else {
-        let sx = Int(floor(cx))
-        let ex = Int(ceil(px))
-        mxs = (ex ... sx).reversed()
-      }
-      for mx in mxs {
-        let ra = (Double(mx) - cx) / vx
-        if !checkRange.contains(ra) {
-          continue;
-        }
-        let my = Int(round(ra * vy + cy))
-        // 各座標のメッシュ高さ
-        let mz = Mesh.height(x: mx, y: my)
-        if mz > 0.0 {
-          let md = poi.distance * ra
-          // POIが見えるためのその座標位置における最大高さ（メッシュ高さがそれ以下なら邪魔をしない）
-          let hc = a * md * md + bb * md + cz
-          if mz > hc {
-            print(String(format:"\(poi.name),%.0f,%.1f,M,%.3f,%.3f,%.2f,%.0f,%.0f",
-              poi.height, poi.distance / 1000.0, poi.location.longitude, poi.location.latitude,
-              ra, hc, mz))
-            return false
-          }
-        }
-      }
+    // 2) 大圏コース中点と直線の中点との距離、単位ベクトル
+    let dx_gm = mx_gm - (cx + px) / 2.0
+    let dy_gm = my_gm - (cy + py) / 2.0
+    let d_gm = sqrt(dx_gm * dx_gm + dy_gm * dy_gm)
+    let vx_gm = dx_gm / d_gm
+    let vy_gm = dy_gm / d_gm
+    
+    // 3) Mesh.xPitch毎にチェック（両端10ピッチ分はチェックしない）
+    let nCheck = Int(d)
+    let ignore = max(nCheck / 50, min(nCheck / 2 - 1, minIgnore))
+    let checkRange = Array(ignore ..< nCheck - ignore)
+
+    for check in checkRange {
+      // 現在地とPOIの間のメッシュ座標
+      let r = Double(check) / Double(nCheck)
+      let rh = (r - 0.5)
+      let dd = d_gm * (1.0 - 4.0 * rh * rh)
+      let mx = Int(cx + vx * r + vx_gm * dd)
+      let my = Int(cy + vy * r + vy_gm * dd)
       
-    } else {
-      // 現在地とPOIの間のメッシュY座標
-      var mys: [Int]
-      if vy > 0.0 {
-        let sy = Int(ceil(cy))
-        let ey = Int(floor(py))
-        mys = Array(sy ... ey)
-      } else {
-        let sy = Int(floor(cy))
-        let ey = Int(ceil(py))
-        mys = (ey ... sy).reversed()
-      }
-      for my in mys {
-        let ra = (Double(my) - cy) / vy
-        if !checkRange.contains(ra) {
-          continue;
-        }
-        let mx = Int(round(ra * vx + cx))
-        // 各座標のメッシュ高さ
-        let mz = Mesh.height(x: mx, y: my)
-        if mz > 0.0 {
-          let md = poi.distance * ra
-          // POIが見えるためのその座標位置における最大高さ（メッシュ高さがそれ以下なら邪魔をしない）
-          let hc = a * md * md + bb * md + cz
-          if mz > hc {
-            print(String(format:"\(poi.name),%.0f,%.1f,M,%.3f,%.3f,%.2f,%.0f,%.0f",
-              poi.height, poi.distance / 1000.0, poi.location.longitude, poi.location.latitude,
-              ra, hc, mz))
-            return false
-          }
+      // 各座標のメッシュ高さ
+      let mz = Mesh.height(x: mx, y: my)
+      if mz > 0.0 {
+        let md = poi.distance * r
+        // POIが見えるためのその座標位置における最大高さ（メッシュ高さがそれ以下なら邪魔をしない）
+        let hc = a * md * md + bb * md + cz
+        if mz > hc {
+          print(String(format:"\(poi.name),%.0f,%.1f,M,%.3f,%.3f,%.2f,%.0f,%.0f",
+            poi.height, poi.distance / 1000.0, poi.location.longitude, poi.location.latitude,
+            r, hc, mz))
+          return false
         }
       }
     }
+
     print(String(format:"\(poi.name),%.0f,%.1f,G", poi.height, poi.distance / 1000.0))
     return true
   }

@@ -73,11 +73,11 @@ class DirectionRenderer {
   private func createImages() {
     let paragraphStyle = NSMutableParagraphStyle()
     paragraphStyle.alignment = .center
-    var attrs = [NSParagraphStyleAttributeName: paragraphStyle] as [String : Any]
+    var attrs = [NSAttributedStringKey.paragraphStyle: paragraphStyle] as [NSAttributedStringKey : Any]
     for i in 0 ..< directions.count {
       let label = directions[i]
       let font: UIFont
-      switch label.characters.count {
+      switch label.count {
       case 1:
         font = dirFont1
       case 2:
@@ -85,7 +85,7 @@ class DirectionRenderer {
       default:
         font = dirFont3
       }
-      attrs[NSFontAttributeName] = font
+      attrs[NSAttributedStringKey.font] = font
       
       let rect = CGRect(x: 0, y: 0, width: dirWidth, height: dirHeight)
       UIGraphicsBeginImageContext(rect.size)

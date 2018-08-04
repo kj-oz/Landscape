@@ -22,8 +22,8 @@ class Label {
   static let spacing: CGFloat = 9.0
   
   // ラベルの高さ
-  static let height = "国".size(attributes:
-    [NSFontAttributeName: Label.font]).height + 2 * Label.padding
+  static let height = "国".size(withAttributes:
+    [NSAttributedStringKey.font: Label.font]).height + 2 * Label.padding
   
   // ラベルの色（山：高さ1000m以下）
   private let color0000_1000 = UIColor(red: 0.0, green: 0.8, blue: 1.0, alpha: 1).cgColor
@@ -113,7 +113,7 @@ class Label {
   init(of poi: Poi) {
     self.source = poi
     text = poi.name
-    width = text.size(attributes: [NSFontAttributeName: Label.font]).width + 2 * Label.padding
+    width = text.size(withAttributes: [NSAttributedStringKey.font: Label.font]).width + 2 * Label.padding
     image = createImage()
   }
   
@@ -123,7 +123,7 @@ class Label {
   init(of group: PoiGroup) {
     self.source = group
     text = group.name + " ▶"
-    width = text.size(attributes: [NSFontAttributeName: Label.font]).width + 2 * Label.padding
+    width = text.size(withAttributes: [NSAttributedStringKey.font: Label.font]).width + 2 * Label.padding
     image = createImage()
   }
   
@@ -146,9 +146,9 @@ class Label {
     UIGraphicsPushContext(context)
     let paragraphStyle = NSMutableParagraphStyle()
     paragraphStyle.alignment = .center
-    let attrs = [NSFontAttributeName: Label.font,
-                         NSParagraphStyleAttributeName: paragraphStyle,
-                         NSForegroundColorAttributeName: fontColor]
+    let attrs = [NSAttributedStringKey.font: Label.font,
+                         NSAttributedStringKey.paragraphStyle: paragraphStyle,
+                         NSAttributedStringKey.foregroundColor: fontColor]
     text.draw(with: CGRect(x: 0, y: Label.padding,
                                  width: width, height: Label.height),
                     options: .usesLineFragmentOrigin, attributes: attrs, context: nil)

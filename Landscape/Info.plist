@@ -17,9 +17,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.0</string>
+	<string>1.1.0</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.0.2</string>
+	<string>1.1.0.0</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -31,6 +31,10 @@
 	<string>画面に風景を表示するため</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>現在地の緯度経度を得るため</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>スクリーンショットを保存するため</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>スクリーンショットを保存するため</string>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

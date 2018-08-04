@@ -224,10 +224,6 @@ class PoiManager {
   func resetCandidates() {
     let start = Date()
     candidates = pois.filter({
-      checker.calcVector(of: $0)
-      if $0.type == .userDefined {
-        return true
-      }
       return checker.checkVisibility(of: $0)
     })
     candidates.sort(by: { $0.height > $1.height})

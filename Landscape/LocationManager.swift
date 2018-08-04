@@ -41,17 +41,32 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
   var prevLocation = CLLocationCoordinate2D()
   
   // シミュレータ時の緯度経度高度
-  // 八ヶ岳 阿弥陀が岳
-  let simuLat = 35.973213
-  let simuLng = 138.357356
-  let simuAtt = 2780.0
-  let simuHeadding = 285.0
-  // 六本木ヒルズ
+//  // 八ヶ岳 阿弥陀が岳
+//  let simuLat = 35.973213
+//  let simuLng = 138.357356
+//  let simuAtt = 2780.0
+//  let simuHeadding = 285.0
+//  // 六本木ヒルズ
 //  let simuLat = 35.6605
 //  let simuLng = 139.729056
 //  let simuAtt = 238.1
 //  let simuHeadding = 85.0
-  
+//  // 田代平湿原から八甲田
+//  let simuLat = 40.695681
+//  let simuLng = 140.912650
+//  let simuAtt = 565.0
+//  let simuHeadding = 225.0
+  // 福島実家
+  let simuLat = 37.772621
+  let simuLng = 140.443796
+  let simuAtt = 86.0
+  let simuHeadding = 240.0
+//  // 弘前城から八甲田
+//  let simuLat = 40.607781
+//  let simuLng = 140.463317
+//  let simuAtt = 45.0
+//  let simuHeadding = 90.0
+
   /// コンストラクタ
   ///
   /// - Parameter renderer: 画面描画オブジェクト
@@ -89,13 +104,13 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
   }
   
   /// アプリ・フォアグラウンド化時の処理
-  func applicationWillEnterForeground() {
+  @objc func applicationWillEnterForeground() {
     lm.startUpdatingLocation()
     lm.startUpdatingHeading()
   }
   
   /// アプリ・バックグラウンド化時の処理
-  func applicationDidEnterBackground() {
+  @objc func applicationDidEnterBackground() {
     lm.stopUpdatingLocation()
     lm.stopUpdatingHeading()
   }

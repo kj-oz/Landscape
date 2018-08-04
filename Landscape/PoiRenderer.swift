@@ -325,14 +325,14 @@ class PoiRenderer {
       ctx.fill(rect)
       
       let details = poi.detail!.components(separatedBy: ",")
-      var attrs = [NSFontAttributeName: titleFont,
-                   NSForegroundColorAttributeName: fontColor]
+      var attrs = [NSAttributedStringKey.font: titleFont,
+                   NSAttributedStringKey.foregroundColor: fontColor]
       var string = "\(poi.name)　\(details[0])"
       string.draw(with: CGRect(x: x + boxSpacing, y: y + boxSpacing,
                                width: width - boxSpacing * 2, height: titleHeight),
                   options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
       
-      attrs[NSFontAttributeName] = sentenceFont
+      attrs[NSAttributedStringKey.font] = sentenceFont
       string = ""
       if !details[1].isEmpty {
         string += "別名　　：\(details[1])　\(details[2])\n"
@@ -398,14 +398,14 @@ class PoiRenderer {
       ctx.setFillColor(boxColor)
       ctx.fill(rect)
       
-      var attrs = [NSFontAttributeName: titleFont,
-                   NSForegroundColorAttributeName: fontColor]
+      var attrs = [NSAttributedStringKey.font: titleFont,
+                   NSAttributedStringKey.foregroundColor: fontColor]
       var string = "現在地"
       string.draw(with: CGRect(x: x + boxSpacing, y: y + boxSpacing,
                                width: width - boxSpacing * 2, height: titleHeight),
                   options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
 
-      attrs[NSFontAttributeName] = sentenceFont
+      attrs[NSAttributedStringKey.font] = sentenceFont
       string = ""
       string += "標高　　：\(String(format: "%.0f", Double(location!.altitude))) m\n"
       string += "緯度経度：N \(String(format: "%.5f", location!.coordinate.latitude))° "
