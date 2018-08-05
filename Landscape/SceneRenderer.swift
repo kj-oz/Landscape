@@ -320,33 +320,6 @@ class SceneRenderer: NSObject, CALayerDelegate {
     drawScene(with: ctx)
     let now = Date()
     Logger.log("> render : \(now.timeIntervalSince(start))s", now: now)
-//    ctx.saveGState()
-//    UIGraphicsPushContext(ctx)
-//    params.context = ctx
-//    let start = Date()
-//
-//    // シミュレータ上の場合、docフォルダーに所定の名称の画像があればそれを背景に表示する
-//    if isSimulator {
-//      let image = params.isPortrait ? simuImageV : simuImageH
-//      if let image = image {
-//        ctx.translateBy(x: 0.0, y: params.height)
-//        ctx.scaleBy(x: 1.0, y: -1.0)
-//        ctx.draw(image, in: CGRect(x:0, y:0, width: params.width, height: params.height))
-//        ctx.translateBy(x: 0.0, y: params.height)
-//        ctx.scaleBy(x: 1.0, y: -1.0)
-//      }
-//    }
-//
-//    // 方位の描画
-//    directionRenderer.draw(params: params)
-//
-//    // POIの描画
-//    poiRenderer.draw(params: params)
-//
-//    let now = Date()
-//    Logger.log("> render : \(now.timeIntervalSince(start))s", now: now)
-//    UIGraphicsPopContext()
-//    ctx.restoreGState()
   }
   
   func drawScene(with ctx: CGContext) {

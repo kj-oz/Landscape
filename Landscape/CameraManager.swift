@@ -259,8 +259,8 @@ class CameraManager: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
   func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
     if takesSnapshot {
       if snapshotHandler != nil {
-        if let image = imageFromSampleBuffer(sampleBuffer:
-          sampleBuffer) {
+        if let image = imageFromSampleBuffer(sampleBuffer: sampleBuffer) {
+          AudioServicesPlaySystemSound(1108)
           snapshotHandler!(image)
         }
       }

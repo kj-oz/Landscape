@@ -41,11 +41,11 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
   var prevLocation = CLLocationCoordinate2D()
   
   // シミュレータ時の緯度経度高度
-//  // 八ヶ岳 阿弥陀が岳
-//  let simuLat = 35.973213
-//  let simuLng = 138.357356
-//  let simuAtt = 2780.0
-//  let simuHeadding = 285.0
+  // 八ヶ岳 阿弥陀が岳
+  let simuLat = 35.973213
+  let simuLng = 138.357356
+  let simuAtt = 2780.0
+  let simuHeadding = 285.0
 //  // 六本木ヒルズ
 //  let simuLat = 35.6605
 //  let simuLng = 139.729056
@@ -56,11 +56,11 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 //  let simuLng = 140.912650
 //  let simuAtt = 565.0
 //  let simuHeadding = 225.0
-  // 福島実家
-  let simuLat = 37.772621
-  let simuLng = 140.443796
-  let simuAtt = 86.0
-  let simuHeadding = 240.0
+  // 福島
+//  let simuLat = 37.772621
+//  let simuLng = 140.443796
+//  let simuAtt = 86.0
+//  let simuHeadding = 240.0
 //  // 弘前城から八甲田
 //  let simuLat = 40.607781
 //  let simuLng = 140.463317
